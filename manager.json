@@ -23,5 +23,10 @@
     "git":"https://github.com/thisisshihan/mpv-player-config-snad/",
     "whitelist":"pause-indicator.lua$",
     "dest":"~~/scripts/ui/other/pause-indicator/main.lua"
+  },
+  {
+    "git":"https://github.com/Samillion/mpv-boxtowide",
+    "whitelist":"boxtowide.lua$",
+    "dest":"~~/scripts/utils/boxtowide/main.lua"
   }
 ]

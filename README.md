@@ -1,6 +1,6 @@
 # mpv
-
 This is my personal configuration and collection of scripts and shaders for mpv.
+
 
 # Scripts
 ## Script Managing
@@ -8,6 +8,7 @@ This is my personal configuration and collection of scripts and shaders for mpv.
 
 ## Script Loading
 * [load-all-scripts](https://github.com/ang3lo-azevedo/mpv-load-all-scripts) - For loading all the scripts from the scripts subdirectories
+
 
 ## UI
 ### OSC
@@ -18,3 +19,7 @@ This is my personal configuration and collection of scripts and shaders for mpv.
 
 ### Pause Indicator
 * [pause-indicator](https://github.com/thisisshihan/mpv-player-config-snad/blob/mpv-config-snad-windows-ubuntu-linux-macos/removed_conf/scripts/pause-indicator.lua) - To show a pause indicator
+
+
+## Utilities
+* [boxtowide](https://github.com/Samillion/mpv-boxtowide) - To change 4:3 aspect-ratio of video files/streams to 16:9 automatically 
