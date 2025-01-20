@@ -1,0 +1,27 @@
+[
+  {
+    "git":"https://github.com/po5/mpv_manager",
+    "whitelist":"manager.lua$",
+    "dest":"~~/scripts/scripts-manager/main.lua"
+  },
+  {
+    "git":"https://github.com/ang3lo-azevedo/mpv-load-all-scripts",
+    "whitelist":"load-all-scripts.lua$",
+    "dest":"~~/scripts/load-all-scripts/main.lua"
+  },
+  {
+    "git":"https://github.com/Samillion/ModernZ",
+    "whitelist":"modernz.lua$",
+    "dest":"~~/scripts/ui/osc/modernz/main.lua"
+  },
+  {
+    "git":"https://github.com/po5/thumbfast",
+    "whitelist":"thumbfast.lua$",
+    "dest":"~~/scripts/ui/other/thumbnails/thumbfast/main.lua"
+  },
+  {
+    "git":"https://github.com/thisisshihan/mpv-player-config-snad/",
+    "whitelist":"pause-indicator.lua$",
+    "dest":"~~/scripts/ui/other/pause-indicator/main.lua"
+  }
+]
