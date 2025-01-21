@@ -28,6 +28,9 @@ The configurations have been made to be used on Linux.
 ## Utilities
 - [skip-intro](https://github.com/rui-ddc/skip-intro) - To be able to skip intros, outros and previews pressing the ENTER key (the detection is made by analyzing the audio of the video) 
 
+### Tracking
+- [trakt-mpv](https://github.com/ang3lo-azevedo/mpv/tree/main/scripts/utils/tracking/trakt-mpv) - To have automatic scrobbling to trakt.tv
+
 
 
 # Shaders
