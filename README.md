@@ -25,7 +25,7 @@ The configurations have been made to be used on Linux.
 
 ## Script Managing
 
-> - [mpv_manager](https://github.com/ang3lo-azevedo/mpv/tree/main/scripts/mpv_manager) - For managing all the other scripts and shaders (All the other scripts are defined in the manager.json file)
+> - [mpv_manager](https://github.com/ang3lo-azevedo/mpv/tree/main/scripts/scripts-manager/mpv_manager) - For managing all the other scripts and shaders (All the other scripts are defined in the manager.json file)
 
 ## Script Loading
 
