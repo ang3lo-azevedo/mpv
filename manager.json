@@ -17,11 +17,6 @@
     "branch":"mpv-config-snad-windows-ubuntu-linux-macos"
   },
   {
-    "git":"https://github.com/rui-ddc/skip-intro",
-    "whitelist":"skip-intro.lua$",
-    "dest":"~~/scripts/utils/skip-intro/main.lua"
-  },
-  {
     "git":"https://github.com/bloc97/Anime4K",
     "whitelist":"%.glsl$",
     "dest":"~~/shaders/Anime4K/"

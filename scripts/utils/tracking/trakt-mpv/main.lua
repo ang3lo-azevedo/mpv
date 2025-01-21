@@ -1,9 +1,3 @@
--- TODO:
--- Update the script to use the new trakt-scrobbler script
--- Update the helper to be rewritten in Rust™️
-
-
-
 -- GLOBAL VARS:
 Current_action = ""
 
