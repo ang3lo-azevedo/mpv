@@ -1,5 +1,6 @@
 # TODO
 
+- [ ] Improve conf/quality/Quality.conf with [classicjazz mpv.conf](https://github.com/classicjazz/mpv-config/blob/master/mpv.conf)
 - [ ] Fix the script-opts-append on the /conf/scripts/**/*.conf files
 - [ ] Fix mpvcontextmenu
 - [ ] Add rest of the scripts to the manager
