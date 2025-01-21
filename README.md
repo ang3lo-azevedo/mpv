@@ -1,3 +1,5 @@
+`The config is still in experimental phase`
+
 # TODO
 
 > - [ ]  Improve conf/quality/Quality.conf with [classicjazz mpv.conf](https://github.com/classicjazz/mpv-config/blob/master/mpv.conf)
@@ -8,7 +10,7 @@
 > - [ ]  Update the trakt-mpv script
 > - [ ]  Update the trakt-mpv helper to be rewritten in Rust™️
 
-`The config is still in experimental phase`
+# 
 
 This is my personal configuration and collection of scripts and shaders for mpv.
 The configurations have been made to be used on Linux.
