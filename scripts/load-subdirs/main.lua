@@ -91,18 +91,9 @@ function load_from_dir(dir)
     end
 end
 
--- Get the conf directory path
-local conf_dir_name = "conf"
-local conf_dir = mp.command_native({"expand-path", "~~/" .. conf_dir_name})
-msg.info("Loading config files from: " .. conf_dir)
+-- Get the mpv directory path
+local mpv_dir = mp.command_native({"expand-path", "~~/"})
+msg.info("Loading config files from: " .. mpv_dir)
 
--- Load all config files
-load_from_dir(conf_dir)
-
--- Get the scripts directory path
-local scripts_dir_name = "scripts"
-local scripts_dir = mp.command_native({"expand-path", "~~/" .. scripts_dir_name})
-msg.info("Loading scripts from: " .. scripts_dir)
-
--- Load all scripts recursively
-load_from_dir(scripts_dir)
+-- Load all config and script files recursively from the mpv directory
+load_from_dir(mpv_dir)
