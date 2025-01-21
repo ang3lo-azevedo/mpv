@@ -1,5 +1,9 @@
 This is my personal configuration and collection of scripts and shaders for mpv.
 
+# Configs
+* [netflix-subtitles](https://github.com/ang3lo-azevedo/mpv-netflix-subtitles) - For having the subtitles as close as possible to the ones on Netflix
+
+
 # Scripts
 ## Script Managing
 * [mpv_manager](https://github.com/ang3lo-azevedo/mpv_manager) - For managing all the other scripts and shaders (All the other scripts are defined in the manager.json file)
