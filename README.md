@@ -3,8 +3,8 @@ The configurations have been made to be used on Linux.
 
 # Configs
 - [netflix-subtitles](https://github.com/ang3lo-azevedo/mpv/tree/main/conf/netflix-subtitles) - For having the subtitles as close as possible to the ones on Netflix
-- [quality](https://github.com/ang3lo-azevedo/mpv/tree/main/conf/quality) - For having the best quality possible
-- [audio](https://github.com/ang3lo-azevedo/mpv/tree/main/conf/audio) - For having the best audio possible
+- [quality](https://github.com/ang3lo-azevedo/mpv/tree/main/conf/quality) - For having the best video quality possible
+- [audio](https://github.com/ang3lo-azevedo/mpv/tree/main/conf/audio) - For having the best audio quality possible
 
 # Scripts
 ## Script Managing
@@ -19,14 +19,14 @@ The configurations have been made to be used on Linux.
 - [ModernZ](https://github.com/Samillion/ModernZ) - As the UI for the OSC
 
 ### Thumbnails
-- [thumbfast](https://github.com/po5/thumbfast) - To use thumbnails
+- [thumbfast](https://github.com/po5/thumbfast) - To show thumbnails on the OSC
 
 ### Pause Indicator
-- [pause-indicator](https://github.com/thisisshihan/mpv-player-config-snad/tree/mpv-config-snad-windows-ubuntu-linux-macos/removed_conf/scripts/pause-indicator.lua) - To show a pause indicator
+- [pause-indicator](https://github.com/thisisshihan/mpv-player-config-snad/tree/mpv-config-snad-windows-ubuntu-linux-macos/removed_conf/scripts/pause-indicator.lua) - To show a pause/resume indicator
 
 
 ## Utilities
-- [skip-intro](https://github.com/rui-ddc/skip-intro) - To be able to skip intros, outros and previews by analyzing the audio of the video pressing the ENTER key
+- [skip-intro](https://github.com/rui-ddc/skip-intro) - To be able to skip intros, outros and previews pressing the ENTER key (the detection is made by analyzing the audio of the video) 
 
 
 
