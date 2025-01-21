@@ -1,15 +1,5 @@
 [
   {
-    "git":"https://github.com/po5/mpv_manager",
-    "whitelist":"manager.lua$",
-    "dest":"~~/scripts/scripts-manager/mpv_manager/main.lua"
-  },
-  {
-    "git":"https://github.com/ang3lo-azevedo/mpv-load-all-scripts",
-    "whitelist":"load-all-scripts.lua$",
-    "dest":"~~/scripts/load-all-scripts/main.lua"
-  },
-  {
     "git":"https://github.com/Samillion/ModernZ",
     "whitelist":"modernz.lua$",
     "dest":"~~/scripts/ui/osc/ModernZ/main.lua"

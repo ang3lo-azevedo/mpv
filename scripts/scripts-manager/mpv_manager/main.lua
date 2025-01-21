@@ -50,7 +50,11 @@ function apply_defaults(info)
     return info
 end
 
--- Update a script
+--[[
+* Update a script
+* @param info The script info
+* @return true if the script was updated, false otherwise
+]]
 function update(info)
     info = apply_defaults(info)
     if not info then return false end
@@ -59,16 +63,17 @@ function update(info)
     
     -- Get the destination directory or file
     local e_dest = string.match(mp.command_native({"expand-path", info.dest}), "(.-)[/\\]?$")
-    mkdir(e_dest)
+    local dest_dir = parent(e_dest) or e_dest
+    mkdir(dest_dir)
     
     local files = {}
     
     -- Add the remote repository
-    run({"git", "-C", e_dest, "remote", "add", "manager", info.git})
-    run({"git", "-C", e_dest, "remote", "set-url", "manager", info.git})
-    run({"git", "-C", e_dest, "fetch", "manager", info.branch})
+    run({"git", "-C", dest_dir, "remote", "add", "manager", info.git})
+    run({"git", "-C", dest_dir, "remote", "set-url", "manager", info.git})
+    run({"git", "-C", dest_dir, "fetch", "manager", info.branch})
     
-    for file in string.gmatch(run({"git", "-C", e_dest, "ls-tree", "-r", "--name-only", "remotes/manager/"..info.branch}).stdout, "[^\r\n]+") do
+    for file in string.gmatch(run({"git", "-C", dest_dir, "ls-tree", "-r", "--name-only", "remotes/manager/"..info.branch}).stdout, "[^\r\n]+") do
         local l_file = string.lower(file)
         if info.whitelist == "" or match(l_file, info.whitelist) then
             if info.blacklist == "" or not match(l_file, info.blacklist) then
@@ -93,17 +98,30 @@ function update(info)
         for _, file in ipairs(files) do
             local based = string.sub(file, string.len(base)+1)
             local p_based = parent(based)
-            if p_based and not info.flatten_folders then mkdir(e_dest.."/"..p_based) end
-            local c = string.match(run({"git", "-C", e_dest, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
-            local f = io.open(e_dest.."/"..(info.flatten_folders and file:match("[^/]+$") or based), "w")
-            f:write(c)
-            f:close()
+            
+            -- If dest is a file, write directly to it
+            if parent(e_dest) then
+                local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
+                local f = io.open(e_dest, "w")
+                f:write(c)
+                f:close()
+                break -- Only write the first matching file
+            else
+                -- Otherwise handle as directory
+                if p_based and not info.flatten_folders then mkdir(e_dest.."/"..p_based) end
+                local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
+                local f = io.open(e_dest.."/"..(info.flatten_folders and file:match("[^/]+$") or based), "w")
+                f:write(c)
+                f:close()
+            end
         end
     end
     return true
 end
 
--- Update all scripts
+--[[
+    Update all scripts
+]]
 function update_all()
     -- Open the manager.json file
     local f = io.open(
