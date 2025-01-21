@@ -35,10 +35,13 @@ end
 -- Match a string against a list of patterns
 function match(str, patterns)
     for pattern in string.gmatch(patterns, "[^|]+") do
+        -- Remove whitespaces and check the pattern
+        pattern = pattern:gsub("^%s*(.-)%s*$", "%1")
         if string.match(str, pattern) then
             return true
         end
     end
+    return false  -- Return false when no match is found
 end
 
 -- Apply default values to a script info
@@ -59,8 +62,6 @@ end
 function update(info)
     info = apply_defaults(info)
     if not info then return false end
-
-    local base = nil
     
     -- Get the destination directory or file
     local e_dest = string.match(mp.command_native({"expand-path", info.dest}), "(.-)[/\\]?$")
@@ -69,52 +70,42 @@ function update(info)
     
     local files = {}
     
-    -- Add the remote repository
+    -- Remove remote if it exists and add it again
+    run({"git", "-C", dest_dir, "remote", "remove", "manager"})
     run({"git", "-C", dest_dir, "remote", "add", "manager", info.git})
-    run({"git", "-C", dest_dir, "remote", "set-url", "manager", info.git})
     run({"git", "-C", dest_dir, "fetch", "manager", info.branch})
     
     for file in string.gmatch(run({"git", "-C", dest_dir, "ls-tree", "-r", "--name-only", "remotes/manager/"..info.branch}).stdout, "[^\r\n]+") do
         local l_file = string.lower(file)
-        if info.whitelist == "" or match(l_file, info.whitelist) then
-            if info.blacklist == "" or not match(l_file, info.blacklist) then
-                table.insert(files, file)
-                if base == nil then base = parent(l_file) or "" end
-                while string.match(base, l_file) == nil do
-                    if l_file == "" then break end
-                    l_file = parent(l_file) or ""
-                end
-                base = l_file
-            end
+        if (info.whitelist == "" or match(l_file, info.whitelist)) and
+           (info.blacklist == "" or not match(l_file, info.blacklist)) then
+            table.insert(files, file)
         end
     end
     
-    if base == nil then return false end
-    
-    if base ~= "" then base = base.."/" end
-    
     if next(files) == nil then
         print("no files matching patterns")
-    else
-        for _, file in ipairs(files) do
-            local based = string.sub(file, string.len(base)+1)
-            local p_based = parent(based)
-            
-            -- If dest is a file, write directly to it
-            if parent(e_dest) then
-                local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
-                local f = io.open(e_dest, "w")
-                f:write(c)
-                f:close()
-                break -- Only write the first matching file
-            else
-                -- Otherwise handle as directory
-                if p_based and not info.flatten_folders then mkdir(e_dest.."/"..p_based) end
-                local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
-                local f = io.open(e_dest.."/"..(info.flatten_folders and file:match("[^/]+$") or based), "w")
-                f:write(c)
-                f:close()
+        return false
+    end
+    
+    for _, file in ipairs(files) do
+        -- If dest is a file, write directly to it
+        if parent(e_dest) then
+            local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
+            local f = io.open(e_dest, "w")
+            f:write(c)
+            f:close()
+            break -- Only write the first matching file
+        else
+            -- Otherwise handle as directory
+            local p_based = parent(file)
+            if p_based and not info.flatten_folders then 
+                mkdir(e_dest.."/"..p_based) 
             end
+            local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
+            local f = io.open(e_dest.."/"..(info.flatten_folders and file:match("[^/]+$") or file), "w")
+            f:write(c)
+            f:close()
         end
     end
     return true

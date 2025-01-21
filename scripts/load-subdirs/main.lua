@@ -20,8 +20,14 @@ function load_conf_from_path(path)
                 -- Split line into key and value
                 local key, value = line:match("^%s*([^=]+)%s*=%s*(.+)%s*$")
                 if key and value then
+                    -- Remove inline comments (only if # is preceded by space) and trailing whitespace
+                    value = value:gsub("%s+#.*$", "")
+                    value = value:gsub("%s+$", "")
+                    -- Remove quotes from value
+                    value = value:gsub("^'(.*)'$", "%1")
                     -- Set the option
-                    mp.set_property(key, value)
+                    msg.debug("Setting " .. key .. " to " .. value)
+                    mp.set_property(key:gsub("%s+$", ""), value)
                 end
             end
         end

@@ -68,6 +68,29 @@ end
 function matches(index, title)
     if not title then return false end
     title = title:lower()
+
+    -- Get chapters list to check special cases
+    local chapters = mp.get_property_native("chapter-list")
+    if chapters then
+        local ch1_idx, ch2_idx
+        for i, chapter in ipairs(chapters) do
+            if chapter.title == "Chapter 01" then ch1_idx = i end
+            if chapter.title == "Chapter 02" then ch2_idx = i end
+        end
+
+        -- If both chapters exist, check their times
+        if ch1_idx and ch2_idx then
+            if title == "chapter 01" and ch1_idx < ch2_idx then
+                return true -- Chapter 01 is opening when before Chapter 02
+            elseif title == "chapter 02" and ch2_idx < ch1_idx then
+                return true -- Chapter 02 is opening when before Chapter 01
+            elseif title == "chapter 01" and ch1_idx > ch2_idx then
+                categories["prologue"] = categories["prologue"] .. "/Chapter 01"
+            end
+        end
+    end
+
+    -- Check regular patterns
     for category, patterns in pairs(categories) do
         for pattern in string.gmatch(patterns, "[^/]+") do
             if title:match(pattern:lower()) then
