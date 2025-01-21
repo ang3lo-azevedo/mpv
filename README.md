@@ -1,4 +1,5 @@
 This is my personal configuration and collection of scripts and shaders for mpv.
+The configurations have been made to be used on Linux.
 
 # Configs
 - [netflix-subtitles](https://github.com/ang3lo-azevedo/mpv/tree/main/conf/netflix-subtitles) - For having the subtitles as close as possible to the ones on Netflix
@@ -26,10 +27,9 @@ This is my personal configuration and collection of scripts and shaders for mpv.
 
 ## Utilities
 - [skip-intro](https://github.com/rui-ddc/skip-intro) - To be able to skip intros, outros and previews by analyzing the audio of the video pressing the ENTER key
-- [chapter-skip-button](https://github.com/ang3lo-azevedo/mpv/tree/main/scripts/utils/chapter-skip-button) - To show a skip button for certain chapter categories mainly for the intro, outro and previews
 
 
 
 # Shaders
 - [Anime4K](https://github.com/bloc97/Anime4K) - For upscaling anime
-- [Tsubajashi config shaders](https://github.com/Tsubajashi/mpv-settings/tree/master/shaders) - For upscaling anime
+- [Tsubajashi config shaders](https://github.com/Tsubajashi/mpv-settings/tree/master/shaders) - All the shaders used in the Tsubajashi config
