@@ -1,9 +1,10 @@
 # TODO
 
-- [ ]  Add rest of the scripts to the manager
-- [ ]  Update the scripts-manager script
-- [ ]  Update the trakt-mpv script
-- [ ]  Update the trakt-mpv helper to be rewritten in Rust™️
+- [ ] Fix the script-opts-append on the /conf/scripts/**/*.conf files
+- [ ] Add rest of the scripts to the manager
+- [ ] Update the scripts-manager script
+- [ ] Update the trakt-mpv script
+- [ ] Update the trakt-mpv helper to be rewritten in Rust™️
 
 > The config is still in experimental phase
 
@@ -24,7 +25,7 @@ The configurations have been made to be used on Linux.
 
 ## Script Loading
 
-> - [load-subfolders](https://github.com/ang3lo-azevedo/mpv/tree/main/scripts/load-subfolders) - For loading all the scripts from the scripts subdirectories
+> - [load-subdirs](https://github.com/ang3lo-azevedo/mpv/tree/main/scripts/load-subdirs) - For loading all the scripts main.* and all the conf files from the scripts/ and conf/ subdirectories
 
 ## UI
 

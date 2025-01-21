@@ -26,7 +26,7 @@ function load_conf_from_path(path)
                     -- Remove quotes from value
                     value = value:gsub("^'(.*)'$", "%1")
                     -- Set the option
-                    msg.debug("Setting " .. key .. " to " .. value)
+                    msg.info("Setting " .. key .. "to " .. value)
                     mp.set_property(key:gsub("%s+$", ""), value)
                 end
             end
