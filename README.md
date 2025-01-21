@@ -1,6 +1,7 @@
 # TODO
 
 - [ ] Fix the script-opts-append on the /conf/scripts/**/*.conf files
+- [ ] Fix mpvcontextmenu
 - [ ] Add rest of the scripts to the manager
 - [ ] Update the scripts-manager script
 - [ ] Update the trakt-mpv script
