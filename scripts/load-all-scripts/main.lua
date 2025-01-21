@@ -21,6 +21,7 @@ function load_scripts_from_dir(dir)
             -- Load .lua files
             msg.debug("Loading script: " .. path)
             local success, err = pcall(function()
+                -- Load the script
                 mp.commandv("load-script", path)
             end)
             if not success then
@@ -39,6 +40,7 @@ local script_dir = mp.get_script_directory()
 msg.info("Script directory: " .. script_dir)
 
 local scripts_dir = utils.join_path(script_dir, "..")
+
 msg.info("Loading scripts from: " .. scripts_dir)
 
 -- Load all scripts recursively

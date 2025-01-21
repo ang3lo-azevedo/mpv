@@ -1,3 +1,6 @@
 {
-    "gitConfigUser.selectedProfile": "50565 - Ângelo Azevedo"
+    "gitConfigUser.selectedProfile": "50565 - Ângelo Azevedo",
+    "Lua.diagnostics.globals": [
+        "load_scripts_from_dir"
+    ]
 }
