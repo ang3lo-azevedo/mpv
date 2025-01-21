@@ -26,7 +26,7 @@ function load_conf_from_path(path)
                     -- Remove quotes from value
                     value = value:gsub("^'(.*)'$", "%1")
                     -- Set the option
-                    msg.info("Setting " .. key .. "to " .. value)
+                    msg.debug("Setting " .. key .. "to " .. value)
                     mp.set_property(key:gsub("%s+$", ""), value)
                 end
             end
@@ -84,8 +84,8 @@ function load_from_dir(dir)
         elseif info and info.is_file and file:match("%.conf$") then
             -- Load .conf files
             load_conf_from_path(path)
-        elseif info and info.is_file and file:match("%.lua$") then
-            -- Load .lua files
+        elseif info and info.is_file and file:match("^main[%.]?.*$") then
+            -- Load script files
             load_script_from_path(path)
         end
     end
