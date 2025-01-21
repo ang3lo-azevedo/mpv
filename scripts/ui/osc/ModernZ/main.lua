@@ -120,8 +120,9 @@ local user_opts = {
     osc_color = "#000000",                 -- accent color of the OSC and title bar
     window_title_color = "#FFFFFF",        -- color of the title in borderless/fullscreen mode
     window_controls_color = "#FFFFFF",     -- color of the window controls (close, minimize, maximize) in borderless/fullscreen mode
-    windowcontrols_close_hover = "#E81123", -- color of close window control on hover
-    windowcontrols_minmax_hover = "#FFD700", -- color of min/max window controls on hover
+    windowcontrols_close_hover = "#F45C5B", -- color of close window control on hover
+    windowcontrols_max_hover = "#F8BC3A",  -- color of maximize window controls on hover
+    windowcontrols_min_hover = "#43CB44",  -- color of minimize window controls on hover
     title_color = "#FFFFFF",               -- color of the title (above seekbar)
     cache_info_color = "#FFFFFF",          -- color of the cache information
     seekbarfg_color = "#FB8C00",           -- color of the seekbar progress and handle
@@ -187,7 +188,7 @@ local user_opts = {
     time_codes_centered_height = 57,       -- time codes height position with portrait window
     tooltip_height_offset = 2,             -- tooltip height position offset
     tooltip_left_offset = 5,               -- if tooltip contains many characters, it is moved to the left by offset
-    portrait_window_trigger = 930,         -- portrait window width trigger to move some elements
+    portrait_window_trigger = 1000,        -- portrait window width trigger to move some elements
     hide_volume_bar_trigger = 1150,        -- hide volume bar trigger window width
     notitle_osc_h_offset = 25,             -- osc height offset if title above seekbar is disabled
     nochapter_osc_h_offset = 10,           -- osc height offset if chapter title is disabled or doesn't exist
@@ -267,10 +268,10 @@ local osc_param = {                  -- calculated by osc_init()
 }
 
 local icons = {
-    maximize = "\238\132\147",
-    unmaximize = "\238\132\148",
-    minimize = "\238\132\146",
-    close = "\238\132\149",
+    maximize = "\238\159\171",
+    unmaximize = "\238\174\150",
+    minimize = "\238\175\144",
+    close = "\239\141\169",
 
     audio = "\238\175\139",
     subtitle = "\238\175\141",
@@ -440,26 +441,26 @@ local function set_osc_styles()
     local midbuttons_size = user_opts.midbuttons_size or 24
     local sidebuttons_size = user_opts.sidebuttons_size or 24
     osc_styles = {
-        box_bg = "{\\blur" .. user_opts.fade_blur_strength .. "\\bord" .. user_opts.fade_alpha .. "\\1c&H000000&\\3c&H" .. osc_color_convert(user_opts.osc_color) .. "&}",
-        window_box_bg = "{\\blur" .. user_opts.window_fade_blur_strength .. "\\bord" .. user_opts.window_fade_alpha .. "\\1c&H000000&\\3c&H" .. osc_color_convert(user_opts.osc_color) .. "&}",
-        chapter_title = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.chapter_title_color) .. "&\\3c&H000000&\\fs" .. user_opts.chapter_title_font_size .. "\\fn" .. user_opts.font .. "}",
+        osc_fade_bg = "{\\blur" .. user_opts.fade_blur_strength .. "\\bord" .. user_opts.fade_alpha .. "\\1c&H0&\\3c&H" .. osc_color_convert(user_opts.osc_color) .. "&}",
+        window_fade_bg = "{\\blur" .. user_opts.window_fade_blur_strength .. "\\bord" .. user_opts.window_fade_alpha .. "\\1c&H0&\\3c&H" .. osc_color_convert(user_opts.osc_color) .. "&}",
+        window_control = "{\\blur1\\bord0.5\\1c&H" .. osc_color_convert(user_opts.window_controls_color) .. "&\\3c&H0&\\fs25\\fn" .. iconfont .. "}",
+        window_title = "{\\blur1\\bord0.5\\1c&H" .. osc_color_convert(user_opts.window_title_color) .. "&\\3c&H0&\\fs26\\q2\\fn" .. user_opts.font .. "}",
+        title = "{\\blur1\\bord0.5\\1c&H" .. osc_color_convert(user_opts.title_color) .. "&\\3c&H0&\\fs".. user_opts.title_font_size .."\\q2\\fn" .. user_opts.font .. "}",
+        chapter_title = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.chapter_title_color) .. "&\\3c&H0&\\fs" .. user_opts.chapter_title_font_size .. "\\fn" .. user_opts.font .. "}",
+        seekbar_bg = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.seekbarbg_color) .. "&}",
+        seekbar_fg = "{\\blur1\\bord1\\1c&H" .. osc_color_convert(user_opts.seekbarfg_color) .. "&}",
+        thumbnail = "{\\blur0\\bord1\\1c&H" .. osc_color_convert(user_opts.thumbnail_border_color) .. "&\\3c&H" .. osc_color_convert(user_opts.thumbnail_border_outline) .. "&}",
+        time = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.time_color) .. "&\\3c&H0&\\fs" .. user_opts.time_font_size .. "\\fn" .. user_opts.font .. "}",
+        cache = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.cache_info_color) .. "&\\3c&H0&\\fs" .. user_opts.cache_info_font_size .. "\\fn" .. user_opts.font .. "}",
+        tooltip = "{\\blur1\\bord0.5\\1c&HFFFFFF&\\3c&H0&\\fs" .. user_opts.tooltip_font_size .. "\\fn" .. user_opts.font .. "}",
+        volumebar_bg = "{\\blur0\\bord0\\1c&H999999&}",
+        volumebar_fg = "{\\blur1\\bord1\\1c&H" .. osc_color_convert(user_opts.side_buttons_color) .. "&}",
         control_1 = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.playpause_color) .. "&\\3c&HFFFFFF&\\fs" .. playpause_size .. "\\fn" .. iconfont .. "}",
         control_2 = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.middle_buttons_color) .. "&\\3c&HFFFFFF&\\fs" .. midbuttons_size .. "\\fn" .. iconfont .. "}",
         control_2_flip = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.middle_buttons_color) .. "&\\3c&HFFFFFF&\\fs" .. midbuttons_size .. "\\fn" .. iconfont .. "\\fry180}",
         control_3 = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.side_buttons_color) .. "&\\3c&HFFFFFF&\\fs" .. sidebuttons_size .. "\\fn" .. iconfont .. "}",
         element_down = "{\\1c&H" .. osc_color_convert(user_opts.held_element_color) .. "&}",
         element_hover = "{" .. (contains(user_opts.hover_effect, "color") and "\\1c&H" .. osc_color_convert(user_opts.hover_effect_color) .. "&" or "") .."\\2c&HFFFFFF&" .. (contains(user_opts.hover_effect, "size") and string.format("\\fscx%s\\fscy%s", user_opts.hover_button_size, user_opts.hover_button_size) or "") .. "}",
-        seekbar_bg = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.seekbarbg_color) .. "&}",
-        seekbar_fg = "{\\blur1\\bord1\\1c&H" .. osc_color_convert(user_opts.seekbarfg_color) .. "&}",
-        thumbnail = "{\\blur0\\bord1\\1c&H" .. osc_color_convert(user_opts.thumbnail_border_color) .. "&\\3c&H" .. osc_color_convert(user_opts.thumbnail_border_outline) .. "&}",
-        time = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.time_color) .. "&\\3c&H000000&\\fs" .. user_opts.time_font_size .. "\\fn" .. user_opts.font .. "}",
-        cache = "{\\blur0\\bord0\\1c&H" .. osc_color_convert(user_opts.cache_info_color) .. "&\\3c&H000000&\\fs" .. user_opts.cache_info_font_size .. "\\fn" .. user_opts.font .. "}",
-        title = "{\\blur1\\bord0.5\\1c&H" .. osc_color_convert(user_opts.title_color) .. "&\\3c&H0&\\fs".. user_opts.title_font_size .."\\q2\\fn" .. user_opts.font .. "}",
-        tooltip = "{\\blur1\\bord0.5\\1c&HFFFFFF&\\3c&H000000&\\fs" .. user_opts.tooltip_font_size .. "\\fn" .. user_opts.font .. "}",
-        volumebar_bg = "{\\blur0\\bord0\\1c&H999999&}",
-        volumebar_fg = "{\\blur1\\bord1\\1c&H" .. osc_color_convert(user_opts.side_buttons_color) .. "&}",
-        window_control = "{\\blur1\\bord0.5\\1c&H" .. osc_color_convert(user_opts.window_controls_color) .. "&\\3c&H000000&\\fs25\\fnmpv-osd-symbols}",
-        window_title = "{\\blur1\\bord0.5\\1c&H" .. osc_color_convert(user_opts.window_title_color) .. "&\\3c&H000000&\\fs26\\q2\\fn" .. user_opts.font .. "}",
     }
 end
 
@@ -505,6 +506,8 @@ local state = {
     sliderpos = 0,
     touchingprogressbar = false,            -- if the mouse is touching the progress bar
     initialborder = mp.get_property("border"),
+    playtime_hour_force_init = false,       -- used to force request_init() once
+    playtime_nohour_force_init = false,     -- used to force request_init() once
     playingWhilstSeeking = false,
     playingWhilstSeekingWaitingForEnd = false,
     persistentprogresstoggle = user_opts.persistentprogress,
@@ -1266,7 +1269,6 @@ local function render_elements(master_ass)
             elseif element.content ~= nil then
                 buttontext = element.content -- text objects
             end
-            buttontext = buttontext:gsub(":%((.?.?.?)%) unknown ", ":%(%1%)")  --gsub('%) unknown %(\'', '')
 
             local maxchars = element.layout.button.maxchars
             if maxchars ~= nil and #buttontext > maxchars then
@@ -1278,9 +1280,8 @@ local function render_elements(master_ass)
                     end
                     buttontext = buttontext .. "..."
                 end
-                local _, nchars2 = buttontext:gsub(".[\128-\191]*", "")
-                local stretch = (maxchars/#buttontext) * 100
-                buttontext = string.format("{\\fscx%f}%s{\\r}", stretch, buttontext)
+                buttontext = string.format("{\\fscx%f}",
+                    (maxchars/#buttontext)*100) .. buttontext
             end
 
             -- add hover effects
@@ -1583,19 +1584,19 @@ local function window_controls()
         lo = add_layout("close")
         lo.geometry = third_geo
         lo.style = osc_styles.window_control
-        lo.button.hoverstyle = "{\\c&H" .. osc_color_convert(user_opts.windowcontrols_close_hover) .. "&\\3c&H000000&}"
+        lo.button.hoverstyle = "{\\c&H" .. osc_color_convert(user_opts.windowcontrols_close_hover) .. "&" .. (contains(user_opts.hover_effect, "size") and string.format("\\fscx%s\\fscy%s", user_opts.hover_button_size, user_opts.hover_button_size) or "") .. "}"
 
         -- Minimize: 🗕
         lo = add_layout("minimize")
         lo.geometry = first_geo
         lo.style = osc_styles.window_control
-        lo.button.hoverstyle = "{\\c&H" .. osc_color_convert(user_opts.windowcontrols_minmax_hover) .. "&\\3c&H000000&}"
+        lo.button.hoverstyle = "{\\c&H" .. osc_color_convert(user_opts.windowcontrols_min_hover) .. "&" .. (contains(user_opts.hover_effect, "size") and string.format("\\fscx%s\\fscy%s", user_opts.hover_button_size, user_opts.hover_button_size) or "") .. "}"
 
         -- Maximize: 🗖 /🗗
         lo = add_layout("maximize")
         lo.geometry = second_geo
         lo.style = osc_styles.window_control
-        lo.button.hoverstyle = "{\\c&H" .. osc_color_convert(user_opts.windowcontrols_minmax_hover) .. "&\\3c&H000000&}"
+        lo.button.hoverstyle = "{\\c&H" .. osc_color_convert(user_opts.windowcontrols_max_hover) .. "&" .. (contains(user_opts.hover_effect, "size") and string.format("\\fscx%s\\fscy%s", user_opts.hover_button_size, user_opts.hover_button_size) or "") .. "}"
         
         add_area("window-controls", get_hitbox_coords(controlbox_left, wc_geo.y, wc_geo.an, controlbox_w, wc_geo.h))
     end
@@ -1657,10 +1658,10 @@ layouts["modern"] = function ()
     -- Controller Background
     local lo, geo
 
-    new_element("box_bg", "box")
-    lo = add_layout("box_bg")
+    new_element("osc_fade_bg", "box")
+    lo = add_layout("osc_fade_bg")
     lo.geometry = {x = posX, y = posY, an = 7, w = osc_w, h = 1}
-    lo.style = osc_styles.box_bg
+    lo.style = osc_styles.osc_fade_bg
     lo.layer = 10
     lo.alpha[3] = 0
 
@@ -1671,7 +1672,7 @@ layouts["modern"] = function ()
         new_element("window_bar_alpha_bg", "box")
         lo = add_layout("window_bar_alpha_bg")
         lo.geometry = {x = posX, y = -100, an = 7, w = osc_w, h = -1}
-        lo.style = osc_styles.window_box_bg
+        lo.style = osc_styles.window_fade_bg
         lo.layer = 10
         lo.alpha[3] = 0
     end
@@ -1693,7 +1694,7 @@ layouts["modern"] = function ()
     lo = add_layout("seekbar")
     local seekbar_h = 18
     lo.geometry = {x = refX, y = refY - 72, an = 5, w = osc_geo.w - 50, h = seekbar_h}
-    lo.layer = 100
+    lo.layer = 51
     lo.style = osc_styles.seekbar_fg
     lo.slider.gap = (seekbar_h - seekbar_bg_h) / 2.0
     lo.slider.tooltip_style = osc_styles.tooltip
@@ -1829,22 +1830,30 @@ layouts["modern"] = function ()
 
     -- Time codes
     local remsec = mp.get_property_number("playtime-remaining", 0)
-    local possec = mp.get_property_number("playback-time", 0)
     local dur = mp.get_property_number("duration", 0)
-    local show_hours = possec >= 3600 or user_opts.time_format ~= "dynamic"
+    local show_hours = mp.get_property_number("playback-time", 0) >= 3600 or user_opts.time_format ~= "dynamic"
     local show_remhours = (state.tc_right_rem and remsec >= 3600) or (not state.tc_right_rem and dur >= 3600) or user_opts.time_format ~= "dynamic"
-    local tc_w_offset = (state.tc_ms and 60 or 0) + (show_hours and 20 or 0) + (show_remhours and 20 or 0)
     local auto_hide_volbar = (audio_track and user_opts.volume_control) and osc_param.playresx < (user_opts.hide_volume_bar_trigger - outeroffset)
-    local narrow_vid_tc_y = osc_param.playresx < (user_opts.portrait_window_trigger - outeroffset - (playlist_button and 0 or 100) - (subtitle_track and 0 or 100) - (audio_track and 0 or 100))
     local time_codes_x = 275
         - (auto_hide_volbar and 75 or 0) -- window width with audio track and elements
         - (audio_track and not user_opts.volume_control and 115 or 0) -- audio track with no elements
         - (not audio_track and 160 or 0) -- no audio track or elements
         - (subtitle_track and 0 or 45)
         - (playlist_button and 0 or 45)
-
+    local time_codes_width = 80
+        + (state.tc_ms and 50 or 0)
+        + (state.tc_right_rem and 15 or 0)
+        + (show_hours and 20 or 0)
+        + (show_remhours and 20 or 0)
+    local narrow_win = osc_param.playresx < (
+        user_opts.portrait_window_trigger
+        - outeroffset
+        - (playlist_button and 0 or 100)
+        - (subtitle_track and 0 or 100)
+        - (audio_track and 0 or 100)
+    )
     lo = add_layout("time_codes")
-    lo.geometry = {x = (narrow_vid_tc_y and refX or time_codes_x), y = refY - (narrow_vid_tc_y and user_opts.time_codes_centered_height or user_opts.time_codes_height), an = (narrow_vid_tc_y and 5 or 4), w = 90 + tc_w_offset, h = 15}
+    lo.geometry = {x = (narrow_win and refX or time_codes_x), y = refY - (narrow_win and user_opts.time_codes_centered_height or user_opts.time_codes_height), an = (narrow_win and 5 or 4), w = time_codes_width, h = user_opts.time_font_size}
     lo.style = osc_styles.time
 
     -- Fullscreen/Info/Pin/Screenshot/Loop/Speed
@@ -1934,10 +1943,10 @@ layouts["modern-image"] = function ()
     -- Controller Background
     local lo, geo
     
-    new_element("box_bg", "box")
-    lo = add_layout("box_bg")
+    new_element("osc_fade_bg", "box")
+    lo = add_layout("osc_fade_bg")
     lo.geometry = {x = posX, y = posY, an = 7, w = osc_w, h = 1}
-    lo.style = osc_styles.box_bg
+    lo.style = osc_styles.osc_fade_bg
     lo.layer = 10
     lo.alpha[3] = 0
 
@@ -1948,7 +1957,7 @@ layouts["modern-image"] = function ()
         new_element("window_bar_alpha_bg", "box")
         lo = add_layout("window_bar_alpha_bg")
         lo.geometry = {x = posX, y = -100, an = 7, w = osc_w, h = -1}
-        lo.style = osc_styles.window_box_bg
+        lo.style = osc_styles.window_fade_bg
         lo.layer = 10
         lo.alpha[3] = 0
     end
@@ -2787,6 +2796,21 @@ local function osc_init()
     ne.content = function()
         local playback_time = mp.get_property_number("playback-time", 0)
 
+        -- force request_init() once to update time codes width hitbox
+        -- run once when less than hour, once again if hour or more
+        -- since request_init() is expensive, this is a measure to call it when needed only
+        if user_opts.time_format ~= "fixed" and playback_time then
+            if playback_time >= 3600 and not state.playtime_hour_force_init then
+                request_init()
+                state.playtime_hour_force_init = true
+                state.playtime_nohour_force_init = false
+            elseif playback_time < 3600 and not state.playtime_nohour_force_init then
+                request_init()
+                state.playtime_hour_force_init = false
+                state.playtime_nohour_force_init = true
+            end
+        end
+
         local duration = mp.get_property_number("duration", 0)
         if duration <= 0 then return "--:--" end
 
@@ -3317,10 +3341,6 @@ mp.observe_property("chapter-list", "native", function(_, list)
     update_duration_watch()
     request_init()
 end)
-
-mp.observe_property("playback-time", "native", function(_, time)
-    request_tick()
-end)
 mp.observe_property("seeking", "native", function(_, seeking)
     if user_opts.seek_resets_hidetimeout then
         reset_timeout()
@@ -3331,7 +3351,6 @@ mp.observe_property("seeking", "native", function(_, seeking)
         state.new_file_flag = false
     end
 end)
-
 mp.observe_property("fullscreen", "bool", function(_, val)
     state.fullscreen = val
     state.marginsREQ = true
@@ -3354,10 +3373,10 @@ mp.observe_property("idle-active", "bool", function(_, val)
     state.idle = val
     request_tick()
 end)
-
 mp.observe_property("display-fps", "number", set_tick_delay)
 mp.observe_property("demuxer-cache-state", "native", cache_state)
 mp.observe_property("vo-configured", "bool", request_tick)
+mp.observe_property("playback-time", "number", request_tick)
 mp.observe_property("osd-dimensions", "native", function()
     -- (we could use the value instead of re-querying it all the time, but then
     --  we might have to worry about property update ordering)
@@ -3587,13 +3606,13 @@ local function validate_user_opts()
     end
 
     local colors = {
-        user_opts.osc_color, user_opts.seekbarfg_color, user_opts.seekbarbg_color, 
-        user_opts.title_color, user_opts.time_color, user_opts.side_buttons_color, 
-        user_opts.middle_buttons_color, user_opts.playpause_color, user_opts.window_title_color, 
-        user_opts.window_controls_color, user_opts.held_element_color, user_opts.thumbnail_border_color, 
+        user_opts.osc_color, user_opts.seekbarfg_color, user_opts.seekbarbg_color,
+        user_opts.title_color, user_opts.time_color, user_opts.side_buttons_color,
+        user_opts.middle_buttons_color, user_opts.playpause_color, user_opts.window_title_color,
+        user_opts.window_controls_color, user_opts.held_element_color, user_opts.thumbnail_border_color,
         user_opts.chapter_title_color, user_opts.seekbar_cache_color, user_opts.hover_effect_color,
-        user_opts.windowcontrols_close_hover, user_opts.windowcontrols_minmax_hover, user_opts.cache_info_color,
-        user_opts.thumbnail_border_outline,
+        user_opts.windowcontrols_close_hover, user_opts.windowcontrols_max_hover, user_opts.windowcontrols_min_hover,
+        user_opts.cache_info_color, user_opts.thumbnail_border_outline,
     }
 
     for _, color in pairs(colors) do

@@ -1,4 +1,5 @@
 local utils = require "mp.utils"
+local msg = require "mp.msg"
 local legacy = mp.command_native_async == nil
 local config = {}
 local dir_cache = {}
@@ -146,9 +147,11 @@ function update_all()
 
     -- Update each script
     for i, info in ipairs(config) do
-        print("update"..i, update(info))
+        msg.info("Updating script "..i ..":", update(info))
     end
 end
+
+msg.info("Updating all scripts")
 
 -- Update all scripts when the file is loaded
 mp.register_event("file-loaded", update_all)

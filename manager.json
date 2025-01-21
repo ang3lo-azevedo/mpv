@@ -2,7 +2,8 @@
   {
     "git":"https://github.com/Samillion/ModernZ",
     "whitelist":"modernz.lua$",
-    "dest":"~~/scripts/ui/osc/ModernZ/main.lua"
+    "dest":"~~/scripts/ui/osc/ModernZ/main.lua",
+    "branch":"main"
   },
   {
     "git":"https://github.com/po5/thumbfast",
@@ -12,6 +13,7 @@
   {
     "git":"https://github.com/thisisshihan/mpv-player-config-snad/",
     "whitelist":"pause-indicator.lua$",
-    "dest":"~~/scripts/ui/other/pause-indicator/main.lua"
+    "dest":"~~/scripts/ui/other/pause-indicator/main.lua",
+    "branch":"mpv-config-snad-windows-ubuntu-linux-macos"
   }
 ]
