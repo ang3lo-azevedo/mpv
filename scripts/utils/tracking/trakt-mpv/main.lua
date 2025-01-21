@@ -17,19 +17,9 @@ local function merge_tables(t1, t2)
     return t1
 end
 
-
 -- Calls the Python file
 local function evoque_python(flags)
-    -- Find the path
-    local location
-
-    if os.getenv("HOME") == nil then
-        -- If you are using Windows, it will assume you are using mpv
-        location = os.getenv("APPDATA") .. "/mpv/Scripts/trakt-mpv/main.py"
-    else
-        -- If you are using Linux, it will assume you are using mpv
-        location = os.getenv("HOME") .. "/.config/mpv/scripts/trakt-mpv/main.py"
-    end
+    local location = mp.command_native({"expand-path", "~~/scripts/utils/tracking/trakt-mpv/helper.py"})
 
     -- Add the flags
     local args = merge_tables({ "python", location }, flags)
@@ -111,4 +101,3 @@ local function start_trakt()
 end
 
 mp.register_event("file-loaded", start_trakt)
-mp.add_key_binding('t', 'manualy_start_scrobbling', start_trakt)

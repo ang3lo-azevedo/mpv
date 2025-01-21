@@ -1,3 +1,8 @@
+# TODO
+- [ ] Add rest of the scripts to the manager
+- [ ] Update the trakt-mpv script
+- [ ] Update the trakt-mpv helper to be rewritten in Rust™️
+
 This is my personal configuration and collection of scripts and shaders for mpv.
 The configurations have been made to be used on Linux.
 
@@ -24,9 +29,13 @@ The configurations have been made to be used on Linux.
 ### Pause Indicator
 - [pause-indicator](https://github.com/thisisshihan/mpv-player-config-snad/tree/mpv-config-snad-windows-ubuntu-linux-macos/removed_conf/scripts/pause-indicator.lua) - To show a pause/resume indicator
 
+### Context Menu
+- [mpvcontextmenu](https://gitlab.com/carmanaught/mpvcontextmenu/) - To show a context menu on the OSC
+
 
 ## Utilities
-- [skip-intro](https://github.com/rui-ddc/skip-intro) - To be able to skip intros, outros and previews pressing the ENTER key (the detection is made by analyzing the audio of the video) 
+- [SmartSkip](https://github.com/Eisa01/mpv-scripts/blob/master/scripts/SmartSkip.lua) - To be able to skip intros, outros and previews
+- [recent](https://github.com/hacel/recent) - To show the most recent files
 
 ### Tracking
 - [trakt-mpv](https://github.com/ang3lo-azevedo/mpv/tree/main/scripts/utils/tracking/trakt-mpv) - To have automatic scrobbling to trakt.tv
