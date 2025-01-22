@@ -2,13 +2,13 @@
 
 # TODO
 
-> - [ ]  Improve conf/quality/Quality.conf with [classicjazz mpv.conf](https://github.com/classicjazz/mpv-config/blob/master/mpv.conf)
-> - [ ]  Fix the script-opts-append on the /conf/scripts/**/*.conf files
-> - [ ]  Fix mpvcontextmenu
-> - [ ]  Add rest of the scripts to the manager
-> - [ ]  Update the scripts-manager script
-> - [ ]  Update the trakt-mpv script
-> - [ ]  Update the trakt-mpv helper to be rewritten in Rust™️
+> - [ ]  Improve [conf/quality/Quality.conf](scripts/conf/quality/Quality.conf) with [classicjazz mpv.conf](https://github.com/classicjazz/mpv-config/blob/master/mpv.conf)
+> - [ ]  Fix the script-opts-append on the [/conf/scripts/**/*.conf](scripts/conf/scripts/) files
+> - [ ]  Fix [mpvcontextmenu](scripts/utils/ui/context-menu/mpvcontextmenu.lua)
+> - [ ]  Add rest of the scripts to the [manager](scripts/scripts-manager/mpv_manager/manager.json)
+> - [ ]  Update the [scripts-manager](scripts/scripts-manager/mpv_manager/main.lua) script
+> - [ ]  Update the [trakt-mpv](scripts/utils/tracking/trakt-mpv/main.lua) script
+> - [ ]  Update the [trakt-mpv](scripts/utils/tracking/trakt-mpv/trakt-mpv.py) helper to be rewritten in Rust™️
 
 # 
 
@@ -17,19 +17,19 @@ The configurations have been made to be used on Linux.
 
 # Configs
 
-> - [netflix-subtitles](https://github.com/ang3lo-azevedo/mpv/tree/main/conf/netflix-subtitles) - For having the subtitles as close as possible to the ones on Netflix
-> - [quality](https://github.com/ang3lo-azevedo/mpv/tree/main/conf/quality) - For having the best video quality possible
-> - [audio](https://github.com/ang3lo-azevedo/mpv/tree/main/conf/audio) - For having the best audio quality possible
+> - [netflix-subtitles](conf/netflix-subtitles) - For having the subtitles as close as possible to the ones on Netflix
+> - [quality](conf/quality) - For having the best video quality possible
+> - [audio](conf/audio) - For having the best audio quality possible
 
 # Scripts
 
 ## Script Managing
 
-> - [mpv_manager](https://github.com/ang3lo-azevedo/mpv/tree/main/scripts/scripts-manager/mpv_manager) - For managing all the other scripts and shaders (All the other scripts are defined in the manager.json file)
+> - [mpv_manager](scripts/scripts-manager/mpv_manager) - For managing all the other scripts and shaders (All the other scripts are defined in the manager.json file)
 
 ## Script Loading
 
-> - [load-subdirs](https://github.com/ang3lo-azevedo/mpv/tree/main/scripts/load-subdirs) - For loading all the scripts main.* and all the conf files from the scripts/ and conf/ subdirectories
+> - [load-subdirs](scripts/load-subdirs) - For loading all the scripts main.* and all the conf files from the scripts/ and conf/ subdirectories
 
 ## UI
 
@@ -56,7 +56,7 @@ The configurations have been made to be used on Linux.
 
 ### Tracking
 
-> - [trakt-mpv](https://github.com/ang3lo-azevedo/mpv/tree/main/scripts/utils/tracking/trakt-mpv) - To have automatic scrobbling to trakt.tv
+> - [trakt-mpv](scripts/utils/tracking/trakt-mpv) - To have automatic scrobbling to trakt.tv
 
 # Shaders
 
