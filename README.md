@@ -2,8 +2,8 @@
 
 # TODO
 
-> - [ ]  Improve [conf/quality/Quality.conf](scripts/conf/quality/Quality.conf) with [classicjazz mpv.conf](https://github.com/classicjazz/mpv-config/blob/master/mpv.conf)
-> - [ ]  Fix the script-opts-append on the [/conf/scripts/**/*.conf](scripts/conf/scripts/) files
+> - [ ]  Improve [conf/quality/Quality.conf](conf/quality/Quality.conf) with [classicjazz mpv.conf](https://github.com/classicjazz/mpv-config/blob/master/mpv.conf)
+> - [ ]  Fix the script-opts-append on the [/conf/scripts/**/*.conf](conf/scripts/) files
 > - [ ]  Fix [mpvcontextmenu](scripts/utils/ui/context-menu/mpvcontextmenu.lua)
 > - [ ]  Add rest of the scripts to the [manager](scripts/scripts-manager/mpv_manager/manager.json)
 > - [ ]  Update the [scripts-manager](scripts/scripts-manager/mpv_manager/main.lua) script
