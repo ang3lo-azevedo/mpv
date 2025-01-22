@@ -9,6 +9,8 @@ import sys
 import os
 import json
 from time import sleep
+import time
+import datetime
 
 import requests
 from datetime import date
@@ -225,6 +227,37 @@ def __query_whatever(name, configs):
 
 
 def checkin(configs, body):
+    # First check if there's an ongoing scrobble that's still within its duration
+    res = requests.get(
+        'https://api.trakt.tv/users/' + configs['user_slug'] + '/watching',
+        headers={
+            'trakt-api-key': configs['client_id'],
+            'trakt-api-version': '2',
+            'Authorization': 'Bearer ' + configs['access_token']
+        }
+    )
+
+    if res.status_code == 200:
+        # There's an active scrobble
+        current_time = int(time.time())
+        scrobble_start = res.json().get('started_at')
+        
+        if scrobble_start:
+            # Convert ISO 8601 to timestamp
+            start_time = datetime.datetime.fromisoformat(scrobble_start.replace('Z', '+00:00')).timestamp()
+            
+            # Get runtime from the response
+            runtime = None
+            if 'movie' in res.json():
+                runtime = res.json()['movie'].get('runtime', 90) * 60  # Convert minutes to seconds
+            elif 'episode' in res.json():
+                runtime = res.json()['episode'].get('runtime', 30) * 60  # Convert minutes to seconds
+            
+            if runtime and (current_time - start_time) < runtime:
+                # Still within the duration of the last scrobble
+                sys.exit(0)
+
+    # Proceed with normal checkin if no active scrobble or previous one has finished
     res = requests.post(
         'https://api.trakt.tv/checkin',
         headers={
