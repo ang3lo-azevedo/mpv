@@ -255,6 +255,7 @@ def checkin(configs, body):
             
             if runtime and (current_time - start_time) < runtime:
                 # Still within the duration of the last scrobble
+                print("Still within the duration of the last scrobble")
                 sys.exit(0)
 
     # Proceed with normal checkin if no active scrobble or previous one has finished
