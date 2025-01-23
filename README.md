@@ -18,7 +18,7 @@ The configurations have been made to be used on Linux.
 # Configs
 
 > - [netflix-subtitles](conf/netflix-subtitles) - For having the subtitles as close as possible to the ones on Netflix
-> - [quality](conf/quality) - For having the best video quality possible
+> - [vuality](conf/video) - For having the best video quality possible
 > - [audio](conf/audio) - For having the best audio quality possible
 
 # Scripts

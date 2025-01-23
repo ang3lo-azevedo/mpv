@@ -2,7 +2,7 @@ local utils = require("mp.utils")
 local msg = require("mp.msg")
 
 --[[
-* Load a conf file from a path
+* Load a conf file from a path and process profiles if present
 * @param path The path to load the conf file from
 ]]
 function load_conf_from_path(path)
@@ -13,21 +13,33 @@ function load_conf_from_path(path)
         return
     end
 
+    local current_profile = nil
     local success, err = pcall(function()
         for line in file:lines() do
             -- Skip comments and empty lines
             if not line:match("^%s*#") and not line:match("^%s*$") then
-                -- Split line into key and value
-                local key, value = line:match("^%s*([^=]+)%s*=%s*(.+)%s*$")
-                if key and value then
-                    -- Remove inline comments (only if # is preceded by space) and trailing whitespace
-                    value = value:gsub("%s+#.*$", "")
-                    value = value:gsub("%s+$", "")
-                    -- Remove quotes from value
-                    value = value:gsub("^'(.*)'$", "%1")
-                    -- Set the option
-                    msg.debug("Setting " .. key .. "to " .. value)
-                    mp.set_property(key:gsub("%s+$", ""), value)
+                -- Check if line starts a new profile
+                local profile_name = line:match("^%s*%[([^%]]+)%]%s*$")
+                if profile_name then
+                    current_profile = profile_name
+                    msg.info("Found profile: " .. profile_name)
+                else
+                    -- Split line into key and value
+                    local key, value = line:match("^%s*([^=]+)%s*=%s*(.+)%s*$")
+                    if key and value then
+                        -- Remove inline comments and trailing whitespace
+                        value = value:gsub("%s+#.*$", "")
+                        value = value:gsub("%s+$", "")
+                        value = value:gsub("^'(.*)'$", "%1")
+                        
+                        -- If we're in a profile, prefix the key with profile name
+                        if current_profile then
+                            key = "profile-" .. current_profile .. "-" .. key:gsub("%s+$", "")
+                        end
+                        
+                        msg.info("Setting " .. key .. " to " .. value)
+                        mp.set_property(key:gsub("%s+$", ""), value)
+                    end
                 end
             end
         end
@@ -62,6 +74,7 @@ end
 ]]
 function load_from_dir(dir)
     local files = utils.readdir(dir)
+    local profile_confs = {}
 
     if not files then
         msg.warn("Could not read directory: " .. dir)
@@ -82,12 +95,22 @@ function load_from_dir(dir)
                 load_from_dir(path)
             end
         elseif info and info.is_file and file:match("%.conf$") then
-            -- Load .conf files
-            load_conf_from_path(path)
+            -- Store profiles/*.conf files to load them later
+            if path:match("profiles[/\\].*%.conf$") then
+                table.insert(profile_confs, path)
+            else
+                -- Load non-profile .conf files immediately
+                load_conf_from_path(path)
+            end
         elseif info and info.is_file and file:match("^main[%.]?.*$") then
             -- Load script files
             load_script_from_path(path)
         end
+    end
+
+    -- Load profile configs after all other configs
+    for _, profile_path in ipairs(profile_confs) do
+        load_conf_from_path(profile_path)
     end
 end
 
