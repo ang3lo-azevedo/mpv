@@ -1,6 +1,9 @@
 # mpv_manager
+
+> This script is based on [mpv_manager](https://github.com/po5/mpv_manager) with some changes to work with my structure of the scripts.
+
+# mpv_manager
 User script and shader manager for mpv.
-Based on [mpv_manager](https://github.com/po5/mpv-manager)
 
 ## Requirements
 - git

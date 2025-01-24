@@ -1,5 +1,7 @@
 # trakt-mpv
 
+> This script is based on [trakt-mpv](https://github.com/LiTO773/trakt-mpv) with some changes to improve the quality of the tracking.
+
 A MPV script that checks in your movies and shows with Trakt.tv without the need for an IPC server.
 
 | ![mpv_screenshot](imgs/mpv_screenshot.jpg) | ![mpv_screenshot](imgs/trakt_screenshot.jpg) |
