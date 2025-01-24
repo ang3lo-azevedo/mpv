@@ -49,6 +49,11 @@ The configurations have been made to be used on Linux.
 
 > - [mpvcontextmenu](https://gitlab.com/carmanaught/mpvcontextmenu/) - To show a context menu on the OSC
 
+### Subtitles
+
+> - [mpv-autosub](https://github.com/davidde/mpv-autosub) - To download subtitles automatically (using subliminal)
+
+
 ## Utilities
 
 > - [SmartSkip](https://github.com/Eisa01/mpv-scripts/blob/master/scripts/SmartSkip.lua) - To be able to skip intros, outros and previews

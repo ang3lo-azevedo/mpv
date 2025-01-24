@@ -22,7 +22,7 @@ function load_conf_from_path(path)
                 local profile_name = line:match("^%s*%[([^%]]+)%]%s*$")
                 if profile_name then
                     current_profile = profile_name
-                    msg.info("Found profile: " .. profile_name)
+                    msg.debug("Found profile: " .. profile_name)
                 else
                     -- Split line into key and value
                     local key, value = line:match("^%s*([^=]+)%s*=%s*(.+)%s*$")
@@ -37,7 +37,7 @@ function load_conf_from_path(path)
                             key = "profile-" .. current_profile .. "-" .. key:gsub("%s+$", "")
                         end
                         
-                        msg.info("Setting " .. key .. " to " .. value)
+                        msg.debug("Setting " .. key .. " to " .. value)
                         mp.set_property(key:gsub("%s+$", ""), value)
                     end
                 end
