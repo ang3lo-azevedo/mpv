@@ -28,17 +28,18 @@ function load_conf_from_path(path)
                     local key, value = line:match("^%s*([^=]+)%s*=%s*(.+)%s*$")
                     if key and value then
                         -- Remove inline comments and trailing whitespace
+                        key = key:gsub("%s+$", "")
                         value = value:gsub("%s+#.*$", "")
                         value = value:gsub("%s+$", "")
                         value = value:gsub("^'(.*)'$", "%1")
                         
                         -- If we're in a profile, prefix the key with profile name
                         if current_profile then
-                            key = "profile-" .. current_profile .. "-" .. key:gsub("%s+$", "")
+                            key = "profile-" .. current_profile .. "-" .. key
                         end
                         
-                        msg.debug("Setting " .. key .. " to " .. value)
-                        mp.set_property(key:gsub("%s+$", ""), value)
+                        msg.info("Setting " .. key .. " -> " .. value)
+                        mp.set_property(key, value)
                     end
                 end
             end
@@ -120,3 +121,5 @@ msg.info("Loading config files from: " .. mpv_dir)
 
 -- Load all config and script files recursively from the mpv directory
 load_from_dir(mpv_dir)
+
+mp.set_property("sub-ass-style-overrides-append", "PrimaryColour=0xFFFFFF")
