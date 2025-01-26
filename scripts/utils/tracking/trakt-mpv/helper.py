@@ -240,7 +240,7 @@ def checkin(configs, body):
     if res.status_code == 200:
         # There's an active scrobble
         current_time = int(time.time())
-        scrobble_start = res.json().get('started_at')
+        scrobble_start = res.json().get('started_at')L
         
         if scrobble_start:
             # Convert ISO 8601 to timestamp

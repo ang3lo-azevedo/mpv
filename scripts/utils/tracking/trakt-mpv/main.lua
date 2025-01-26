@@ -77,6 +77,12 @@ end
 
 --local function on_file_start(event)
 local function start_trakt()
+    -- Check if the current media is a web stream
+    local path = mp.get_property("path", "")
+    if not string.match(path, "^https?://") then
+        return
+    end
+
     local status = evoque_python({"--hello"})
 
     -- Check status and act accordingly
