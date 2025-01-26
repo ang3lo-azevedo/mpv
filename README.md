@@ -2,7 +2,7 @@
 
 # TODO
 
-> - [ ] Add the [mpv-auto-chapters](https://github.com/po5/mpv-auto-chapters) script
+> - [ ]  Add the [mpv-auto-chapters](https://github.com/po5/mpv-auto-chapters) script
 > - [ ]  Fix [load-subdirs](scripts/load-subdirs/main.lua) by changing the way the appends are handled (Make a map with all the appends and then set them all at once probably)
 > - [ ]  Improve [conf/quality/quality.conf](conf/quality/quality.conf) with [classicjazz mpv.conf](https://github.com/classicjazz/mpv-config/blob/master/mpv.conf)
 > - [ ]  Fix the script-opts-append on the [/conf/scripts/**/*.conf](conf/scripts/) files
