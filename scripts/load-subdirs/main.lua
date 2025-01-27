@@ -49,7 +49,7 @@ function load_conf_from_path(path)
                             key = base_key
                         end
                         
-                        msg.info("Setting " .. key .. "-> " .. value)
+                        msg.debug("Setting " .. key .. "-> " .. value)
                         mp.set_property(key:gsub("%s+$", ""), value)
                     end
                 end

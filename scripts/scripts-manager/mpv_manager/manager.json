@@ -1,24 +1,19 @@
 [
   {
     "git":"https://github.com/Samillion/ModernZ",
-    "whitelist":"modernz.lua$",
+    "whitelist":"modernz.lua",
     "dest":"~~/scripts/ui/osc/ModernZ/main.lua",
     "branch":"main"
   },
   {
     "git":"https://github.com/po5/thumbfast",
-    "whitelist":"thumbfast.lua$",
+    "whitelist":"thumbfast.lua",
     "dest":"~~/scripts/ui/other/thumbnails/thumbfast/main.lua"
   },
   {
     "git":"https://github.com/thisisshihan/mpv-player-config-snad/",
-    "whitelist":"blob/mpv-config-snad-windows-ubuntu-linux-macos/removed_conf/scripts/pause-indicator.lua$",
+    "whitelist":"pause-indicator.lua",
     "dest":"~~/scripts/ui/other/pause-indicator/main.lua",
     "branch":"mpv-config-snad-windows-ubuntu-linux-macos"
-  },
-  {
-    "git":"https://github.com/bloc97/Anime4K",
-    "whitelist":"%.glsl$",
-    "dest":"~~/shaders/Anime4K/"
   }
 ]

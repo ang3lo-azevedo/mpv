@@ -6,10 +6,34 @@ local dir_cache = {}
 
 -- Run a command
 function run(args)
-    if legacy then
-        return utils.subprocess({args = args})
+    -- Add quiet flags for git commands
+    if args[1] == "git" then
+        if args[2] == "fetch" then
+            table.insert(args, "--quiet")
+            table.insert(args, "--no-progress")
+        elseif args[2] == "remote" then
+            table.insert(args, "-q")
+        elseif args[2] == "init" then
+            table.insert(args, "--quiet")
+        elseif args[2] == "ls-tree" then
+            table.insert(args, "--quiet")
+        end
     end
-    return mp.command_native({name = "subprocess", capture_stdout = true, playback_only = false, args = args})
+    
+    if legacy then
+        return utils.subprocess({
+            args = args,
+            env = {"GIT_TERMINAL_PROMPT=0"}
+        })
+    end
+    return mp.command_native({
+        name = "subprocess", 
+        capture_stdout = true,
+        capture_stderr = false,
+        playback_only = false,
+        env = {"GIT_TERMINAL_PROMPT=0"},
+        args = args
+    })
 end
 
 -- Get the parent directory of a path
@@ -37,11 +61,12 @@ function match(str, patterns)
     for pattern in string.gmatch(patterns, "[^|]+") do
         -- Remove whitespaces and check the pattern
         pattern = pattern:gsub("^%s*(.-)%s*$", "%1")
-        if string.match(str, pattern) then
+        -- Check if pattern is found anywhere in the string
+        if string.find(str, pattern, 1, true) then
             return true
         end
     end
-    return false  -- Return false when no match is found
+    return false
 end
 
 -- Apply default values to a script info
@@ -63,9 +88,16 @@ function update(info)
     info = apply_defaults(info)
     if not info then return false end
     
-    -- Get the destination directory or file
+    -- Expand destination path and remove trailing slashes
     local e_dest = string.match(mp.command_native({"expand-path", info.dest}), "(.-)[/\\]?$")
-    local dest_dir = parent(e_dest) or e_dest
+    
+    -- Determine if the destination is a directory or file
+    local is_dir = true  -- Force directory treatment
+    if string.match(info.dest, "%.%w+$") then  -- If ends with extension (e.g. .lua), it's a file
+        is_dir = false
+    end
+    local dest_dir = is_dir and e_dest or parent(e_dest)
+    
     mkdir(dest_dir)
     
     local files = {}
@@ -75,7 +107,10 @@ function update(info)
     run({"git", "-C", dest_dir, "remote", "add", "manager", info.git})
     run({"git", "-C", dest_dir, "fetch", "manager", info.branch})
     
-    for file in string.gmatch(run({"git", "-C", dest_dir, "ls-tree", "-r", "--name-only", "remotes/manager/"..info.branch}).stdout, "[^\r\n]+") do
+    -- List all files in repository
+    local files_in_repo = run({"git", "-C", dest_dir, "ls-tree", "-r", "--name-only", "remotes/manager/"..info.branch}).stdout
+    
+    for file in string.gmatch(files_in_repo, "[^\r\n]+") do
         local l_file = string.lower(file)
         if (info.whitelist == "" or match(l_file, info.whitelist)) and
            (info.blacklist == "" or not match(l_file, info.blacklist)) then
@@ -84,20 +119,20 @@ function update(info)
     end
     
     if next(files) == nil then
-        print("no files matching patterns")
+        msg.info("no files matching patterns")
         return false
     end
     
     for _, file in ipairs(files) do
-        -- If dest is a file, write directly to it
-        if parent(e_dest) then
+        -- If destination is not a directory, use the destination name as the filename
+        if not is_dir then
             local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
             local f = io.open(e_dest, "w")
             f:write(c)
             f:close()
-            break -- Only write the first matching file
+            break -- Only write the first file that matches the patterns
         else
-            -- Otherwise handle as directory
+            -- If it's a directory, maintain the original structure
             local p_based = parent(file)
             if p_based and not info.flatten_folders then 
                 mkdir(e_dest.."/"..p_based) 
@@ -118,7 +153,7 @@ function update_all()
     -- Open the manager.json file
     local f = io.open(
         mp.command_native(
-            {"expand-path", "~~/manager.json"}
+            {"expand-path", "~~/scripts/scripts-manager/mpv_manager/manager.json"}
         ),
         "r"
     )
@@ -138,11 +173,11 @@ function update_all()
 
     -- Update each script
     for i, info in ipairs(config) do
-        msg.info("Updating script "..i ..":", update(info))
+        local script_path = info.dest:match("~~/(.*)")  -- Get path after ~~/
+        msg.info("Updating " .. script_path .. ":", update(info))
     end
 end
 
 msg.info("Updating all scripts")
 
--- Update all scripts when the file is loaded
-mp.register_event("file-loaded", update_all)
+update_all()
