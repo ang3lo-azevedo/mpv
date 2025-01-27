@@ -38,8 +38,19 @@ function load_conf_from_path(path)
                             key = "profile-" .. current_profile .. "-" .. key
                         end
                         
-                        msg.info("Setting " .. key .. " -> " .. value)
-                        mp.set_property(key, value)
+                        -- Check if key ends with -append and handle accordingly
+                        local base_key = key:match("^(.+)-append$")
+                        if base_key then
+                            -- For -append, get existing value and append new value
+                            local current = mp.get_property(base_key, "")
+                            if current ~= "" then
+                                value = current .. "," .. value
+                            end
+                            key = base_key
+                        end
+                        
+                        msg.info("Setting " .. key .. "-> " .. value)
+                        mp.set_property(key:gsub("%s+$", ""), value)
                     end
                 end
             end
@@ -121,5 +132,3 @@ msg.info("Loading config files from: " .. mpv_dir)
 
 -- Load all config and script files recursively from the mpv directory
 load_from_dir(mpv_dir)
-
-mp.set_property("sub-ass-style-overrides-append", "PrimaryColour=0xFFFFFF")
