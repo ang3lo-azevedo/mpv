@@ -176,9 +176,9 @@ function autosub_allowed()
         mp.msg.warn('Video is less than 15 minutes\n' ..
                       '=> NOT auto-downloading subtitles')
         return false
-    elseif directory:find('^http') then
-        mp.msg.warn('Automatic subtitle downloading is disabled for web streaming')
-        return false
+    -- elseif directory:find('^http') then
+    --     mp.msg.warn('Automatic subtitle downloading is disabled for web streaming')
+    --     return false
     elseif active_format:find('^cue') then
         mp.msg.warn('Automatic subtitle downloading is disabled for cue files')
         return false
