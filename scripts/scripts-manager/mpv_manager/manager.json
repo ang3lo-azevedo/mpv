@@ -20,5 +20,10 @@
     "git":"https://github.com/mosquito-byte/mpv-interactive-video",
     "whitelist":"interactive-video.lua",
     "dest":"~~/scripts/utils/mpv-interactive-video/main.lua"
+  },
+  {
+    "git":"https://github.com/AzuredBlue/mpv-anilist-updater",
+    "whitelist":"main.lua",
+    "dest":"~~/scripts/utils/tracking/anilistUpdater/main.lua"
   }
 ]

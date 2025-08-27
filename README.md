@@ -63,6 +63,7 @@ The configurations have been made to be used on Linux.
 ### Tracking
 
 > - [trakt-mpv](scripts/utils/tracking/trakt-mpv) - To have automatic scrobbling to trakt.tv
+> - [mpv-anilist-updater](scripts/utils/tracking/trakt-mpv/mpv-anilist-updater) - To automatically update your AniList watching status
 
 # Shaders
 
