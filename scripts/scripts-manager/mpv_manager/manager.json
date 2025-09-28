@@ -24,6 +24,37 @@
   {
     "git":"https://github.com/AzuredBlue/mpv-anilist-updater",
     "whitelist":"main.lua",
-    "dest":"~~/scripts/utils/tracking/anilistUpdater/main.lua"
+    "dest":"~~/scripts/utils/tracking/anilistUpdater/main.lua",
+    "branch":"main"
+  },
+  {
+    "git":"https://github.com/allecsc/Stremio-Kai/",
+    "whitelist":"notify_skip.lua",
+    "dest":"~~/scripts/ui/notify_skip/notify_skip.lua",
+    "branch":"main"
+  },
+  {
+    "git":"https://github.com/allecsc/Stremio-Kai/",
+    "whitelist":"profile_manager.lua",
+    "dest":"~~/scripts/utils/profile_manager/profile_manager.lua",
+    "branch":"main"
+  },
+  {
+    "git":"https://github.com/allecsc/Stremio-Kai/",
+    "whitelist":"reactive_vf_bypass.lua",
+    "dest":"~~/scripts/utils/reactive_vf_bypass/reactive_vf_bypass.lua",
+    "branch":"main"
+  },
+  {
+    "git":"https://github.com/allecsc/Stremio-Kai/",
+    "whitelist":"smart_skip.lua",
+    "dest":"~~/scripts/utils/smart_skip/smart_skip.lua",
+    "branch":"main"
+  },
+    {
+    "git":"https://github.com/allecsc/Stremio-Kai/",
+    "whitelist":"svp_cleanup.lua",
+    "dest":"~~/scripts/utils/svp_cleanup/svp_cleanup.lua",
+    "branch":"main"
   }
 ]
