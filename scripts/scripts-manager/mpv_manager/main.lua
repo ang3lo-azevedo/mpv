@@ -168,6 +168,16 @@ function update(info)
         if not is_dir then
             local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
             
+            if info.replacements then
+                for _, rep in ipairs(info.replacements) do
+                    if rep.search and rep.replace then
+                        local escaped_search = rep.search:gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
+                        local escaped_replace = rep.replace:gsub("%%", "%%%%")
+                        c = c:gsub(escaped_search, escaped_replace)
+                    end
+                end
+            end
+            
             local current_content = ""
             local old_f = io.open(e_dest, "r")
             if old_f then
@@ -199,6 +209,16 @@ function update(info)
                 mkdir(e_dest.."/"..p_based) 
             end
             local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
+            
+            if info.replacements then
+                for _, rep in ipairs(info.replacements) do
+                    if rep.search and rep.replace then
+                        local escaped_search = rep.search:gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
+                        local escaped_replace = rep.replace:gsub("%%", "%%%%")
+                        c = c:gsub(escaped_search, escaped_replace)
+                    end
+                end
+            end
             
             local target_path = e_dest.."/"..(info.flatten_folders and out_file:match("[^/]+$") or out_file)
             local current_content = ""

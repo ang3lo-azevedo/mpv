@@ -44,7 +44,13 @@
     "git":"https://github.com/allecsc/Stremio-Kai/",
     "whitelist":"profile-manager.lua",
     "dest":"~~/scripts/ui/other/profile-manager/main.lua",
-    "branch":"main"
+    "branch":"main",
+    "replacements": [
+      {
+        "search": "local current_visual_profile = \"kai\"",
+        "replace": "local current_visual_profile = \"original\""
+      }
+    ]
   },
   {
     "git":"https://github.com/allecsc/Stremio-Kai/",

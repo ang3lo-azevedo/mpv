@@ -430,7 +430,7 @@ local function apply_visual_settings(profile_name, icc_enabled, is_hdr_passthrou
     -- NOTE: We trust the user. If they manually select a profile during HDR playback, apply it.
     -- The "Default to Original" logic is handled int the select_and_apply_profile function.
 
-    if current_visual_profile == "original" then
+    if current_visual_profile == "kai" then
         mp.set_property("contrast", 0)
         mp.set_property("brightness", 0)
         mp.set_property("saturation", 0)
@@ -459,7 +459,7 @@ mp.register_script_message("cycle-visual-profile", function()
     if current_visual_profile == "kai" then
         current_visual_profile = "vivid"
     elseif current_visual_profile == "vivid" then
-        current_visual_profile = "original"
+        current_visual_profile = "kai"
     else
         current_visual_profile = "kai"
     end
@@ -643,7 +643,7 @@ function try_execute_profile()
     end
     
     if is_passthrough_active then
-        color_profile = "original"
+        color_profile = "kai"
         log("HDR Passthrough: Forcing 'original' colors")
     end
     

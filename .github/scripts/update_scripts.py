@@ -13,6 +13,26 @@ def is_match(string, patterns):
             return True
     return False
 
+def copy_with_replacements(src, dst, replacements):
+    if not replacements:
+        shutil.copy2(src, dst)
+        return
+    try:
+        with open(src, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except UnicodeDecodeError:
+        shutil.copy2(src, dst)
+        return
+    
+    for rep in replacements:
+        s = rep.get('search', '')
+        r = rep.get('replace', '')
+        if s:
+            content = content.replace(s, r)
+            
+    with open(dst, 'w', encoding='utf-8') as f:
+        f.write(content)
+
 def remove_empty_dirs(path):
     try:
         while path and path != '.':
@@ -57,6 +77,7 @@ def main():
         branch = info.get('branch', 'master')
         base_dir = info.get('base_dir', '')
         flatten_folders = info.get('flatten_folders', False)
+        replacements = info.get('replacements', [])
 
         # Expand destination path (~/ expands to current directory conceptually)
         if dest.startswith('~~/'):
@@ -112,7 +133,7 @@ def main():
                     dest_dir = os.path.dirname(dest)
                     if dest_dir:
                         os.makedirs(dest_dir, exist_ok=True)
-                    shutil.copy2(src_path, dest)
+                    copy_with_replacements(src_path, dest, replacements)
                     current_installed.append(dest)
                     print(f"  Saved -> {dest}")
                     break # Only copy the first matching file to the specific file destination
@@ -130,7 +151,7 @@ def main():
                     target_dir = os.path.dirname(target_path)
                     if target_dir:
                         os.makedirs(target_dir, exist_ok=True)
-                    shutil.copy2(src_path, target_path)
+                    copy_with_replacements(src_path, target_path, replacements)
                     current_installed.append(target_path)
                     print(f"  Saved -> {target_path}")
 
