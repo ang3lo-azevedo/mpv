@@ -75,5 +75,20 @@
     "whitelist":"autochapters/main.lua",
     "dest":"~~/scripts/utils/mpv-auto-chapters/main.lua",
     "branch":"master"
+  },
+  {
+    "git":"https://github.com/allecsc/Stremio-Kai/",
+    "whitelist":"portable_config/svp_main.vpy",
+    "base_dir":"portable_config",
+    "dest":"~~/svp_main.vpy",
+    "branch":"main"
+  },
+  {
+    "git":"https://github.com/bloc97/Anime4K",
+    "whitelist":"%.glsl$",
+    "base_dir":"glsl",
+    "dest":"~~/shaders",
+    "branch":"master",
+    "flatten_folders":true
   }
 ]
