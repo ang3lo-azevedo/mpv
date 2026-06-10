@@ -63,6 +63,10 @@
       {
         "search": "local base_profile = is_anime and \"anime-sdr\" or \"sdr\"",
         "replace": "local base_profile = is_anime and \"anime-base\" or \"sdr\""
+      },
+      {
+        "search": "\"Pn8\",",
+        "replace": "\"Pn8\", \"MK-Pn8\","
       }
     ]
   },

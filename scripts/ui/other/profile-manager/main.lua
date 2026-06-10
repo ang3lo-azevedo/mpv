@@ -55,7 +55,7 @@ local opts = {
         "Ayashii", "CRUCiBLE", "Dekinai", "EXP", "Headpatter", "Kaizoku",
         "Mysteria", "Senjou", "YURI", "ASC", "AssMix", "B00BA", "CBT", "CTR",
         "CyC", "Flugel", "Galator", "GSK", "Holomux", "IK", "AnimeKaizoku",
-        "Kametsu", "KH", "kuchikirukia", "LazyRemux", "MK", "Netaro", "Pn8",
+        "Kametsu", "KH", "kuchikirukia", "LazyRemux", "MK", "Netaro", "Pn8", "MK-Pn8",
         "Pookie", "Quetzal", "Rasetsu", "ShowY", "WBDP", "WSE", "Yoghurt", "ZOIO", "ZR",
         "Asakura", "Bolshevik", "Bulldog", "Chihiro", "Chimera", "Davinci",
         "Doki", "Foxtrot", "Lia", "Orphan", "SOLA", "Tsundere",
