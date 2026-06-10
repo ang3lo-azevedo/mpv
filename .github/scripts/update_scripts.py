@@ -85,7 +85,9 @@ def main():
                 
                 if not is_dir:
                     # File destination
-                    os.makedirs(os.path.dirname(dest), exist_ok=True)
+                    dest_dir = os.path.dirname(dest)
+                    if dest_dir:
+                        os.makedirs(dest_dir, exist_ok=True)
                     shutil.copy2(src_path, dest)
                     print(f"  Saved -> {dest}")
                     break # Only copy the first matching file to the specific file destination
@@ -100,7 +102,9 @@ def main():
                     else:
                         target_path = os.path.join(dest, out_file)
                     
-                    os.makedirs(os.path.dirname(target_path), exist_ok=True)
+                    target_dir = os.path.dirname(target_path)
+                    if target_dir:
+                        os.makedirs(target_dir, exist_ok=True)
                     shutil.copy2(src_path, target_path)
                     print(f"  Saved -> {target_path}")
 
