@@ -13,6 +13,12 @@
     "branch":"main"
   },
   {
+    "git":"https://github.com/Samillion/ModernZ",
+    "whitelist":"modernz-icons.ttf",
+    "dest":"~~/fonts/modernz-icons.ttf",
+    "branch":"main"
+  },
+  {
     "git":"https://github.com/po5/thumbfast",
     "whitelist":"thumbfast.lua",
     "dest":"~~/scripts/ui/other/thumbnails/thumbfast/main.lua"
