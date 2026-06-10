@@ -7,15 +7,15 @@
     "branch":"main"
   },
   {
-    "git":"https://github.com/Samillion/ModernZ",
-    "whitelist":"modernz.lua",
-    "dest":"~~/scripts/ui/osc/ModernZ/main.lua",
+    "git":"https://github.com/nekoxuee/hayase-osc",
+    "whitelist":"hayase-osc.lua",
+    "dest":"~~/scripts/ui/osc/hayase-osc/main.lua",
     "branch":"main"
   },
   {
-    "git":"https://github.com/Samillion/ModernZ",
-    "whitelist":"modernz-icons.ttf",
-    "dest":"~~/fonts/modernz-icons.ttf",
+    "git":"https://github.com/nekoxuee/hayase-osc",
+    "whitelist":"Lucide.ttf",
+    "dest":"~~/fonts/Lucide.ttf",
     "branch":"main"
   },
   {
@@ -79,7 +79,7 @@
   {
     "git":"https://github.com/po5/mpv-auto-chapters",
     "whitelist":"autochapters/main.lua",
-    "dest":"~~/scripts/utils/mpv-auto-chapters/main.lua",
+    "dest":"~~/scripts/utils/mpv-auto-chapters/main.lua", 
     "branch":"master"
   },
   {
