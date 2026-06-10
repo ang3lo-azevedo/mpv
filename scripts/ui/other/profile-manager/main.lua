@@ -55,7 +55,7 @@ local opts = {
         "Ayashii", "CRUCiBLE", "Dekinai", "EXP", "Headpatter", "Kaizoku",
         "Mysteria", "Senjou", "YURI", "ASC", "AssMix", "B00BA", "CBT", "CTR",
         "CyC", "Flugel", "Galator", "GSK", "Holomux", "IK", "AnimeKaizoku",
-        "Kametsu", "KH", "kuchikirukia", "LazyRemux", "MK", "Netaro", "Pn8", "MK-Pn8",
+        "Kametsu", "KH", "kuchikirukia", "LazyRemux", "MK", "Netaro", "Pn8", "MK-Pn8", -- [Local Override] Added MK-Pn8 for Parasyte
         "Pookie", "Quetzal", "Rasetsu", "ShowY", "WBDP", "WSE", "Yoghurt", "ZOIO", "ZR",
         "Asakura", "Bolshevik", "Bulldog", "Chihiro", "Chimera", "Davinci",
         "Doki", "Foxtrot", "Lia", "Orphan", "SOLA", "Tsundere",
@@ -406,7 +406,7 @@ end
 
 
 -- Visual Identity Application Function
-local current_visual_profile = "original" -- Default tracking
+local current_visual_profile = "original" -- [Local Override] Maintain original OSC UI instead of forcing 'kai' -- Default tracking
 
 local function apply_visual_settings(profile_name, icc_enabled, is_hdr_passthrough, show_osd)
     -- Update tracking state if a valid profile name is passed
@@ -529,7 +529,7 @@ function try_execute_profile()
         return 
     end
     
-    if false and not state.metadata_ready then
+    if false and not state.metadata_ready then -- [Local Override] Bypass Stremio IPC metadata latch to apply profiles immediately
         -- Waiting for Stremio metadata (Strict Latch)
         log("Latch: Waiting for Metadata...")
         return
@@ -606,7 +606,7 @@ function try_execute_profile()
     end
     
     -- Determine base profile
-    local base_profile = is_anime and "anime-base" or "sdr"
+    local base_profile = is_anime and "anime-base" or "sdr" -- [Local Override] Map 'anime' to our custom 'anime-base' profile
     
     -- Build OSD message
     local osd_parts = {}

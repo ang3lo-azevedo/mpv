@@ -172,7 +172,7 @@ local function on_file_loaded()
         else
             -- Content type not yet known, set pending flag for deferred setup
             content.set_setup_pending(true)
-            mp.msg.info("Content type unknown, falling back to series for local playback"); finalize_setup()
+            mp.msg.info("Content type unknown, falling back to series for local playback"); finalize_setup() -- [Local Override] Bypass Stremio IPC metadata latch for local playback
         end
     end)
 end
