@@ -18,7 +18,7 @@ mp.set_property("osc", "no")
 -- default user option values
 -- do not touch, change them in hayase-osc.conf
 local user_opts = {
-    idlescreen = true,                     -- show mpv logo when idle
+    scale = 1.0, idlescreen = true,        -- UI scale factor added via mpv_manager
     audioonlyscreen = false,               -- show mpv logo when no video
     osc_on_start = false,                  -- show OSC on start of every file
     osc_on_seek = false,                   -- show OSC when seeking
@@ -1642,7 +1642,7 @@ end
 local function setup_canvas()
     local dimensions = state.osd_dimensions
 
-    osc_param.playresy = dimensions.h > 0 and dimensions.h or 720
+    osc_param.playresy = (dimensions.h > 0 and dimensions.h or 720) / (user_opts.scale or 1.0)
     if dimensions.aspect > 0 then
         osc_param.display_aspect = dimensions.aspect
     end

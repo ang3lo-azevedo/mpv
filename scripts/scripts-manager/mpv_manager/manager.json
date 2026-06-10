@@ -16,7 +16,17 @@
     "git":"https://github.com/nekoxuee/hayase-osc",
     "whitelist":"hayase-osc.lua",
     "dest":"~~/scripts/ui/osc/hayase-osc/main.lua",
-    "branch":"main"
+    "branch":"main",
+    "replacements": [
+      {
+        "search": "idlescreen = true,                     -- show mpv logo when idle",
+        "replace": "scale = 1.0, idlescreen = true,        -- UI scale factor added via mpv_manager"
+      },
+      {
+        "search": "osc_param.playresy = dimensions.h > 0 and dimensions.h or 720",
+        "replace": "osc_param.playresy = (dimensions.h > 0 and dimensions.h or 720) / (user_opts.scale or 1.0)"
+      }
+    ]
   },
   {
     "git":"https://github.com/nekoxuee/hayase-osc",
