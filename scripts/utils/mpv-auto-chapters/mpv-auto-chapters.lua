@@ -20,7 +20,7 @@ local options = {
     hook = false
 }
 
-local script_name, script_dir = mp.get_script_name(), mp.get_script_directory()
+local script_name, script_dir = mp.get_script_name(), mp.get_script_directory() or mp.command_native({"expand-path", "~~/script-opts"})
 opts.read_options(options, script_name, function() end)
 
 local types = {

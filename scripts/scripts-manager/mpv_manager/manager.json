@@ -1,10 +1,10 @@
 [
   {
-    "git":"https://github.com/allecsc/Stremio-Kai/",
-    "whitelist":"portable_config/scripts/notify_skip",
-    "base_dir":"portable_config/scripts/notify_skip",
-    "dest":"~~/scripts/ui/notify_skip",
-    "branch":"main",
+    "git": "https://github.com/allecsc/Stremio-Kai/",
+    "whitelist": "portable_config/scripts/notify_skip",
+    "base_dir": "portable_config/scripts/notify_skip",
+    "dest": "~~/scripts/ui/notify_skip",
+    "branch": "main",
     "replacements": [
       {
         "search": "mp.msg.info(\"Content type unknown, waiting for metadata...\")",
@@ -13,10 +13,10 @@
     ]
   },
   {
-    "git":"https://github.com/nekoxuee/hayase-osc",
-    "whitelist":"hayase-osc.lua",
-    "dest":"~~/scripts/ui/osc/hayase-osc/main.lua",
-    "branch":"main",
+    "git": "https://github.com/nekoxuee/hayase-osc",
+    "whitelist": "hayase-osc.lua",
+    "dest": "~~/scripts/ui/osc/hayase-osc/hayase-osc.lua",
+    "branch": "main",
     "replacements": [
       {
         "search": "idlescreen = true,                     -- show mpv logo when idle",
@@ -29,38 +29,38 @@
     ]
   },
   {
-    "git":"https://github.com/nekoxuee/hayase-osc",
-    "whitelist":"Lucide.ttf",
-    "dest":"~~/fonts/Lucide.ttf",
-    "branch":"main"
+    "git": "https://github.com/nekoxuee/hayase-osc",
+    "whitelist": "Lucide.ttf",
+    "dest": "~~/fonts/Lucide.ttf",
+    "branch": "main"
   },
   {
-    "git":"https://github.com/po5/thumbfast",
-    "whitelist":"thumbfast.lua",
-    "dest":"~~/scripts/ui/other/thumbnails/thumbfast/main.lua"
+    "git": "https://github.com/po5/thumbfast",
+    "whitelist": "thumbfast.lua",
+    "dest": "~~/scripts/ui/other/thumbnails/thumbfast/thumbfast.lua"
   },
   {
-    "git":"https://github.com/thisisshihan/mpv-player-config-snad/",
-    "whitelist":"pause-indicator.lua",
-    "dest":"~~/scripts/ui/other/pause-indicator/main.lua",
-    "branch":"mpv-config-snad-windows-ubuntu-linux-macos"
+    "git": "https://github.com/thisisshihan/mpv-player-config-snad/",
+    "whitelist": "pause-indicator.lua",
+    "dest": "~~/scripts/ui/other/pause-indicator/pause-indicator.lua",
+    "branch": "mpv-config-snad-windows-ubuntu-linux-macos"
   },
   {
-    "git":"https://github.com/mosquito-byte/mpv-interactive-video",
-    "whitelist":"interactive-video.lua",
-    "dest":"~~/scripts/utils/mpv-interactive-video/main.lua"
+    "git": "https://github.com/mosquito-byte/mpv-interactive-video",
+    "whitelist": "interactive-video.lua",
+    "dest": "~~/scripts/utils/mpv-interactive-video/mpv-interactive-video.lua"
   },
   {
-    "git":"https://github.com/AzuredBlue/mpv-anilist-updater",
-    "whitelist":"main.lua",
-    "dest":"~~/scripts/utils/tracking/anilistUpdater/main.lua",
-    "branch":"main"
+    "git": "https://github.com/AzuredBlue/mpv-anilist-updater",
+    "whitelist": "main.lua",
+    "dest": "~~/scripts/utils/tracking/anilistUpdater/anilistUpdater.lua",
+    "branch": "main"
   },
   {
-    "git":"https://github.com/allecsc/Stremio-Kai/",
-    "whitelist":"profile-manager.lua",
-    "dest":"~~/scripts/ui/other/profile-manager/main.lua",
-    "branch":"main",
+    "git": "https://github.com/allecsc/Stremio-Kai/",
+    "whitelist": "profile-manager.lua",
+    "dest": "~~/scripts/ui/other/profile-manager/profile-manager.lua",
+    "branch": "main",
     "replacements": [
       {
         "search": "local current_visual_profile = \"kai\"",
@@ -70,7 +70,6 @@
         "search": "if not state.metadata_ready then",
         "replace": "if false and not state.metadata_ready then -- [Local Override] Bypass Stremio IPC metadata latch to apply profiles immediately"
       },
-
       {
         "search": "\"Pn8\",",
         "replace": "\"Pn8\", \"MK-Pn8\", -- [Local Override] Added MK-Pn8 for Parasyte"
@@ -78,54 +77,60 @@
     ]
   },
   {
-    "git":"https://github.com/allecsc/Stremio-Kai/",
-    "whitelist":"reactive_vf_bypass.lua",
-    "dest":"~~/scripts/utils/reactive_vf_bypass/main.lua",
-    "branch":"main"
+    "git": "https://github.com/allecsc/Stremio-Kai/",
+    "whitelist": "reactive_vf_bypass.lua",
+    "dest": "~~/scripts/utils/reactive_vf_bypass/reactive_vf_bypass.lua",
+    "branch": "main"
   },
   {
-    "git":"https://github.com/allecsc/Stremio-Kai/",
-    "whitelist":"svp_cleanup.lua",
-    "dest":"~~/scripts/utils/svp_cleanup/main.lua",
-    "branch":"main"
+    "git": "https://github.com/allecsc/Stremio-Kai/",
+    "whitelist": "svp_cleanup.lua",
+    "dest": "~~/scripts/utils/svp_cleanup/svp_cleanup.lua",
+    "branch": "main"
   },
   {
-    "git":"https://github.com/allecsc/Stremio-Kai/",
-    "whitelist":"smart-track-selector/main.lua",
-    "dest":"~~/scripts/utils/smart-track-selector/main.lua",
-    "branch":"main"
+    "git": "https://github.com/allecsc/Stremio-Kai/",
+    "whitelist": "smart-track-selector/main.lua",
+    "dest": "~~/scripts/utils/smart-track-selector/smart-track-selector.lua",
+    "branch": "main"
   },
   {
-    "git":"https://github.com/davidde/mpv-autosub",
-    "whitelist":"autosub.lua",
-    "dest":"~~/scripts/subtitles/mpv-autosub/main.lua",
-    "branch":"master"
+    "git": "https://github.com/davidde/mpv-autosub",
+    "whitelist": "autosub.lua",
+    "dest": "~~/scripts/subtitles/mpv-autosub/mpv-autosub.lua",
+    "branch": "master"
   },
   {
-    "git":"https://github.com/hacel/recent",
-    "whitelist":"recent.lua",
-    "dest":"~~/scripts/utils/recent/main.lua",
-    "branch":"master"
+    "git": "https://github.com/hacel/recent",
+    "whitelist": "recent.lua",
+    "dest": "~~/scripts/utils/recent/recent.lua",
+    "branch": "master"
   },
   {
-    "git":"https://github.com/po5/mpv-auto-chapters",
-    "whitelist":"autochapters/main.lua",
-    "dest":"~~/scripts/utils/mpv-auto-chapters/main.lua", 
-    "branch":"master"
+    "git": "https://github.com/po5/mpv-auto-chapters",
+    "whitelist": "autochapters/main.lua",
+    "dest": "~~/scripts/utils/mpv-auto-chapters/mpv-auto-chapters.lua",
+    "branch": "master",
+    "replacements": [
+      {
+        "search": "local script_name, script_dir = mp.get_script_name(), mp.get_script_directory()",
+        "replace": "local script_name, script_dir = mp.get_script_name(), mp.get_script_directory() or mp.command_native({\"expand-path\", \"~~/script-opts\"})"
+      }
+    ]
   },
   {
-    "git":"https://github.com/allecsc/Stremio-Kai/",
-    "whitelist":"portable_config/svp_main.vpy",
-    "base_dir":"portable_config",
-    "dest":"~~/svp_main.vpy",
-    "branch":"main"
+    "git": "https://github.com/allecsc/Stremio-Kai/",
+    "whitelist": "portable_config/svp_main.vpy",
+    "base_dir": "portable_config",
+    "dest": "~~/svp_main.vpy",
+    "branch": "main"
   },
   {
-    "git":"https://github.com/bloc97/Anime4K",
-    "whitelist":".glsl",
-    "base_dir":"glsl",
-    "dest":"~~/shaders",
-    "branch":"master",
-    "flatten_folders":true
+    "git": "https://github.com/bloc97/Anime4K",
+    "whitelist": ".glsl",
+    "base_dir": "glsl",
+    "dest": "~~/shaders",
+    "branch": "master",
+    "flatten_folders": true
   }
 ]

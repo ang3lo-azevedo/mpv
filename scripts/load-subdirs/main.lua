@@ -97,8 +97,13 @@ function scan_dir(dir)
                 else
                     table.insert(regular_confs, path)
                 end
-            elseif file:match("^main[%.]?.*$") then
-                table.insert(script_files, path)
+            elseif file:match("%.lua$") then
+                -- Exclude 'load-subdirs' self-loading and 'modules/' subdirectories used by some scripts (like notify_skip)
+                if file ~= "main.lua" or not path:match("[/\\]load%-subdirs[/\\]") then
+                    if not path:match("[/\\]modules[/\\]") then
+                        print("FOUND SCRIPT: " .. path); table.insert(script_files, path)
+                    end
+                end
             end
         end
     end
