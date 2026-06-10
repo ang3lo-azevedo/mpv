@@ -53,6 +53,10 @@
       {
         "search": "if not state.metadata_ready then",
         "replace": "if false and not state.metadata_ready then"
+      },
+      {
+        "search": "local base_profile = is_anime and \"anime-sdr\" or \"sdr\"",
+        "replace": "local base_profile = is_anime and \"anime-base\" or \"sdr\""
       }
     ]
   },
