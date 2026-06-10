@@ -13,14 +13,38 @@ def is_match(string, patterns):
             return True
     return False
 
+def remove_empty_dirs(path):
+    try:
+        while path and path != '.':
+            path = os.path.dirname(path)
+            if not path or path == '.':
+                break
+            if not os.listdir(path):
+                os.rmdir(path)
+            else:
+                break
+    except OSError:
+        pass
+
 def main():
     manager_path = 'scripts/scripts-manager/mpv_manager/manager.json'
+    installed_path = 'scripts/scripts-manager/mpv_manager/installed.json'
     if not os.path.exists(manager_path):
         print(f"Error: {manager_path} not found")
         return
 
     with open(manager_path, 'r') as f:
         config = json.load(f)
+
+    old_installed = []
+    if os.path.exists(installed_path):
+        with open(installed_path, 'r') as f:
+            try:
+                old_installed = json.load(f)
+            except json.JSONDecodeError:
+                pass
+
+    current_installed = []
 
     for info in config:
         git_url = info.get('git')
@@ -89,6 +113,7 @@ def main():
                     if dest_dir:
                         os.makedirs(dest_dir, exist_ok=True)
                     shutil.copy2(src_path, dest)
+                    current_installed.append(dest)
                     print(f"  Saved -> {dest}")
                     break # Only copy the first matching file to the specific file destination
                 else:
@@ -106,7 +131,24 @@ def main():
                     if target_dir:
                         os.makedirs(target_dir, exist_ok=True)
                     shutil.copy2(src_path, target_path)
+                    current_installed.append(target_path)
                     print(f"  Saved -> {target_path}")
+
+    # Cleanup orphaned files
+    orphans = set(old_installed) - set(current_installed)
+    for orphan in orphans:
+        if os.path.exists(orphan):
+            try:
+                os.remove(orphan)
+                print(f"Removed orphan: {orphan}")
+                remove_empty_dirs(orphan)
+            except OSError as e:
+                print(f"Failed to remove orphan {orphan}: {e}")
+
+    # Save new installed list
+    os.makedirs(os.path.dirname(installed_path), exist_ok=True)
+    with open(installed_path, 'w') as f:
+        json.dump(current_installed, f, indent=2)
 
 if __name__ == '__main__':
     main()

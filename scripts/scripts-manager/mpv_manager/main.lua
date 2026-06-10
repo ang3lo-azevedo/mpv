@@ -59,6 +59,26 @@ function parent(path)
     return string.match(path, "(.*)[/\\]")
 end
 
+local function remove_empty_dirs_lua(path)
+    local p = parent(path)
+    while p and p ~= "" and p ~= "." do
+        local success, err = os.remove(p)
+        if not success then
+            break
+        end
+        p = parent(p)
+    end
+end
+
+local function to_relative(abs_path)
+    local mpv_dir = mp.command_native({"expand-path", "~~/"})
+    local escaped_dir = mpv_dir:gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
+    local rel = abs_path:gsub("^" .. escaped_dir .. "[/\\]?", "")
+    return rel:gsub("\\", "/")
+end
+
+local current_installed = {}
+
 -- Cache a directory
 function cache(path)
     local p_path = parent(path)
@@ -155,6 +175,7 @@ function update(info)
                 old_f:close()
             end
             
+            table.insert(current_installed, to_relative(e_dest))
             if c ~= current_content then
                 local f = io.open(e_dest, "w")
                 if f then
@@ -187,6 +208,7 @@ function update(info)
                 old_f:close()
             end
             
+            table.insert(current_installed, to_relative(target_path))
             if c ~= current_content then
                 local f = io.open(target_path, "w")
                 if f then
@@ -229,6 +251,17 @@ function update_all()
 
     -- Update each script
     local total_updated = 0
+    current_installed = {}
+    
+    local installed_path = mp.command_native({"expand-path", "~~/scripts/scripts-manager/mpv_manager/installed.json"})
+    local old_installed = {}
+    local f_inst = io.open(installed_path, "r")
+    if f_inst then
+        local j = f_inst:read("*all")
+        f_inst:close()
+        old_installed = utils.parse_json(j or "[]") or {}
+    end
+
     for i, info in ipairs(config) do
         local script_path = info.dest:match("~~/(.*)")  -- Get path after ~~/
         local updated = update(info)
@@ -236,6 +269,32 @@ function update_all()
             total_updated = total_updated + updated
         end
         msg.info("Checked " .. script_path .. ": Updated " .. (type(updated) == "number" and updated or 0) .. " files")
+    end
+    
+    -- Cleanup orphans
+    local current_set = {}
+    for _, path in ipairs(current_installed) do
+        current_set[path] = true
+    end
+
+    local mpv_dir = mp.command_native({"expand-path", "~~/"})
+    for _, path in ipairs(old_installed) do
+        if not current_set[path] then
+            local abs_path = mpv_dir .. "/" .. path
+            os.remove(abs_path)
+            msg.info("Removed orphan: " .. path)
+            remove_empty_dirs_lua(abs_path)
+        end
+    end
+
+    -- Save new installed list
+    local f_out = io.open(installed_path, "w")
+    if f_out then
+        local j_out = utils.format_json(current_installed)
+        if j_out then
+            f_out:write(j_out)
+        end
+        f_out:close()
     end
     
     if total_updated > 0 then
