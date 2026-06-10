@@ -172,7 +172,7 @@ local function on_file_loaded()
         else
             -- Content type not yet known, set pending flag for deferred setup
             content.set_setup_pending(true)
-            mp.msg.info("Content type unknown, waiting for metadata...")
+            mp.msg.info("Content type unknown, falling back to series for local playback"); finalize_setup()
         end
     end)
 end
