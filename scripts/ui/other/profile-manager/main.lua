@@ -406,7 +406,7 @@ end
 
 
 -- Visual Identity Application Function
-local current_visual_profile = "kai" -- Default tracking
+local current_visual_profile = "original" -- Default tracking
 
 local function apply_visual_settings(profile_name, icc_enabled, is_hdr_passthrough, show_osd)
     -- Update tracking state if a valid profile name is passed
@@ -430,7 +430,7 @@ local function apply_visual_settings(profile_name, icc_enabled, is_hdr_passthrou
     -- NOTE: We trust the user. If they manually select a profile during HDR playback, apply it.
     -- The "Default to Original" logic is handled int the select_and_apply_profile function.
 
-    if current_visual_profile == "kai" then
+    if current_visual_profile == "original" then
         mp.set_property("contrast", 0)
         mp.set_property("brightness", 0)
         mp.set_property("saturation", 0)
@@ -459,7 +459,7 @@ mp.register_script_message("cycle-visual-profile", function()
     if current_visual_profile == "kai" then
         current_visual_profile = "vivid"
     elseif current_visual_profile == "vivid" then
-        current_visual_profile = "kai"
+        current_visual_profile = "original"
     else
         current_visual_profile = "kai"
     end
@@ -529,7 +529,7 @@ function try_execute_profile()
         return 
     end
     
-    if not state.metadata_ready then
+    if false and not state.metadata_ready then
         -- Waiting for Stremio metadata (Strict Latch)
         log("Latch: Waiting for Metadata...")
         return
@@ -643,7 +643,7 @@ function try_execute_profile()
     end
     
     if is_passthrough_active then
-        color_profile = "kai"
+        color_profile = "original"
         log("HDR Passthrough: Forcing 'original' colors")
     end
     

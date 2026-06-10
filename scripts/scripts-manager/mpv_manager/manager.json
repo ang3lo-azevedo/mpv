@@ -49,6 +49,10 @@
       {
         "search": "local current_visual_profile = \"kai\"",
         "replace": "local current_visual_profile = \"original\""
+      },
+      {
+        "search": "if not state.metadata_ready then",
+        "replace": "if false and not state.metadata_ready then"
       }
     ]
   },
