@@ -43,13 +43,13 @@
   {
     "git":"https://github.com/allecsc/Stremio-Kai/",
     "whitelist":"reactive_vf_bypass.lua",
-    "dest":"~~/scripts/utils/reactive_vf_bypass/reactive_vf_bypass.lua",
+    "dest":"~~/scripts/utils/reactive_vf_bypass/main.lua",
     "branch":"main"
   },
   {
     "git":"https://github.com/allecsc/Stremio-Kai/",
     "whitelist":"svp_cleanup.lua",
-    "dest":"~~/scripts/utils/svp_cleanup/svp_cleanup.lua",
+    "dest":"~~/scripts/utils/svp_cleanup/main.lua",
     "branch":"main"
   },
   {
