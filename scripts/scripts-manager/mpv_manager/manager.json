@@ -37,7 +37,13 @@
   {
     "git": "https://github.com/po5/thumbfast",
     "whitelist": "thumbfast.lua",
-    "dest": "~~/scripts/ui/other/thumbnails/thumbfast/thumbfast.lua"
+    "dest": "~~/scripts/ui/other/thumbnails/thumbfast/thumbfast.lua",
+    "replacements": [
+      {
+        "search": "pre_0_33_0 = false",
+        "replace": "-- pre_0_33_0 = false"
+      }
+    ]
   },
   {
     "git": "https://github.com/thisisshihan/mpv-player-config-snad/",
@@ -54,7 +60,13 @@
     "git": "https://github.com/AzuredBlue/mpv-anilist-updater",
     "whitelist": "main.lua",
     "dest": "~~/scripts/utils/tracking/anilistUpdater/anilistUpdater.lua",
-    "branch": "main"
+    "branch": "main",
+    "replacements": [
+      {
+        "search": "return \"python3\"",
+        "replace": "return \"mpv-python\""
+      }
+    ]
   },
   {
     "git": "https://github.com/allecsc/Stremio-Kai/",
@@ -98,7 +110,13 @@
     "git": "https://github.com/davidde/mpv-autosub",
     "whitelist": "autosub.lua",
     "dest": "~~/scripts/subtitles/mpv-autosub/mpv-autosub.lua",
-    "branch": "master"
+    "branch": "master",
+    "replacements": [
+      {
+        "search": "local subliminal = '/home/david/.local/bin/subliminal'",
+        "replace": "local subliminal = 'subliminal'"
+      }
+    ]
   },
   {
     "git": "https://github.com/hacel/recent",

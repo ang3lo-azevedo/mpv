@@ -224,7 +224,7 @@ local function get_python_command()
         return "python"
     else
         -- Linux
-        return "python3"
+        return "mpv-python"
     end
 end
 
