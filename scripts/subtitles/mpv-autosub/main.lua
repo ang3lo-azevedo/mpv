@@ -3,7 +3,7 @@
 --=============================================================================
 --          This script uses Subliminal to download subtitles,
 --          so make sure to specify your system's Subliminal location below:
-local subliminal = mp.command_native({"expand-path", "~/.local/bin/subliminal"})
+local subliminal = '/home/david/.local/bin/subliminal'
 --=============================================================================
 -->>    SUBTITLE LANGUAGE:
 --=============================================================================
@@ -15,12 +15,12 @@ local languages = {
 --          other languages will NOT be downloaded,
 --          so put your preferred language first:
             { 'English', 'en', 'eng' },
---          { 'Dutch', 'nl', 'dut' },
+            { 'Dutch', 'nl', 'dut' },
 --          { 'Spanish', 'es', 'spa' },
 --          { 'French', 'fr', 'fre' },
 --          { 'German', 'de', 'ger' },
 --          { 'Italian', 'it', 'ita' },
-            { 'Portuguese', 'pt', 'por' },
+--          { 'Portuguese', 'pt', 'por' },
 --          { 'Polish', 'pl', 'pol' },
 --          { 'Russian', 'ru', 'rus' },
 --          { 'Chinese', 'zh', 'chi' },
@@ -176,9 +176,9 @@ function autosub_allowed()
         mp.msg.warn('Video is less than 15 minutes\n' ..
                       '=> NOT auto-downloading subtitles')
         return false
-    -- elseif directory:find('^http') then
-    --     mp.msg.warn('Automatic subtitle downloading is disabled for web streaming')
-    --     return false
+    elseif directory:find('^http') then
+        mp.msg.warn('Automatic subtitle downloading is disabled for web streaming')
+        return false
     elseif active_format:find('^cue') then
         mp.msg.warn('Automatic subtitle downloading is disabled for cue files')
         return false
