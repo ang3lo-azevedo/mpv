@@ -85,7 +85,7 @@
   },
   {
     "git":"https://github.com/bloc97/Anime4K",
-    "whitelist":"%.glsl$",
+    "whitelist":".glsl",
     "base_dir":"glsl",
     "dest":"~~/shaders",
     "branch":"master",
