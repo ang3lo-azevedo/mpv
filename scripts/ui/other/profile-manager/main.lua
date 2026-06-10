@@ -135,9 +135,9 @@ local opts = {
 
 -- Shader presets (from original mpv.conf comments)
 local SHADER_PRESETS = {
-    optimized = "~~/shaders/denoise1.glsl:~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_M.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_Denoise_CNN_x2_M.glsl:~~/shaders/Anime4K_Thin_Fast.glsl",
-    fast = "~~/shaders/denoise1.glsl:~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_M.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_Restore_CNN_S.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl:~~/shaders/Anime4K_Thin_HQ.glsl:~~/shaders/Anime4K_Thin_Fast.glsl:~~/shaders/Anime4K_Thin_VeryFast.glsl",
-    hq = "~~/shaders/nlmeans.glsl:~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_VL.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_VL.glsl:~~/shaders/Anime4K_Restore_CNN_M.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_Thin_HQ.glsl:~~/shaders/Anime4K_Thin_Fast.glsl:~~/shaders/Anime4K_Thin_VeryFast.glsl"
+    optimized = "~~/shaders/denoise1.glsl;~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Upscale_Denoise_CNN_x2_M.glsl;~~/shaders/Anime4K_Thin_Fast.glsl",
+    fast = "~~/shaders/denoise1.glsl;~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl;~~/shaders/Anime4K_Restore_CNN_S.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl;~~/shaders/Anime4K_Thin_HQ.glsl;~~/shaders/Anime4K_Thin_Fast.glsl;~~/shaders/Anime4K_Thin_VeryFast.glsl",
+    hq = "~~/shaders/nlmeans.glsl;~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Restore_CNN_VL.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_VL.glsl;~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl;~~/shaders/Anime4K_Thin_HQ.glsl;~~/shaders/Anime4K_Thin_Fast.glsl;~~/shaders/Anime4K_Thin_VeryFast.glsl"
 }
 
 -- VF components (composable)
@@ -171,9 +171,6 @@ local function log(str)
     mp.msg.info("[profile-manager] " .. str)
 end
 
--- Fallback timer handle (cancelled if Stremio metadata arrives first)
-local metadata_fallback_timer = nil
-
 -- Latch State
 local state = {
     profile_applied = false,
@@ -204,13 +201,6 @@ mp.register_script_message("anime-metadata", function(json_str)
             
         state.metadata_ready = true
         state.metadata_arrival = mp.get_time() -- Track arrival time to prevent race-condition wipes
-        
-        -- Cancel the standalone fallback timer — real metadata arrived
-        if metadata_fallback_timer then
-            metadata_fallback_timer:kill()
-            metadata_fallback_timer = nil
-            log("Fallback timer cancelled (Stremio metadata arrived)")
-        end
         
         -- Immediate Ultrawide Zoom (safe anytime)
         if stremio_metadata.ultrawide_zoom then
@@ -332,10 +322,10 @@ end
 -- Remove denoise shaders from chain (for legacy/HDR anime)
 local function remove_denoise_shaders(shader_chain)
     return shader_chain
-        :gsub("~~/shaders/denoise1%.glsl:?", "")
-        :gsub("~~/shaders/denoise3%.glsl:?", "")
-        :gsub("~~/shaders/nlmeans%.glsl:?", "")
-        :gsub(":$", "")  -- Clean trailing colon
+        :gsub("~~/shaders/denoise1%.glsl;?", "")
+        :gsub("~~/shaders/denoise3%.glsl;?", "")
+        :gsub("~~/shaders/nlmeans%.glsl;?", "")
+        :gsub(";$", "")  -- Clean trailing semicolon
 end
 
 -- Apply anime shader preset
@@ -722,12 +712,6 @@ mp.register_event('start-file', function()
     -- Clear stale OSD from previous session
     mp.set_property("osd-playing-msg", "")
     
-    -- Cancel any pending fallback timer from the previous file
-    if metadata_fallback_timer then
-        metadata_fallback_timer:kill()
-        metadata_fallback_timer = nil
-    end
-    
     -- Smart Metadata Clear: Only clear if it didn't just arrive
     -- This fixes the race condition where metadata arrives milliseconds before start-file
     local now = mp.get_time()
@@ -738,17 +722,6 @@ mp.register_event('start-file', function()
     else
         state.metadata_ready = false
         stremio_metadata = nil
-        
-        -- Start standalone fallback: if no Stremio metadata arrives within 2.5s,
-        -- unlock the latch so release-group detection applies the profile on its own.
-        metadata_fallback_timer = mp.add_timeout(2.5, function()
-            metadata_fallback_timer = nil
-            if not state.metadata_ready then
-                log("No Stremio metadata after 2.5s — running standalone (release-group detection only)")
-                state.metadata_ready = true
-                try_execute_profile()
-            end
-        end)
     end
     
     log("State reset. Waiting for latch (params + metadata)...")

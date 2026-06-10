@@ -1,72 +1,78 @@
-`The config is still in experimental phase`
+# Ângelo's MPV Config
 
-# TODO
+> **Note:** This config is still in the experimental phase.
 
-> - [ ]  Add the addons from [Stremio-Kai mpv config](https://github.com/allecsc/Stremio-Kai/tree/main/portable_config)
-> - [ ]  Add the [mpv-auto-chapters](https://github.com/po5/mpv-auto-chapters) script
-> - [X]  Fix [load-subdirs](scripts/load-subdirs/main.lua) by changing the way the appends are handled (Make a map with all the appends and then set them all at once probably)
-> - [ ]  Improve [conf/quality/quality.conf](conf/quality/quality.conf) with [classicjazz mpv.conf](https://github.com/classicjazz/mpv-config/blob/master/mpv.conf)
-> - [X]  Fix the script-opts-append on the [/conf/scripts/**/*.conf](conf/scripts/) files
-> - [ ]  Fix [mpvcontextmenu](scripts/utils/ui/context-menu/mpvcontextmenu.lua)
-> - [ ]  Add rest of the scripts to the [manager](scripts/scripts-manager/mpv_manager/manager.json)
-> - [ ]  Update the [scripts-manager](scripts/scripts-manager/mpv_manager/main.lua) script
-> - [ ]  Update the [trakt-mpv](scripts/utils/tracking/trakt-mpv/main.lua) script
-> - [ ]  Update the [trakt-mpv](scripts/utils/tracking/trakt-mpv/trakt-mpv.py) helper to be rewritten in Rust™️
+This repository is my personal configuration and collection of scripts and shaders for [mpv](https://mpv.io/). The configuration was made to work on Linux, but it should still work well on other operating systems.
 
-# 
+---
 
-This is my personal configuration and collection of scripts and shaders for mpv.
-The configurations have been made to be used on Linux.
+## MPV Manager
 
-# Configs
+A major feature of this configuration is the custom `mpv_manager` system designed to automatically keep all 3rd-party scripts, shaders, and utilities perfectly up to date.
 
-> - [netflix-subtitles](conf/netflix-subtitles) - For having the subtitles as close as possible to the ones on Netflix
-> - [vuality](conf/video) - For having the best video quality possible
-> - [audio](conf/audio) - For having the best audio quality possible
+* **GitHub Actions:** An automated workflow runs every Sunday at midnight to fetch upstream updates directly into this repository.
+* **Declarative Configuration:** The script map is defined simply in [`manager.json`](scripts/scripts-manager/mpv_manager/manager.json), allowing mapping of GitHub repositories and directories to local paths.
+* **Modular Support:** It seamlessly parses whole repositories or single standalone `.lua` scripts, extracting them to their exact necessary locations.
+* **Local Runner:** If you do not wish to use GitHub Actions, you can run the [manager script](scripts/scripts-manager/mpv_manager/main.lua) manually inside mpv.
 
-# Scripts
+---
 
-## Script Managing
+## Core Configurations
 
-> - [mpv_manager](scripts/scripts-manager/mpv_manager) - For managing all the other scripts and shaders (All the other scripts are defined in the manager.json file)
+* [**Video (`vuality`)**](conf/video) - Configured for the highest possible video quality.
+* [**Audio (`audio`)**](conf/audio) - Configured for the best possible audio fidelity.
+* [**Netflix Subtitles**](conf/netflix-subtitles) - Styled to look identical to Netflix subtitles.
 
-## Script Loading
+---
 
-> - [load-subdirs](scripts/load-subdirs) - For loading all the scripts main.* and all the conf files from the scripts/ and conf/ subdirectories
+## Scripts Included
 
-## UI
+### System & Management
+* [**mpv_manager**](scripts/scripts-manager/mpv_manager) - Manages downloading and updating all scripts.
+* [**load-subdirs**](scripts/load-subdirs) - Automatically loads all `main.*` and `.conf` files from subdirectories.
 
-### OSC
+### User Interface (UI)
+* [**ModernZ**](https://github.com/Samillion/ModernZ) - A modern UI replacement for the default OSC.
+* [**Thumbfast**](https://github.com/po5/thumbfast) - Generates high-performance thumbnails on the OSC timeline.
+* [**Pause Indicator**](https://github.com/thisisshihan/mpv-player-config-snad/tree/mpv-config-snad-windows-ubuntu-linux-macos/removed_conf/scripts/pause-indicator.lua) - Displays a sleek play/pause indicator on screen.
+* [**Context Menu**](https://gitlab.com/carmanaught/mpvcontextmenu/) - A right-click context menu within mpv.
+* [**Interactive Video**](https://github.com/mosquito-byte/mpv-interactive-video) - Support for interactive branching videos.
 
-> - [ModernZ](https://github.com/Samillion/ModernZ) - As the UI for the OSC
-
-### Thumbnails
-
-> - [thumbfast](https://github.com/po5/thumbfast) - To show thumbnails on the OSC
-
-### Pause Indicator
-
-> - [pause-indicator](https://github.com/thisisshihan/mpv-player-config-snad/tree/mpv-config-snad-windows-ubuntu-linux-macos/removed_conf/scripts/pause-indicator.lua) - To show a pause/resume indicator
-
-### Context Menu
-
-> - [mpvcontextmenu](https://gitlab.com/carmanaught/mpvcontextmenu/) - To show a context menu on the OSC
-
-### Subtitles
-
-> - [mpv-autosub](scripts/subtitles/mpv-autosub) - To download subtitles automatically (using subliminal)
-
-## Utilities
-
-> - [SmartSkip](https://github.com/Eisa01/mpv-scripts/blob/master/scripts/SmartSkip.lua) - To be able to skip intros, outros and previews
-> - [recent](https://github.com/hacel/recent) - To show the most recent files
+### Utilities & Playback
+* [**Notify Skip**](https://github.com/allecsc/Stremio-Kai) - Advanced chapter and silence-based skipping for anime/TV intros.
+* [**Smart Track Selector**](https://github.com/allecsc/Stremio-Kai) - Automatically selects the best audio and subtitle tracks.
+* [**Profile Manager**](https://github.com/allecsc/Stremio-Kai) - Dynamically applies configurations and shader presets based on content.
+* [**mpv-auto-chapters**](https://github.com/po5/mpv-auto-chapters) - Automatically generates chapters based on video silence and black frames.
+* [**Reactive VF Bypass**](https://github.com/allecsc/Stremio-Kai) - Bypasses video filters efficiently when not needed.
+* [**SVP Cleanup**](https://github.com/allecsc/Stremio-Kai) - Cleanup tools for SmoothVideo Project (SVP) integration.
+* [**Recent**](https://github.com/hacel/recent) - Keeps track of recently watched files.
+* [**mpv-autosub**](https://github.com/davidde/mpv-autosub) - Automatically downloads missing subtitles using Subliminal.
 
 ### Tracking
+* [**trakt-mpv**](scripts/utils/tracking/trakt-mpv) - Automatic scrobbling of watch history to Trakt.tv.
+* [**mpv-anilist-updater**](https://github.com/AzuredBlue/mpv-anilist-updater) - Automatically updates your anime watch status on AniList.
 
-> - [trakt-mpv](scripts/utils/tracking/trakt-mpv) - To have automatic scrobbling to trakt.tv
-> - [mpv-anilist-updater](scripts/utils/tracking/trakt-mpv/mpv-anilist-updater) - To automatically update your AniList watching status
+---
 
-# Shaders
+## Shaders & Video Processing
 
-> - [Anime4K](https://github.com/bloc97/Anime4K) - For upscaling anime
-> - [Tsubajashi config shaders](https://github.com/Tsubajashi/mpv-settings/tree/master/shaders) - All the shaders used in the Tsubajashi config
+Dynamic shader profiles are automatically applied using the Profile Manager.
+
+* [**Anime4K**](https://github.com/bloc97/Anime4K) - Real-time anime upscaling, denoising, and debanding.
+* [**NLMeans & Denoise**](shaders/) - Standard mpv noise reduction shaders.
+* [**Tsubajashi Shaders**](https://github.com/Tsubajashi/mpv-settings/tree/master/shaders) - Collection of shaders from the Tsubajashi configuration.
+
+---
+
+## Credits
+
+A huge thank you to the original creators whose scripts, configurations, and shaders have been adapted and included in this repository:
+* [**allecsc**](https://github.com/allecsc) for the incredible Stremio-Kai suite (Notify Skip, Profile Manager, Smart Track Selector, etc.).
+* [**Samillion**](https://github.com/Samillion) for the ModernZ user interface.
+* [**po5**](https://github.com/po5) for Thumbfast and mpv-auto-chapters.
+* [**bloc97**](https://github.com/bloc97) for the amazing Anime4K shaders.
+* [**Tsubajashi**](https://github.com/Tsubajashi), [**thisisshihan**](https://github.com/thisisshihan), [**carmanaught**](https://gitlab.com/carmanaught), [**mosquito-byte**](https://github.com/mosquito-byte), [**hacel**](https://github.com/hacel), [**davidde**](https://github.com/davidde), and [**AzuredBlue**](https://github.com/AzuredBlue) for their various utilities and playback enhancements.
+
+---
+
+See [TODO.md](TODO.md) for the list of planned improvements and bug fixes.

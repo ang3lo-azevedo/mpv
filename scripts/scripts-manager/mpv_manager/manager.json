@@ -1,5 +1,12 @@
 [
   {
+    "git":"https://github.com/allecsc/Stremio-Kai/",
+    "whitelist":"portable_config/scripts/notify_skip",
+    "base_dir":"portable_config/scripts/notify_skip",
+    "dest":"~~/scripts/ui/notify_skip",
+    "branch":"main"
+  },
+  {
     "git":"https://github.com/Samillion/ModernZ",
     "whitelist":"modernz.lua",
     "dest":"~~/scripts/ui/osc/ModernZ/main.lua",
@@ -29,14 +36,8 @@
   },
   {
     "git":"https://github.com/allecsc/Stremio-Kai/",
-    "whitelist":"notify_skip.lua",
-    "dest":"~~/scripts/ui/notify_skip/notify_skip.lua",
-    "branch":"main"
-  },
-  {
-    "git":"https://github.com/allecsc/Stremio-Kai/",
-    "whitelist":"profile_manager.lua",
-    "dest":"~~/scripts/utils/profile_manager/profile_manager.lua",
+    "whitelist":"profile-manager.lua",
+    "dest":"~~/scripts/ui/other/profile-manager/main.lua",
     "branch":"main"
   },
   {
@@ -47,14 +48,38 @@
   },
   {
     "git":"https://github.com/allecsc/Stremio-Kai/",
-    "whitelist":"smart_skip.lua",
-    "dest":"~~/scripts/utils/smart_skip/smart_skip.lua",
-    "branch":"main"
-  },
-    {
-    "git":"https://github.com/allecsc/Stremio-Kai/",
     "whitelist":"svp_cleanup.lua",
     "dest":"~~/scripts/utils/svp_cleanup/svp_cleanup.lua",
     "branch":"main"
+  },
+  {
+    "git":"https://github.com/allecsc/Stremio-Kai/",
+    "whitelist":"smart-track-selector/main.lua",
+    "dest":"~~/scripts/utils/smart-track-selector/main.lua",
+    "branch":"main"
+  },
+  {
+    "git":"https://github.com/davidde/mpv-autosub",
+    "whitelist":"mpv-autosub.lua",
+    "dest":"~~/scripts/subtitles/mpv-autosub/main.lua",
+    "branch":"master"
+  },
+  {
+    "git":"https://github.com/hacel/recent",
+    "whitelist":"recent.lua",
+    "dest":"~~/scripts/utils/recent/main.lua",
+    "branch":"master"
+  },
+  {
+    "git":"https://github.com/jonniek/mpv-scripts",
+    "whitelist":"select.lua",
+    "dest":"~~/scripts/ui/other/context-menu/select/main.lua",
+    "branch":"master"
+  },
+  {
+    "git":"https://github.com/po5/mpv-auto-chapters",
+    "whitelist":"auto-chapters.lua",
+    "dest":"~~/scripts/utils/mpv-auto-chapters/main.lua",
+    "branch":"master"
   }
 ]

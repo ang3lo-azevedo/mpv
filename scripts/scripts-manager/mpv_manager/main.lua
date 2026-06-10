@@ -76,6 +76,7 @@ function apply_defaults(info)
     if info.blacklist == nil then info.blacklist = "" end
     if info.dest == nil then info.dest = "~~/scripts" end
     if info.branch == nil then info.branch = "master" end
+    if info.base_dir == nil then info.base_dir = "" end
     return info
 end
 
@@ -133,14 +134,27 @@ function update(info)
             break -- Only write the first file that matches the patterns
         else
             -- If it's a directory, maintain the original structure
-            local p_based = parent(file)
+            local out_file = file
+            if info.base_dir and info.base_dir ~= "" then
+                -- Try to strip base_dir prefix safely
+                local escaped_base = info.base_dir:gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
+                out_file = out_file:gsub("^" .. escaped_base .. "/?", "")
+            end
+            
+            local p_based = parent(out_file)
             if p_based and not info.flatten_folders then 
                 mkdir(e_dest.."/"..p_based) 
             end
             local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
-            local f = io.open(e_dest.."/"..(info.flatten_folders and file:match("[^/]+$") or file), "w")
-            f:write(c)
-            f:close()
+            
+            local target_path = e_dest.."/"..(info.flatten_folders and out_file:match("[^/]+$") or out_file)
+            local f = io.open(target_path, "w")
+            if f then
+                f:write(c)
+                f:close()
+            else
+                msg.error("Failed to write to " .. target_path)
+            end
         end
     end
     return true

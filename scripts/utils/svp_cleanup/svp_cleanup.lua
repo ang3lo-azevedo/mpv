@@ -4,19 +4,19 @@
                file begins loading, preventing race conditions and crashes
   @version 1.0
   @author allecsc
-
+  
   @changelog
     v1.0 - Initial implementation using on_unload hook for synchronous cleanup
-
+  
   @requires
     - SVP or VapourSynth filters in the VF chain
-
+  
   How It Works:
     This script uses mpv's `on_unload` hook with priority 50 to block the file
     transition until cleanup completes. When SVP is detected in the filter chain,
     it clears both VF and AF lists synchronously, allowing VapourSynth processes
     to release handles before the next file attempts to initialize them.
-
+  
   Why Synchronous?
     Async cleanup can cause race conditions where the next file tries to initialize
     SVP while the previous instance is still shutting down, leading to crashes or
@@ -49,7 +49,7 @@ mp.add_hook("on_unload", 50, function()
         -- Clear both video and audio filters to ensure a clean state
         mp.commandv("vf", "clr", "")
         mp.commandv("af", "clr", "")
-
+        
         -- Small internal delay to allow the VapourSynth process to release handles
         -- Since this is a hook, mpv will wait here.
         mp.msg.verbose("SVP Cleanup: Deinit complete.")
