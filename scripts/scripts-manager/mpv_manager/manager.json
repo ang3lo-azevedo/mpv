@@ -60,7 +60,7 @@
   },
   {
     "git":"https://github.com/davidde/mpv-autosub",
-    "whitelist":"mpv-autosub.lua",
+    "whitelist":"autosub.lua",
     "dest":"~~/scripts/subtitles/mpv-autosub/main.lua",
     "branch":"master"
   },
@@ -71,14 +71,8 @@
     "branch":"master"
   },
   {
-    "git":"https://github.com/jonniek/mpv-scripts",
-    "whitelist":"select.lua",
-    "dest":"~~/scripts/ui/other/context-menu/select/main.lua",
-    "branch":"master"
-  },
-  {
     "git":"https://github.com/po5/mpv-auto-chapters",
-    "whitelist":"auto-chapters.lua",
+    "whitelist":"autochapters/main.lua",
     "dest":"~~/scripts/utils/mpv-auto-chapters/main.lua",
     "branch":"master"
   }
