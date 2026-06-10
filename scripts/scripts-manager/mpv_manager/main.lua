@@ -20,20 +20,38 @@ function run(args)
         end
     end
     
-    if legacy then
-        return utils.subprocess({
-            args = args,
-            env = {"GIT_TERMINAL_PROMPT=0"}
+    local co = coroutine.running()
+    if legacy or not co then
+        if legacy then
+            return utils.subprocess({
+                args = args,
+                env = {"GIT_TERMINAL_PROMPT=0"}
+            })
+        end
+        return mp.command_native({
+            name = "subprocess", 
+            capture_stdout = true,
+            capture_stderr = false,
+            playback_only = false,
+            env = {"GIT_TERMINAL_PROMPT=0"},
+            args = args
         })
     end
-    return mp.command_native({
+    
+    mp.command_native_async({
         name = "subprocess", 
         capture_stdout = true,
         capture_stderr = false,
         playback_only = false,
         env = {"GIT_TERMINAL_PROMPT=0"},
         args = args
-    })
+    }, function(success, res, err)
+        if not res then res = {} end
+        if not res.stdout then res.stdout = "" end
+        if not res.status then res.status = -1 end
+        coroutine.resume(co, res)
+    end)
+    return coroutine.yield()
 end
 
 -- Get the parent directory of a path
@@ -86,6 +104,7 @@ end
 * @return true if the script was updated, false otherwise
 ]]
 function update(info)
+    local updated_count = 0
     info = apply_defaults(info)
     if not info then return false end
     
@@ -128,9 +147,22 @@ function update(info)
         -- If destination is not a directory, use the destination name as the filename
         if not is_dir then
             local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
-            local f = io.open(e_dest, "w")
-            f:write(c)
-            f:close()
+            
+            local current_content = ""
+            local old_f = io.open(e_dest, "r")
+            if old_f then
+                current_content = old_f:read("*all")
+                old_f:close()
+            end
+            
+            if c ~= current_content then
+                local f = io.open(e_dest, "w")
+                if f then
+                    f:write(c)
+                    f:close()
+                    updated_count = updated_count + 1
+                end
+            end
             break -- Only write the first file that matches the patterns
         else
             -- If it's a directory, maintain the original structure
@@ -148,16 +180,26 @@ function update(info)
             local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
             
             local target_path = e_dest.."/"..(info.flatten_folders and out_file:match("[^/]+$") or out_file)
-            local f = io.open(target_path, "w")
-            if f then
-                f:write(c)
-                f:close()
-            else
-                msg.error("Failed to write to " .. target_path)
+            local current_content = ""
+            local old_f = io.open(target_path, "r")
+            if old_f then
+                current_content = old_f:read("*all")
+                old_f:close()
+            end
+            
+            if c ~= current_content then
+                local f = io.open(target_path, "w")
+                if f then
+                    f:write(c)
+                    f:close()
+                    updated_count = updated_count + 1
+                else
+                    msg.error("Failed to write to " .. target_path)
+                end
             end
         end
     end
-    return true
+    return updated_count
 end
 
 --[[
@@ -186,12 +228,24 @@ function update_all()
     end
 
     -- Update each script
+    local total_updated = 0
     for i, info in ipairs(config) do
         local script_path = info.dest:match("~~/(.*)")  -- Get path after ~~/
-        msg.info("Updating " .. script_path .. ":", update(info))
+        local updated = update(info)
+        if type(updated) == "number" then
+            total_updated = total_updated + updated
+        end
+        msg.info("Checked " .. script_path .. ": Updated " .. (type(updated) == "number" and updated or 0) .. " files")
+    end
+    
+    if total_updated > 0 then
+        mp.osd_message("Manager: Updated " .. total_updated .. " files!", 5)
+        msg.info("Manager: Updated " .. total_updated .. " files!")
     end
 end
 
-msg.info("Updating all scripts")
-
-update_all()
+msg.info("Starting background update of all scripts...")
+coroutine.wrap(function()
+    update_all()
+    msg.info("Background update complete!")
+end)()

@@ -1,6 +1,11 @@
 local utils = require("mp.utils")
 local msg = require("mp.msg")
 
+local properties = {}
+local regular_confs = {}
+local profile_confs = {}
+local script_files = {}
+
 --[[
 * Load a conf file from a path and process profiles if present
 * @param path The path to load the conf file from
@@ -41,16 +46,16 @@ function load_conf_from_path(path)
                         -- Check if key ends with -append and handle accordingly
                         local base_key = key:match("^(.+)-append$")
                         if base_key then
-                            -- For -append, get existing value and append new value
-                            local current = mp.get_property(base_key, "")
+                            -- Collect into our properties map
+                            local current = properties[base_key] or mp.get_property(base_key, "")
                             if current ~= "" then
-                                value = current .. "," .. value
+                                properties[base_key] = current .. "," .. value
+                            else
+                                properties[base_key] = value
                             end
-                            key = base_key
+                        else
+                            properties[key] = value
                         end
-                        
-                        msg.debug("Setting " .. key .. "-> " .. value)
-                        mp.set_property(key:gsub("%s+$", ""), value)
                     end
                 end
             end
@@ -65,14 +70,69 @@ function load_conf_from_path(path)
 end
 
 --[[
-* Load a script from a path
-* @param path The path to load the script from
+* Scan a directory recursively and organize files by type
+* @param dir The directory to scan
 ]]
-function load_script_from_path(path)
-    msg.debug("Loading script: " .. path)
+function scan_dir(dir)
+    local files = utils.readdir(dir)
+    if not files then return end
 
+    -- Sort files to guarantee deterministic loading order
+    table.sort(files)
+
+    for _, file in ipairs(files) do
+        local path = utils.join_path(dir, file)
+        local info = utils.file_info(path)
+
+        if info and info.is_dir and not file:match("^%.") then
+            -- Skip the load-subdirs folder to avoid infinite loops or self-loading
+            if file ~= "load-subdirs" then
+                scan_dir(path)
+            end
+        elseif info and info.is_file then
+            if file:match("%.conf$") then
+                -- Store profiles/*.conf files to load them later
+                if path:match("profiles[/\\].*%.conf$") then
+                    table.insert(profile_confs, path)
+                else
+                    table.insert(regular_confs, path)
+                end
+            elseif file:match("^main[%.]?.*$") then
+                table.insert(script_files, path)
+            end
+        end
+    end
+end
+
+-- Get the mpv directory path
+local mpv_dir = mp.command_native({"expand-path", "~~/"})
+local conf_dir = utils.join_path(mpv_dir, "conf")
+local scripts_dir = utils.join_path(mpv_dir, "scripts")
+
+msg.info("Scanning directories: " .. conf_dir .. " and " .. scripts_dir)
+
+-- 1. Scan target directories (avoids crawling irrelevant folders like ~/.git)
+scan_dir(conf_dir)
+scan_dir(scripts_dir)
+
+-- 2. Load configurations into properties map
+for _, path in ipairs(regular_confs) do
+    load_conf_from_path(path)
+end
+for _, path in ipairs(profile_confs) do
+    load_conf_from_path(path)
+end
+
+-- 3. Apply aggregated properties at once
+for k, v in pairs(properties) do
+    msg.debug("Applying " .. k .. " -> " .. v)
+    mp.set_property(k, v)
+end
+
+-- 4. Load scripts only AFTER configurations are correctly applied
+for _, path in ipairs(script_files) do
+    msg.debug("Loading script: " .. path)
     local success, err = pcall(function()
-        -- Load the script
         mp.commandv("load-script", path)
     end)
     if not success then
@@ -80,55 +140,4 @@ function load_script_from_path(path)
     end
 end
 
---[[
-* Load all scripts and config files from a directory
-* @param dir The directory to load scripts and config files from
-]]
-function load_from_dir(dir)
-    local files = utils.readdir(dir)
-    local profile_confs = {}
-
-    if not files then
-        msg.warn("Could not read directory: " .. dir)
-        return
-    end
-
-    for _, file in ipairs(files) do
-        local path = utils.join_path(dir, file)
-        local info = utils.file_info(path)
-
-        if info and info.is_dir and not file:match("^%.") then
-            -- Check if the directory is the load-subdirs directory
-            if file == "load-subdirs" then
-                msg.debug("Skipping load-subdirs directory: " .. path)
-            else
-                -- Recursively load scripts from subdirectories, ignoring hidden dirs
-                msg.debug("Entering directory: " .. path)
-                load_from_dir(path)
-            end
-        elseif info and info.is_file and file:match("%.conf$") then
-            -- Store profiles/*.conf files to load them later
-            if path:match("profiles[/\\].*%.conf$") then
-                table.insert(profile_confs, path)
-            else
-                -- Load non-profile .conf files immediately
-                load_conf_from_path(path)
-            end
-        elseif info and info.is_file and file:match("^main[%.]?.*$") then
-            -- Load script files
-            load_script_from_path(path)
-        end
-    end
-
-    -- Load profile configs after all other configs
-    for _, profile_path in ipairs(profile_confs) do
-        load_conf_from_path(profile_path)
-    end
-end
-
--- Get the mpv directory path
-local mpv_dir = mp.command_native({"expand-path", "~~/"})
-msg.info("Loading config files from: " .. mpv_dir)
-
--- Load all config and script files recursively from the mpv directory
-load_from_dir(mpv_dir)
+msg.info("Loaded " .. (#regular_confs + #profile_confs) .. " configs and " .. #script_files .. " scripts.")
