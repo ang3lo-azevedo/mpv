@@ -606,7 +606,7 @@ function try_execute_profile()
     end
     
     -- Determine base profile
-    local base_profile = is_anime and "anime-base" or "sdr" -- [Local Override] Map 'anime' to our custom 'anime-base' profile
+    local base_profile = is_anime and "anime-sdr" or "sdr"
     
     -- Build OSD message
     local osd_parts = {}

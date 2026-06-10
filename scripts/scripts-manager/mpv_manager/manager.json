@@ -70,10 +70,7 @@
         "search": "if not state.metadata_ready then",
         "replace": "if false and not state.metadata_ready then -- [Local Override] Bypass Stremio IPC metadata latch to apply profiles immediately"
       },
-      {
-        "search": "local base_profile = is_anime and \"anime-sdr\" or \"sdr\"",
-        "replace": "local base_profile = is_anime and \"anime-base\" or \"sdr\" -- [Local Override] Map 'anime' to our custom 'anime-base' profile"
-      },
+
       {
         "search": "\"Pn8\",",
         "replace": "\"Pn8\", \"MK-Pn8\", -- [Local Override] Added MK-Pn8 for Parasyte"
