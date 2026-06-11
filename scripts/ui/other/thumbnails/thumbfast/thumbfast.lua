@@ -508,6 +508,15 @@ local function spawn(time)
     spawned = true
     spawn_waiting = true
 
+    local dfile = io.open("/tmp/thumbfast_debug.txt", "w")
+    if dfile then
+        dfile:write("mpv_path: "..tostring(mpv_path).."\n")
+        dfile:write("url: "..tostring(path).."\n")
+        dfile:write("socket: "..tostring(options.socket).."\n")
+        dfile:write("thumbnail: "..tostring(options.thumbnail).."\n")
+        for k, v in pairs(args) do dfile:write("arg "..k..": "..tostring(v).."\n") end
+        dfile:close()
+    end
     subprocess(args, true,
         function(success, result)
             if spawn_waiting and (success == false or (result.status ~= 0 and result.status ~= -2)) then
