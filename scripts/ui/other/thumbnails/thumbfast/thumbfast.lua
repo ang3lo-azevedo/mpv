@@ -183,11 +183,25 @@ local file_check_period = 1/60
 local allow_fast_seek = true
 
 local client_script = [=[
-#!/usr/bin/env bash
-MPV_IPC_FD=0; MPV_IPC_PATH="%s"
-trap "kill 0" EXIT
-while [[ $# -ne 0 ]]; do case $1 in --mpv-ipc-fd=*) MPV_IPC_FD=${1/--mpv-ipc-fd=/} ;; esac; shift; done
-if echo "print-text thumbfast" >&"$MPV_IPC_FD"; then echo -n > "$MPV_IPC_PATH"; tail -f "$MPV_IPC_PATH" >&"$MPV_IPC_FD" & while read -r -u "$MPV_IPC_FD" 2>/dev/null; do :; done; fi
+local last_size = 0
+mp.add_periodic_timer(0.033, function()
+    local finfo = mp.utils.file_info("%s")
+    if finfo and finfo.size > last_size then
+        local f = io.open("%s", "r")
+        if f then
+            f:seek("set", last_size)
+            local data = f:read("*a")
+            last_size = finfo.size
+            f:close()
+            if data and data ~= "" then
+                for cmd in data:gmatch("[^\r\n]+") do
+                    mp.command(cmd)
+                end
+            end
+        end
+    end
+end)
+mp.commandv("print-text", "thumbfast")
 ]=]
 
 local function get_os()
@@ -485,7 +499,7 @@ local function spawn(time)
     if os_name == "windows" or pre_0_33_0 then
         table.insert(args, "--input-ipc-server="..options.socket)
     elseif not script_written then
-        local client_script_path = options.socket..".run"
+        local client_script_path = options.socket..".lua"
         local script = io.open(client_script_path, "w+")
         if script == nil then
             mp.msg.error("client script write failed")
@@ -498,7 +512,7 @@ local function spawn(time)
             table.insert(args, "--scripts="..client_script_path)
         end
     else
-        local client_script_path = options.socket..".run"
+        local client_script_path = options.socket..".lua"
         table.insert(args, "--scripts="..client_script_path)
     end
 
@@ -918,7 +932,7 @@ local function shutdown()
     remove_thumbnail_files()
     if os_name ~= "windows" then
         os.remove(options.socket)
-        os.remove(options.socket..".run")
+        os.remove(options.socket..".lua")
     end
 end
 

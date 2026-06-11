@@ -13,7 +13,7 @@
 [   0.003][v][cplayer]    libswscale      9.5.100
 [   0.003][v][cplayer] Configuration: <omitted>
 [   0.003][v][cplayer] List of enabled features: alsa build-date caca cplugins cuda-hwaccel cuda-interop dmabuf-interop-gl dmabuf-wayland drm dvbin dvdnav egl egl-drm egl-wayland egl-x11 ffmpeg ffnvcodec gbm gl glibc-thread-name glob glob-posix gpl iconv javascript lcms2 libarchive libass libavdevice libbluray libdl libplacebo linux-fstatfs lua memfd-create memrchr openal pipewire posix posix-shm ppoll pthread-condattr-setclock pulse rubberband rubberband-3 uchardet vaapi vaapi-drm vaapi-wayland vaapi-x11 vapoursynth vdpau vector vk-khr-display vt.h vulkan wayland wayland-protocols-1-32 wayland-protocols-1-38 wayland-protocols-1-39 wayland-protocols-1-41 wayland-protocols-1-44 wayland-protocols-1-47 x11 x11-clipboard zimg zimg-st428 zlib
-[   0.003][v][cplayer] Command line options: '--no-config' '--msg-level=all=v' '--log-file=~~/thumbfast_bg.log' '--idle' '--pause' '--keep-open=always' '--really-quiet' '--no-terminal' '--load-scripts=no' '--osc=no' '--ytdl=no' '--load-stats-overlay=no' '--load-osd-console=no' '--load-auto-profiles=no' '--edition=auto' '--vid=1' '--no-sub' '--no-audio' '--start=5' '--hr-seek=yes' '--ytdl-format=worst' '--demuxer-readahead-secs=5' '--demuxer-max-bytes=150MiB' '--vd-lavc-skiploopfilter=all' '--vd-lavc-software-fallback=1' '--vd-lavc-fast' '--vd-lavc-threads=2' '--hwdec=no' '--vf=scale=w=200:h=200,pad=w=200:h=200:x=-1:y=-1,format=bgra' '--sws-scaler=fast-bilinear' '--video-rotate=0' '--ovc=rawvideo' '--of=image2' '--ofopts=update=1' '--o=/tmp/thumbfast.out1798979' '--sws-allow-zimg=no' '--media-controls=no' '--input-ipc-server=/tmp/thumbfast1798979' '--' '/tmp/test.mp4'
+[   0.003][v][cplayer] Command line options: '--no-config' '--msg-level=all=v' '--log-file=~~/thumbfast_bg.log' '--idle' '--pause' '--keep-open=always' '--really-quiet' '--no-terminal' '--load-scripts=no' '--osc=no' '--ytdl=no' '--load-stats-overlay=no' '--load-osd-console=no' '--load-auto-profiles=no' '--edition=auto' '--vid=1' '--no-sub' '--no-audio' '--start=5' '--hr-seek=yes' '--ytdl-format=worst' '--demuxer-readahead-secs=5' '--demuxer-max-bytes=150MiB' '--vd-lavc-skiploopfilter=all' '--vd-lavc-software-fallback=1' '--vd-lavc-fast' '--vd-lavc-threads=2' '--hwdec=no' '--vf=scale=w=300:h=169:force_original_aspect_ratio=decrease,pad=w=300:h=169:x=-1:y=-1,format=bgra' '--sws-scaler=fast-bilinear' '--video-rotate=0' '--ovc=rawvideo' '--of=image2' '--ofopts=update=1' '--o=/tmp/thumbfast.out1909636' '--sws-allow-zimg=no' '--media-controls=no' '--input-ipc-server=/tmp/thumbfast1909636' '--' '/tmp/test.mp4'
 [   0.003][v][cplayer] mpv v0.41.0 Copyright © 2000-2025 mpv/MPlayer/mplayer2 projects
 [   0.003][v][cplayer]  built on Jan  1 1980 00:00:00
 [   0.003][v][cplayer] libplacebo version: v7.360.1
@@ -71,147 +71,151 @@
 [   0.003][v][cplayer] Setting option 'vd-lavc-fast' = '' (flags = 8)
 [   0.003][v][cplayer] Setting option 'vd-lavc-threads' = '2' (flags = 8)
 [   0.003][v][cplayer] Setting option 'hwdec' = 'no' (flags = 8)
-[   0.003][v][cplayer] Setting option 'vf' = 'scale=w=200:h=200,pad=w=200:h=200:x=-1:y=-1,format=bgra' (flags = 8)
+[   0.003][v][cplayer] Setting option 'vf' = 'scale=w=300:h=169:force_original_aspect_ratio=decrease,pad=w=300:h=169:x=-1:y=-1,format=bgra' (flags = 8)
 [   0.003][v][cplayer] Setting option 'sws-scaler' = 'fast-bilinear' (flags = 8)
 [   0.003][v][cplayer] Setting option 'video-rotate' = '0' (flags = 8)
 [   0.003][v][cplayer] Setting option 'ovc' = 'rawvideo' (flags = 8)
 [   0.003][v][cplayer] Setting option 'of' = 'image2' (flags = 8)
 [   0.003][v][cplayer] Setting option 'ofopts' = 'update=1' (flags = 8)
-[   0.003][v][cplayer] Setting option 'o' = '/tmp/thumbfast.out1798979' (flags = 8)
+[   0.003][v][cplayer] Setting option 'o' = '/tmp/thumbfast.out1909636' (flags = 8)
 [   0.003][v][cplayer] Setting option 'sws-allow-zimg' = 'no' (flags = 8)
 [   0.003][v][cplayer] Setting option 'media-controls' = 'no' (flags = 8)
-[   0.003][v][cplayer] Setting option 'input-ipc-server' = '/tmp/thumbfast1798979' (flags = 8)
-[   0.003][d][global] user path: '~~/thumbfast_bg.log' -> 'thumbfast_bg.log'
-[   0.003][d][select] Loading lua script @select.lua...
-[   0.004][d][positioning] Loading lua script @positioning.lua...
-[   0.004][d][commands] Loading lua script @commands.lua...
-[   0.004][d][context_menu] Loading lua script @context_menu.lua...
-[   0.004][v][clipboard] Initialized vo clipboard backend.
-[   0.004][v][cplayer] Waiting for scripts...
-[   0.005][d][select] loading mp.defaults
-[   0.005][d][select] loading @select.lua
-[   0.006][d][positioning] loading mp.defaults
-[   0.006][d][positioning] loading @positioning.lua
-[   0.009][d][commands] loading mp.defaults
-[   0.009][d][context_menu] loading mp.defaults
-[   0.010][d][con[   0.012][d][context_menu] loading @context_menu.lua
-[   0.012][d][commands] loading @commands.lua
+[   0.003][v][cplayer] Setting option 'input-ipc-server' = '/tmp/thumbfast1909636' (flags = 8)
+[   0.008][d][global] user path: '~~/thumbfast_bg.log' -> 'thumbfast_bg.log'
+[   0.008][d][select] Loading lua script @select.lua...
+[   0.008][d][positioning] Loading lua script @positioning.lua...
+[   0.008][d][commands] Loading lua script @commands.lua...
+[   0.008][d][context_menu] Loading lua script @context_menu.lua...
+[   0.011][d][positioning] loading mp.defaults
+[   0.011][d][select] loading mp.defaults
+[   0.011][d][positioning] loading @positioning.lua
+[   0.011][v][clipboard/wayland] Registered interface ext_data_control_manager_v1 at version 1
+[   0.011][v][clipboard/wayland] Registered interface wl_seat at version 8
+[   0.011][d][select] loading @select.lua
+[   0.011][d][positioning] reading options for positioning
+[   0.011][d][positioning] script-opts/positioning.conf not found.
+[   0.011][d][positioning] lua-settings/positioning.conf not found.
+[   0.011][d][context_menu] loading mp.defaults
+[   0.011][v][clipboard] Initialized wayland clipboard backend.
+[   0.011][v][cplayer] Waiting for scripts...
+[   0.011][d][select] reading options for select
+[   0.011][d][select] script-opts/select.conf not found.
+[   0.011][d][select] lua-settings/select.conf not found.
+[   0.011][d][commands] loading mp.defaults
+[   0.011][d][context_menu] loading @context_menu.lua
+[   0.011][v][ipc] Starting IPC master
+[   0.011][v][clipboard/wayland] Read 44598 bytes from the data offer fd
+[   0.011][v][clipboard/wayland] Read 1 bytes from the data offer fd
+[   0.011][v][ipc] Listening to IPC socket.
+[   0.011][d][commands] loading @commands.lua
+[   0.012][d][cplayer] Run command: define-section, flags=64, args=[name="input_positioning", contents="", flags="default"]
+[   0.012][d][cplayer] Run command: enable-section, flags=64, args=[name="input_positioning", flags="allow-hide-cursor+allow-vo-dragging"]
 [   0.012][d][context_menu] reading options for context_menu
 [   0.012][d][context_menu] script-opts/context_menu.conf not found.
 [   0.012][d][context_menu] lua-settings/context_menu.conf not found.
-[   0.012][d][positi[   0.012][d][commands] loading @commands.lua
-[   0.013][d][select] reading options for select
-[   0.013][d][select] script-opts/select.conf not found.
-[   0.014][d][positioning] reading options for positioning
-[   0.014][d][positioning] script-opts/positioning.conf not found.
-[   0.014][d][positioning] lua-settings/positioning.conf not found.
-[   0.014][d][cplayer] Run command: define-section, flags=64, args=[name="input_positioning", contents="", flags="default"]
-[   0.015][d][cplayer] Run command: enable-section, flags=64, args=[name="input_positioning", flags="allow-hide-cursor+allow-vo-dragging"]
-[   0.015][d][cplayer] Run command: define-section, flags=64, args=[name="input_forced_positioning", contents="", flags="force"]
-[   0.015][d][cplayer] Run command: enable-section, flags=64, args=[name="input_forced_positioning", flags="allow-hide-cursor+allow-vo-dragging"]
-[   0.015][d][commands] reading options for commands
-[   0.015][d][commands] script-opts/commands.conf not found.
-[   0.015][d][commands] lua-settings/commands.conf not found.
-[   0.015][d][select] lua-settings/select.conf not found.
-[   0.015][d][cplayer] Run command: define-section, flags=64, args=[name="input_commands", contents="", flags="default"]
-[   0.015][d][cplayer] Run command: enable-section, flags=64, args=[name="input_commands", flags="allow-hide-cursor+allow-vo-dragging"]
-[   0.015][d][cplayer] Run command: define-section, flags=64, args=[name="input_forced_commands", contents="", flags="force"]
-[   0.015][d][cplayer] Run command: enable-section, flags=64, args=[name="input_forced_commands", flags="allow-hide-cursor+allow-vo-dragging"]
-[   0.015][d][cplayer] Run command: define-section, flags=64, args=[name="input_select", contents="", flags="default"]
-[   0.015][d][cplayer] Run command: enable-section, flags=64, args=[name="input_select", flags="allow-hide-cursor+allow-vo-dragging"]
-[   0.015][d][cplayer] Run command: define-section, flags=64, args=[name="input_forced_select", contents="", flags="force"]
-[   0.015][d][cplayer] Run command: enable-section, flags=64, args=[name="input_forced_select", flags="allow-hide-cursor+allow-vo-dragging"]
-[   0.015][v][cplayer] Done loading scripts.
-[   0.015][v][ifo_dvdnav] Opening /tmp/test.mp4
-[   0.015][v][bdmv/bluray] Opening /tmp/test.mp4
-[   0.015][v][file] Opening /tmp/test.mp4
-[   0.016][d][file] resize stream to 131072 bytes, drop 0 bytes
-[   0.016][d][file] Stream opened successfully.
-[   0.016][v][demux] Trying demuxers for level=normal.
-[   0.016][d][demux] Trying demuxer: directory (force-level: normal)
-[   0.016][d][demux] Trying demuxer: disc (force-level: normal)
-[   0.016][d][demux] Trying demuxer: edl (force-level: normal)
-[   0.016][d][demux] Trying demuxer: cue (force-level: normal)
-[   0.016][d][demux] Trying demuxer: rawaudio (force-level: normal)
-[   0.016][d][demux] Trying demuxer: rawvideo (force-level: normal)
-[   0.016][d][demux] Trying demuxer: mkv (force-level: normal)
-[   0.017][d][demux] Trying demuxer: libarchive (force-level: normal)
-[   0.017][d][demux] Trying demuxer: lavf (force-level: normal)
-[   0.028][v][lavf] Found 'mov,mp4,m4a,3gp,3g2,mj2' at score=100 size=2048.
-[   0.029][v][demux] Detected file format: mov,mp4,m4a,3gp,3g2,mj2 (libavformat)
-[   0.029][v][cplayer] Opening done: /tmp/test.mp4
-[   0.030][v][find_files] Loading external files in /tmp/
-[   0.030][v][lavf] select track 0
-[   0.030][i][cplayer] ● Video  --vid=1  (h264 1280x720 30 fps) [default]
-[   0.031][v][vd] Container reported FPS: 30.000000
-[   0.031][v][vd] Codec list:
-[   0.031][v][vd]     h264 - H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10
-[   0.031][v][vd]     h264_v4l2m2m (h264) - V4L2 mem2mem H.264 decoder wrapper
-[   0.031][v][vd]     h264_amf (h264) - H264 AMD AMF video decoder
-[   0.031][v][vd]     h264_cuvid (h264) - Nvidia CUVID H264 decoder
-[   0.031][v][vd] Opening decoder h264
-[   0.031][v][vd] No hardware decoding requested.
-[   0.031][v][vd] Using software decoding.
-[   0.031][v][vd] Requesting 2 threads for decoding.
-[   0.031][v][vd] Selected decoder: h264 - H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10
-[   0.035][d][ffmpeg] filter: w:200 h:200 flags:'' interl:0
-[   0.038][v][user_filter_wrapper] Setting option 'fmt' = 'bgra' (flags = 0)
-[   0.038][v][vf] User filter list:
-[   0.038][v][vf]   scale (scale.00)
-[   0.038][v][vf]   pad (pad.00)
-[   0.038][v][vf]   format (format.00)
-[   0.038][v][cplayer] Starting playback...
-[   0.038][v][lavf] queuing seek to 5.000000
-[   0.038][v][lavf] execute seek (to 5.000000 flags 32)
-[   0.038][v][lavf] seek done
-[   0.038][v][cplayer] hr-seek, skipping to 5.000000
-[   0.042][d][ffmpeg] filter: w:200 h:200 flags:'' interl:0
-[   0.042][v][file] stream level seek from 150983 to 48
-[   0.044][d][ffmpeg/video] h264: Reinit context to 1280x720, pix_fmt: yuv420p
-[   0.044][d][vd] DR parameter change to 1280x738 yuv420p align=64
-[   0.044][d][vd] Allocating new (host-cached) DR image...
-[   0.044][d][vd] ...failed..
-[   0.044][v][vd] DR failed - disabling.
-[   0.053][v][vd] Using software decoding.
-[   0.053][v][vd] Decoder format: 1280x720 yuv420p auto/auto/auto/auto/auto CL=mpeg2/4/h264 crop=1280x720+0+0 A=none
-[   0.053][v][vd] Using container aspect ratio.
-[   0.053][v][vf] [in] 1280x720 yuv420p bt.709/bt.709/bt.1886/limited/display CL=mpeg2/4/h264 crop=1280x720+0+0 A=none
-[   0.053][v][vf] [userdeint] 1280x720 yuv420p bt.709/bt.709/bt.1886/limited/display CL=mpeg2/4/h264 crop=1280x720+0+0 A=none
-[   0.053][v][vf] [userdeint] (disabled)
-[   0.053][v][vf] [scale] 1280x720 yuv420p bt.709/bt.709/bt.1886/limited/display CL=mpeg2/4/h264 crop=1280x720+0+0 A=none
-[   0.053][d][ffmpeg] mpv_src_default_in: w:1280 h:720 pixfmt:yuv420p tb:1/1000000 fr:30/1 sar:1/1 csp:bt709 range:tv alpha:unspecified
-[   0.053][d][ffmpeg] filter: w:1280 h:720 fmt:yuv420p csp:bt709 range:tv sar:1/1 -> w:200 h:200 fmt:yuv420p csp:bt709 range:tv sar:16/9 flags:0x00000004
-[   0.053][d][ffmpeg] framesync: Selected 1/1000000 time base
-[   0.053][d][ffmpeg] framesync: Sync level 1
-[   0.058][v][vf] [pad] 200x200 [16:9] yuv420p bt.709/bt.709/bt.1886/limited/display CL=unknown crop=200x200+0+0 A=none
-[   0.058][d][ffmpeg] mpv_src_default_in: w:200 h:200 pixfmt:yuv420p tb:1/1000000 fr:30/1 sar:16/9 csp:bt709 range:tv alpha:unspecified
-[   0.058][d][ffmpeg] filter: w:200 h:200 -> w:200 h:200 x:0 y:0 color:0x000000FF
-[   0.058][v][vf] [format] 200x200 [16:9] yuv420p bt.709/bt.709/bt.1886/limited/display CL=unknown crop=200x200+0+0 A=none
-[   0.058][i][autoconvert] Converting yuv420p -> bgra
-[   0.059][d][ffmpeg] SwScaler: reducing / aligning filtersize 2 -> 4
-[   0.059][d][ffmpeg] SwScaler: reducing / aligning filtersize 2 -> 4
-[   0.059][d][ffmpeg] SwScaler: reducing / aligning filtersize 1 -> 1
-[   0.059][d][ffmpeg] SwScaler: reducing / aligning filtersize 2 -> 2
-[   0.059][v][ffmpeg] swscaler: fast bilinear scaler, from yuv420p to bgra using MMXEXT
-[   0.059][d][ffmpeg] swscaler: 200x200 -> 200x200
-[   0.059][v][vf] [autovflip] 200x200 [71:40] bgra rgb/bt.709/bt.1886/full/display CL=mpeg1/jpeg crop=200x200+0+0 A=straight
-[   0.059][v][vf] [autovflip] (disabled)
-[   0.059][v][vf] [autorotate] 200x200 [71:40] bgra rgb/bt.709/bt.1886/full/display CL=mpeg1/jpeg crop=200x200+0+0 A=straight
-[   0.059][v][vf] [autorotate] (disabled)
-[   0.059][v][vf] [convert] 200x200 [71:40] bgra rgb/bt.709/bt.1886/full/display CL=mpeg1/jpeg crop=200x200+0+0 A=straight
-[   0.059][v][vf] [convert] (disabled)
-[   0.059][v][vf] [out] 200x200 [71:40] bgra rgb/bt.709/bt.1886/full/display CL=mpeg1/jpeg crop=200x200+0+0 A=straight
-[   0.187][v][lavf] EOF reached.
-[   0.191][i][cplayer] VO: [lavc] 200x200 => 355x200 bgra
-[   0.191][v][cplayer] VO: Description: video encoding using libavcodec
-[   0.191][v][vo/lavc] reconfig to 200x200 [71:40] bgra rgb/bt.709/bt.1886/full/display CL=mpeg1/jpeg crop=200x200+0+0 A=straight
-[   0.191][i][vo/lavc] Opening encoder: raw video [rawvideo]
-[   0.191][i][encode] Opening muxer: image2 sequence [image2]
-[   0.192][d][ffmpeg] AVIOContext: Statistics: 160000 bytes written, 0 seeks, 1 writeouts
+[   0.012][d][cplayer] Run command: define-section, flags=64, args=[name="input_forced_positioning", contents="", flags="force"]
+[   0.012][d][cplayer] Run command: enable-section, flags=64, args=[name="input_forced_positioning", flags="allow-hide-cursor+allow-vo-dragging"]
+[   0.012][d][commands] reading options for commands
+[   0.012][d][commands] script-opts/commands.conf not found.
+[   0.014][d][commands] lua-settings/commands.conf not found.
+[   0.014][v][cplayer] Done loading scripts.
+[   0.014][d][cplayer] Run command: define-section, flags=64, args=[name="input_select", contents="", flags="default"]
+[   0.014][d][cplayer] Run command: enable-section, flags=64, args=[name="input_select", flags="allow-hide-cursor+allow-vo-dragging"]
+[   0.014][d][cplayer] Run command: define-section, flags=64, args=[name="input_forced_select", contents="", flags="force"]
+[   0.014][d][cplayer] Run command: enable-section, flags=64, args=[name="input_forced_select", flags="allow-hide-cursor+allow-vo-dragging"]
+[   0.014][v][ifo_dvdnav] Opening /tmp/test.mp4
+[   0.014][v][bdmv/bluray] Opening /tmp/test.mp4
+[   0.014][v][file] Opening /tmp/test.mp4
+[   0.014][d][file] resize stream to 131072 bytes, drop 0 bytes
+[   0.014][d][file] Stream opened successfully.
+[   0.014][v][demux] Trying demuxers for level=normal.
+[   0.014][d][demux] Trying demuxer: directory (force-level: normal)
+[   0.014][d][demux] Trying demuxer: disc (force-level: normal)
+[   0.014][d][demux] Trying demuxer: edl (force-level: normal)
+[   0.014][d][demux] Trying demuxer: cue (force-level: normal)
+[   0.014][d][demux] Trying demuxer: rawaudio (force-level: normal)
+[   0.014][d][demux] Trying demuxer: rawvideo (force-level: normal)
+[   0.014][d][demux] Trying demuxer: mkv (force-level: normal)
+[   0.014][d][demux] Trying demuxer: libarchive (force-level: normal)
+[   0.014][d][demux] Trying demuxer: lavf (force-level: normal)
+[   0.014][d][cplayer] Run command: define-section, flags=64, args=[name="input_commands", contents="", flags="default"]
+[   0.014][d][cplayer] Run command: enable-section, flags=64, args=[name="input_commands", flags="allow-hide-cursor+allow-vo-dragging"]
+[   0.014][d][cplayer] Run command: define-section, flags=64, args=[name="input_forced_commands", contents="", flags="force"]
+[   0.014][d][cplayer] Run command: enable-section, flags=64, args=[name="input_forced_commands", flags="allow-hide-cursor+allow-vo-dragging"]
+[   0.014][v][lavf] Found 'mov,mp4,m4a,3gp,3g2,mj2' at score=100 size=2048.
+[   0.015][v][demux] Detected file format: mov,mp4,m4a,3gp,3g2,mj2 (libavformat)
+[   0.015][v][cplayer] Opening done: /tmp/test.mp4
+[   0.017][v][find_files] Loading external files in /tmp/
+[   0.017][v][lavf] select track 0
+[   0.017][i][cplayer] ● Video  --vid=1  (h264 1280x720 30 fps) [default]
+[   0.017][v][vd] Container reported FPS: 30.000000
+[   0.018][v][vd] Codec list:
+[   0.018][v][vd]     h264 - H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10
+[   0.018][v][vd]     h264_v4l2m2m (h264) - V4L2 mem2mem H.264 decoder wrapper
+[   0.018][v][vd]     h264_amf (h264) - H264 AMD AMF video decoder
+[   0.018][v][vd]     h264_cuvid (h264) - Nvidia CUVID H264 decoder
+[   0.018][v][vd] Opening decoder h264
+[   0.018][v][vd] No hardware decoding requested.
+[   0.018][v][vd] Using software decoding.
+[   0.018][v][vd] Requesting 2 threads for decoding.
+[   0.018][v][vd] Selected decoder: h264 - H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10
+[   0.019][d][ffmpeg] filter: w:300 h:169 flags:'' interl:0
+[   0.031][v][user_filter_wrapper] Setting option 'fmt' = 'bgra' (flags = 0)
+[   0.031][v][vf] User filter list:
+[   0.031][v][vf]   scale (scale.00)
+[   0.031][v][vf]   pad (pad.00)
+[   0.031][v][vf]   format (format.00)
+[   0.031][v][cplayer] Starting playback...
+[   0.031][v][lavf] queuing seek to 5.000000
+[   0.031][v][lavf] execute seek (to 5.000000 flags 32)
+[   0.031][v][lavf] seek done
+[   0.032][v][cplayer] hr-seek, skipping to 5.000000
+[   0.035][d][ffmpeg] filter: w:300 h:169 flags:'' interl:0
+[   0.035][v][file] stream level seek from 150983 to 48
+[   0.036][d][ffmpeg/video] h264: Reinit context to 1280x720, pix_fmt: yuv420p
+[   0.036][d][vd] DR parameter change to 1280x738 yuv420p align=64
+[   0.036][d][vd] Allocating new (host-cached) DR image...
+[   0.036][d][vd] ...failed..
+[   0.036][v][vd] DR failed - disabling.
+[   0.044][v][vd] Using software decoding.
+[   0.044][v][vd] Decoder format: 1280x720 yuv420p auto/auto/auto/auto/auto CL=mpeg2/4/h264 crop=1280x720+0+0 A=none
+[   0.044][v][vd] Using container aspect ratio.
+[   0.044][v][vf] [in] 1280x720 yuv420p bt.709/bt.709/bt.1886/limited/display CL=mpeg2/4/h264 crop=1280x720+0+0 A=none
+[   0.044][v][vf] [userdeint] 1280x720 yuv420p bt.709/bt.709/bt.1886/limited/display CL=mpeg2/4/h264 crop=1280x720+0+0 A=none
+[   0.044][v][vf] [userdeint] (disabled)
+[   0.044][v][vf] [scale] 1280x720 yuv420p bt.709/bt.709/bt.1886/limited/display CL=mpeg2/4/h264 crop=1280x720+0+0 A=none
+[   0.044][d][ffmpeg] mpv_src_default_in: w:1280 h:720 pixfmt:yuv420p tb:1/1000000 fr:30/1 sar:1/1 csp:bt709 range:tv alpha:unspecified
+[   0.044][d][ffmpeg] filter: w:1280 h:720 fmt:yuv420p csp:bt709 range:tv sar:1/1 -> w:300 h:169 fmt:yuv420p csp:bt709 range:tv sar:676/675 flags:0x00000004
+[   0.044][d][ffmpeg] framesync: Selected 1/1000000 time base
+[   0.044][d][ffmpeg] framesync: Sync level 1
+[   0.061][v][vf] [pad] 300x169 [676:675] yuv420p bt.709/bt.709/bt.1886/limited/display CL=unknown crop=300x169+0+0 A=none
+[   0.061][d][ffmpeg] mpv_src_default_in: w:300 h:169 pixfmt:yuv420p tb:1/1000000 fr:30/1 sar:676/675 csp:bt709 range:tv alpha:unspecified
+[   0.061][e][ffmpeg] filter: Padded dimensions cannot be smaller than input dimensions.
+[   0.061][e][ffmpeg] filter: Failed to configure input pad on filter
+[   0.061][f][lavfi] failed to configure the filter graph
+[   0.061][e][vf] Disabling filter pad.00 because it has failed.
+[   0.061][v][vf] [format] 300x169 [676:675] yuv420p bt.709/bt.709/bt.1886/limited/display CL=unknown crop=300x169+0+0 A=none
+[   0.061][i][autoconvert] Converting yuv420p -> bgra
+[   0.061][d][ffmpeg] SwScaler: reducing / aligning filtersize 2 -> 4
+[   0.061][d][ffmpeg] SwScaler: reducing / aligning filtersize 2 -> 4
+[   0.061][d][ffmpeg] SwScaler: reducing / aligning filtersize 1 -> 1
+[   0.061][d][ffmpeg] SwScaler: reducing / aligning filtersize 2 -> 2
+[   0.061][v][ffmpeg] swscaler: fast bilinear scaler, from yuv420p to bgra using MMXEXT
+[   0.061][d][ffmpeg] swscaler: 300x169 -> 300x169
+[   0.061][v][vf] [autovflip] 300x169 bgra rgb/bt.709/bt.1886/full/display CL=mpeg1/jpeg crop=300x169+0+0 A=straight
+[   0.061][v][vf] [autovflip] (disabled)
+[   0.061][v][vf] [autorotate] 300x169 bgra rgb/bt.709/bt.1886/full/display CL=mpeg1/jpeg crop=300x169+0+0 A=straight
+[   0.061][v][vf] [autorotate] (disabled)
+[   0.061][v][vf] [convert] 300x169 bgra rgb/bt.709/bt.1886/full/display CL=mpeg1/jpeg crop=300x169+0+0 A=straight
+[   0.061][v][vf] [convert] (disabled)
+[   0.061][v][vf] [out] 300x169 bgra rgb/bt.709/bt.1886/full/display CL=mpeg1/jpeg crop=300x169+0+0 A=straight
+[   0.181][v][lavf] EOF reached.
+[   0.188][i][cplayer] VO: [lavc] 300x169 bgra
+[   0.188][v][cplayer] VO: Description: video encoding using libavcodec
+[   0.188][v][vo/lavc] reconfig to 300x169 bgra rgb/bt.709/bt.1886/full/display CL=mpeg1/jpeg crop=300x169+0+0 A=straight
+[   0.188][i][vo/lavc] Opening encoder: raw video [rawvideo]
+[   0.188][i][encode] Opening muxer: image2 sequence [image2]
+[   0.192][d][ffmpeg] AVIOContext: Statistics: 202800 bytes written, 0 seeks, 1 writeouts
 [   0.192][v][cplayer] first video frame after restart shown
 [   0.192][d][cplayer] starting video playback
 [   0.192][v][cplayer] playback restart complete @ 5.000000, audio=eof, video=playing (paused)
- written, 0 seeks, 1 writeouts
-[   0.153][v][cplayer] first video frame after restart shown
-[   0.154][d][cplayer] starting video playback
-[   0.154][v][cplayer] playback restart complete @ 5.000000, audio=eof, video=playing (paused)
