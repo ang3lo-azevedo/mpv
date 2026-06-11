@@ -943,7 +943,7 @@ end
 mp.observe_property("current-tracks/video", "native", function(name, value)
     if pre_0_33_0 then
         mp.unobserve_property(update_tracklist)
-        -- pre_0_33_0 = false
+        pre_0_33_0 = false
     end
     update_property(name, value)
 end)
