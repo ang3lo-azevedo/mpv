@@ -42,6 +42,10 @@
       {
         "search": "pre_0_33_0 = false",
         "replace": "-- pre_0_33_0 = false"
+      },
+      {
+        "search": "        \"--ytdl-format=worst\", \"--demuxer-readahead-secs=0\", \"--demuxer-max-bytes=128KiB\",",
+        "replace": "        \"--ytdl-format=worst\", \"--demuxer-readahead-secs=5\", \"--demuxer-max-bytes=150MiB\","
       }
     ]
   },
