@@ -506,7 +506,7 @@ local function spawn(time)
             return
         else
             script_written = true
-            script:write(string.format(client_script, options.socket))
+            script:write(string.format(client_script, options.socket, options.socket))
             script:close()
             subprocess({"chmod", "+x", client_script_path}, true)
             table.insert(args, "--scripts="..client_script_path)

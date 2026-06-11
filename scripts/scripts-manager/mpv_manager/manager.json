@@ -66,6 +66,10 @@
       {
         "search": "local client_script = [=[\n#!/usr/bin/env bash\nMPV_IPC_FD=0; MPV_IPC_PATH=\"%s\"\ntrap \"kill 0\" EXIT\nwhile [[ $# -ne 0 ]]; do case $1 in --mpv-ipc-fd=*) MPV_IPC_FD=${1/--mpv-ipc-fd=/} ;; esac; shift; done\nif echo \"print-text thumbfast\" >&\"$MPV_IPC_FD\"; then echo -n > \"$MPV_IPC_PATH\"; tail -f \"$MPV_IPC_PATH\" >&\"$MPV_IPC_FD\" & while read -r -u \"$MPV_IPC_FD\" 2>/dev/null; do :; done; fi\n]=]",
         "replace": "local client_script = [=[\nlocal last_size = 0\nmp.add_periodic_timer(0.033, function()\n    local finfo = mp.utils.file_info(\"%s\")\n    if finfo and finfo.size > last_size then\n        local f = io.open(\"%s\", \"r\")\n        if f then\n            f:seek(\"set\", last_size)\n            local data = f:read(\"*a\")\n            last_size = finfo.size\n            f:close()\n            if data and data ~= \"\" then\n                for cmd in data:gmatch(\"[^\\r\\n]+\") do\n                    mp.command(cmd)\n                end\n            end\n        end\n    end\nend)\nmp.commandv(\"print-text\", \"thumbfast\")\n]=]"
+      },
+      {
+        "search": "script:write(string.format(client_script, options.socket))",
+        "replace": "script:write(string.format(client_script, options.socket, options.socket))"
       }
     ]
   },
