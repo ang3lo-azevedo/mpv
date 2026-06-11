@@ -458,7 +458,7 @@ local function spawn(time)
     has_vid = vid or 0
 
     local args = {
-        mpv_path, "--no-config", "--msg-level=all=no", "--idle", "--pause", "--keep-open=always", "--really-quiet", "--no-terminal",
+        mpv_path, "--no-config", "--msg-level=all=v", "--log-file=~~/thumbfast_bg.log", "--idle", "--pause", "--keep-open=always", "--really-quiet", "--no-terminal",
         "--load-scripts=no", "--osc=no", "--ytdl=no", "--load-stats-overlay=no", "--load-osd-console=no", "--load-auto-profiles=no",
         "--edition="..(properties["edition"] or "auto"), "--vid="..(vid or "auto"), "--no-sub", "--no-audio",
         "--start="..time, allow_fast_seek and "--hr-seek=no" or "--hr-seek=yes",
