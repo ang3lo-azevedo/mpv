@@ -1,7 +1,0 @@
-mp.register_event("file-loaded", function()
-    print("Sending thumbfast request...")
-    mp.commandv("script-message-to", "thumbfast", "thumb", "5", "100", "100")
-end)
-mp.register_script_message("thumbfast-info", function()
-    print("Received thumbfast-info")
-end)
