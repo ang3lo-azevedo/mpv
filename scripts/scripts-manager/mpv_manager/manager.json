@@ -9,6 +9,10 @@
       {
         "search": "mp.msg.info(\"Content type unknown, waiting for metadata...\")",
         "replace": "mp.msg.info(\"Content type unknown, falling back to series for local playback\"); finalize_setup() -- [Local Override] Bypass Stremio IPC metadata latch for local playback"
+      },
+      {
+        "search": "    -- Subtle outer glow\\n    ass:rect(self.ax - 2 * self.scale, self.ay - 2 * self.scale,\\n             self.bx + 2 * self.scale, self.by + 2 * self.scale, {\\n        color = border_color,\\n        opacity = 0.12,\\n        border = 0,\\n        radius = 14 * self.scale,\\n    })\\n\\n    -- Main background\\n    ass:rect(self.ax, self.ay, self.bx, self.by, {\\n        color = bg_color,\\n        opacity = 0.85,\\n        border = 1 * self.scale,\\n        border_color = border_color,\\n        border_opacity = 0.35,\\n        radius = 12 * self.scale,\\n    })",
+        "replace": "    -- Main background\\n    ass:rect(self.ax, self.ay, self.bx, self.by, {\\n        color = '000000',\\n        opacity = 0.50,\\n        border = 0,\\n        radius = 0,\\n    })"
       }
     ]
   },
