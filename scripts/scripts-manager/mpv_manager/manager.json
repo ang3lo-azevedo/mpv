@@ -1,6 +1,42 @@
 [
   {
     "git": "https://github.com/allecsc/Stremio-Kai/",
+    "whitelist": "portable_config/mpv.conf",
+    "dest": "~~/conf/video/video.conf",
+    "branch": "main",
+    "replacements": [
+      {
+        "search": "osd-font=Nata Sans",
+        "replace": "osd-font=JetBrains Mono"
+      },
+      {
+        "search": "########\r\n# Subs #\r\n########\r\n\r\nsub-font='Nata Sans'\r\nsub-font-size=48\r\nsub-bold=yes\r\nsub-border-size=0.5\r\nsub-shadow-offset=1.3\r\nsub-margin-y=0\r\n\r\nembeddedfonts=yes\r\n# sub-ass-override=no \t\t\t\t# Remove '#' if subtitle looks weird\r\n\r\n#########################################################################\r\n# SUBTITLE BACKGROUND CONFIGURATION:\t\t\t\t\t\t\t\t\t#\r\n#\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#\r\n# DEFAULT: 'outline-and-shadow'\t\t\t\t\t\t\t\t\t\t\t#\r\n# - This creates an outline and a drop shadow. Color and transparency   #\r\n# can be adjusted from within Stremio's settings for both of them.\t\t#\r\n# \t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#\r\n# ENABLE 'background-box' if you want a box around the subtitle instead.#\r\n#\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#\r\n# To enable: Remove the '#' at the start of the 'sub-border-style' \t\t#\r\n# setting below\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#\r\n#########################################################################\r\n\r\n#sub-border-style=background-box",
+        "replace": ""
+      }
+    ]
+  },
+  {
+    "git": "https://github.com/allecsc/Stremio-Kai/",
+    "whitelist": "portable_config/input.conf",
+    "dest": "~~/input.conf",
+    "branch": "main",
+    "replacements": [
+      {
+        "search": "q       \tquit",
+        "replace": "#q       \tquit"
+      },
+      {
+        "search": "`\t\t    script-message cycle-audio-preset",
+        "replace": "\\\t\t    script-message cycle-audio-preset"
+      },
+      {
+        "search": "Ctrl+F12\tvf toggle @BWDIF:lavfi=[bwdif=mode=1:parity=auto:deint=all],@SVP:vapoursynth=\"~~/svp_main.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"Deinterlace + SVP\" 3000",
+        "replace": "Ctrl+F12\tvf toggle @BWDIF:lavfi=[bwdif=mode=1:parity=auto:deint=all],@SVP:vapoursynth=\"~~/svp_main.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"Deinterlace + SVP\" 3000\n\n# Test\n#u cycle-values sub-ass-override \"force\" \"strip\" \"scale\"# toggle overriding SSA/ASS subtitle styles with the normal styles\n\n# Mouse bindings\nMBTN_LEFT cycle pause"
+      }
+    ]
+  },
+  {
+    "git": "https://github.com/allecsc/Stremio-Kai/",
     "whitelist": "portable_config/scripts/notify_skip",
     "base_dir": "portable_config/scripts/notify_skip",
     "dest": "~~/scripts/ui/notify_skip",
