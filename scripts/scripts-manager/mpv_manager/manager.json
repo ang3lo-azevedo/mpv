@@ -10,6 +10,10 @@
         "replace": "osd-font=JetBrains Mono"
       },
       {
+        "search": "osd-font-size=40",
+        "replace": "osd-font-size=30"
+      },
+      {
         "search": "########\r\n# Subs #\r\n########\r\n\r\nsub-font='Nata Sans'\r\nsub-font-size=48\r\nsub-bold=yes\r\nsub-border-size=0.5\r\nsub-shadow-offset=1.3\r\nsub-margin-y=0\r\n\r\nembeddedfonts=yes\r\n# sub-ass-override=no \t\t\t\t# Remove '#' if subtitle looks weird\r\n\r\n#########################################################################\r\n# SUBTITLE BACKGROUND CONFIGURATION:\t\t\t\t\t\t\t\t\t#\r\n#\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#\r\n# DEFAULT: 'outline-and-shadow'\t\t\t\t\t\t\t\t\t\t\t#\r\n# - This creates an outline and a drop shadow. Color and transparency   #\r\n# can be adjusted from within Stremio's settings for both of them.\t\t#\r\n# \t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#\r\n# ENABLE 'background-box' if you want a box around the subtitle instead.#\r\n#\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#\r\n# To enable: Remove the '#' at the start of the 'sub-border-style' \t\t#\r\n# setting below\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t#\r\n#########################################################################\r\n\r\n#sub-border-style=background-box",
         "replace": ""
       }
