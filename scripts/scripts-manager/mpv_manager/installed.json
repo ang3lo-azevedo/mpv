@@ -1,4 +1,6 @@
 [
+  "conf/video/video.conf",
+  "input.conf",
   "scripts/ui/notify_skip/main.lua",
   "scripts/ui/notify_skip/modules/chapter-detection.lua",
   "scripts/ui/notify_skip/modules/config.lua",
