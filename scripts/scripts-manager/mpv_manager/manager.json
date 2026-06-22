@@ -177,6 +177,22 @@
         "replace": "if false and not state.metadata_ready then -- [Local Override] Bypass Stremio IPC metadata latch to apply profiles immediately"
       },
       {
+        "search": "mp.set_property(\"tone-mapping\", \"bt.2446a\")",
+        "replace": "mp.set_property(\"tone-mapping\", \"spline\") -- [Local Override] Use spline for brighter HDR-to-SDR tonemapping"
+      },
+      {
+        "search": "mp.set_property(\"target-peak\", \"203\")",
+        "replace": "mp.set_property(\"target-peak\", \"100\") -- [Local Override] Make SDR target much brighter"
+      },
+      {
+        "search": "mp.set_property(\"tone-mapping-mode\", \"hybrid\")",
+        "replace": "mp.set_property(\"tone-mapping-mode\", \"auto\") -- [Local Override] Auto mode for spline"
+      },
+      {
+        "search": "mp.set_property(\"hdr-contrast-recovery\", \"0.3\")",
+        "replace": "mp.set_property(\"hdr-contrast-recovery\", \"0.5\") -- [Local Override] Boost shadow visibility"
+      },
+      {
         "search": "\"Pn8\",",
         "replace": "\"Pn8\", \"MK-Pn8\", -- [Local Override] Added MK-Pn8 for Parasyte"
       }
