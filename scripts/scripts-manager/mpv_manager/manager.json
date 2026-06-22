@@ -32,6 +32,10 @@
       {
         "search": "sub-margin-y=0",
         "replace": ""
+      },
+      {
+        "search": "vd-queue-enable=no",
+        "replace": "vd-queue-enable=no\nvideo-sync=display-resample"
       }
     ]
   },
