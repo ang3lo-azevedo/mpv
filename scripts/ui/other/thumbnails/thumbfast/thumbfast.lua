@@ -183,9 +183,10 @@ local file_check_period = 1/60
 local allow_fast_seek = true
 
 local client_script = [=[
+local utils = require 'mp.utils'
 local last_size = 0
 mp.add_periodic_timer(0.033, function()
-    local finfo = mp.utils.file_info("%s")
+    local finfo = utils.file_info("%s")
     if finfo and finfo.size > last_size then
         local f = io.open("%s", "r")
         if f then
