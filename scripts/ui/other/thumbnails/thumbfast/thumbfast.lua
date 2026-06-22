@@ -501,6 +501,7 @@ local function spawn(time)
         table.insert(args, "--input-ipc-server="..options.socket)
     elseif not script_written then
         local client_script_path = options.socket..".lua"
+        local sf = io.open(options.socket, "w"); if sf then sf:close() end
         local script = io.open(client_script_path, "w+")
         if script == nil then
             mp.msg.error("client script write failed")
