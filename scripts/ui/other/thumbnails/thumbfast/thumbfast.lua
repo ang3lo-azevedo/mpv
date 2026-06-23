@@ -68,9 +68,9 @@ function subprocess(args, async, callback)
 
     if not pre_0_30_0 then
         if async then
-            return mp.command_native_async({name = "subprocess", playback_only = true, args = args}, callback)
+            return mp.command_native_async({name = "subprocess", playback_only = true, args = args, env = "PATH="..os.getenv("PATH")}, callback)
         else
-            return mp.command_native({name = "subprocess", playback_only = false, capture_stdout = true, args = args})
+            return mp.command_native({name = "subprocess", playback_only = false, capture_stdout = true, args = args, env = "PATH="..os.getenv("PATH")})
         end
     else
         if async then
@@ -183,26 +183,11 @@ local file_check_period = 1/60
 local allow_fast_seek = true
 
 local client_script = [=[
-local utils = require 'mp.utils'
-local last_size = 0
-mp.add_periodic_timer(0.033, function()
-    local finfo = utils.file_info("%s")
-    if finfo and finfo.size > last_size then
-        local f = io.open("%s", "r")
-        if f then
-            f:seek("set", last_size)
-            local data = f:read("*a")
-            last_size = finfo.size
-            f:close()
-            if data and data ~= "" then
-                for cmd in data:gmatch("[^\r\n]+") do
-                    mp.command(cmd)
-                end
-            end
-        end
-    end
-end)
-mp.commandv("print-text", "thumbfast")
+#!/usr/bin/env bash
+MPV_IPC_FD=0; MPV_IPC_PATH="%s"
+trap "kill 0" EXIT
+while [[ $# -ne 0 ]]; do case $1 in --mpv-ipc-fd=*) MPV_IPC_FD=${1/--mpv-ipc-fd=/} ;; esac; shift; done
+if echo "print-text thumbfast" >&"$MPV_IPC_FD"; then echo -n > "$MPV_IPC_PATH"; tail -f "$MPV_IPC_PATH" >&"$MPV_IPC_FD" & while read -r -u "$MPV_IPC_FD" 2>/dev/null; do :; done; fi
 ]=]
 
 local function get_os()
@@ -473,11 +458,11 @@ local function spawn(time)
     has_vid = vid or 0
 
     local args = {
-        mpv_path, "--no-config", "--msg-level=all=v", "--log-file=~~/thumbfast_bg.log", "--idle", "--pause", "--keep-open=always", "--really-quiet", "--no-terminal",
+        mpv_path, "--no-config", "--msg-level=all=no", "--idle", "--pause", "--keep-open=always", "--really-quiet", "--no-terminal",
         "--load-scripts=no", "--osc=no", "--ytdl=no", "--load-stats-overlay=no", "--load-osd-console=no", "--load-auto-profiles=no",
         "--edition="..(properties["edition"] or "auto"), "--vid="..(vid or "auto"), "--no-sub", "--no-audio",
         "--start="..time, allow_fast_seek and "--hr-seek=no" or "--hr-seek=yes",
-        "--ytdl-format=worst", "--demuxer-readahead-secs=5", "--demuxer-max-bytes=150MiB",
+        "--ytdl-format=worst", "--demuxer-readahead-secs=0", "--demuxer-max-bytes=128KiB",
         "--vd-lavc-skiploopfilter=all", "--vd-lavc-software-fallback=1", "--vd-lavc-fast", "--vd-lavc-threads=2", "--hwdec="..(options.hwdec and "auto" or "no"),
         "--vf="..vf_string(filters_all, true),
         "--sws-scaler=fast-bilinear",
@@ -500,21 +485,20 @@ local function spawn(time)
     if os_name == "windows" or pre_0_33_0 then
         table.insert(args, "--input-ipc-server="..options.socket)
     elseif not script_written then
-        local client_script_path = options.socket..".lua"
-        local sf = io.open(options.socket, "w"); if sf then sf:close() end
+        local client_script_path = options.socket..".run"
         local script = io.open(client_script_path, "w+")
         if script == nil then
             mp.msg.error("client script write failed")
             return
         else
             script_written = true
-            script:write(string.format(client_script, options.socket, options.socket))
+            script:write(string.format(client_script, options.socket))
             script:close()
             subprocess({"chmod", "+x", client_script_path}, true)
             table.insert(args, "--scripts="..client_script_path)
         end
     else
-        local client_script_path = options.socket..".lua"
+        local client_script_path = options.socket..".run"
         table.insert(args, "--scripts="..client_script_path)
     end
 
@@ -524,15 +508,6 @@ local function spawn(time)
     spawned = true
     spawn_waiting = true
 
-    local dfile = io.open("/tmp/thumbfast_debug.txt", "w")
-    if dfile then
-        dfile:write("mpv_path: "..tostring(mpv_path).."\n")
-        dfile:write("url: "..tostring(path).."\n")
-        dfile:write("socket: "..tostring(options.socket).."\n")
-        dfile:write("thumbnail: "..tostring(options.thumbnail).."\n")
-        for k, v in pairs(args) do dfile:write("arg "..k..": "..tostring(v).."\n") end
-        dfile:close()
-    end
     subprocess(args, true,
         function(success, result)
             if spawn_waiting and (success == false or (result.status ~= 0 and result.status ~= -2)) then
@@ -934,7 +909,7 @@ local function shutdown()
     remove_thumbnail_files()
     if os_name ~= "windows" then
         os.remove(options.socket)
-        os.remove(options.socket..".lua")
+        os.remove(options.socket..".run")
     end
 end
 
