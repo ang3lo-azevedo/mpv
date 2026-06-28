@@ -6,6 +6,10 @@
     "branch": "main",
     "replacements": [
       {
+        "search": "osd-font=Nata Sans",
+        "replace": "osd-font=JetBrainsMono NF"
+      },
+      {
         "search": "sub-font='Nata Sans'",
         "replace": ""
       },
