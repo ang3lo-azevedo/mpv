@@ -14,6 +14,7 @@
   "scripts/ui/notify_skip/modules/window-calculator.lua",
   "scripts/ui/osc/hayase-osc/hayase-osc.lua",
   "fonts/Lucide.ttf",
+  "fonts/NataSans[wght].ttf",
   "scripts/ui/other/thumbnails/thumbfast/thumbfast.lua",
   "scripts/ui/other/pause-indicator/pause-indicator.lua",
   "scripts/utils/mpv-interactive-video/mpv-interactive-video.lua",
