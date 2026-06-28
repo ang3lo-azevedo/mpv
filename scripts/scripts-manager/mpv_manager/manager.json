@@ -1,6 +1,13 @@
 [
   {
     "git": "https://github.com/allecsc/Stremio-Kai/",
+    "whitelist": "portable_config/scripts/notify_skip",
+    "base_dir": "portable_config/scripts/notify_skip",
+    "dest": "~~/scripts/ui/.notify_skip",
+    "branch": "main"
+  },
+  {
+    "git": "https://github.com/allecsc/Stremio-Kai/",
     "whitelist": "portable_config/input.conf",
     "dest": "~~/input.conf",
     "branch": "main",
