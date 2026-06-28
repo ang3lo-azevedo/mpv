@@ -1,10 +1,36 @@
 [
   {
-    "git": "https://github.com/allecsc/Stremio-Kai/",
-    "whitelist": "portable_config/scripts/notify_skip",
-    "base_dir": "portable_config/scripts/notify_skip",
-    "dest": "~~/scripts/ui/.notify_skip",
-    "branch": "main"
+    "git": "https://github.com/allecsc/mpv-qol-scripts",
+    "whitelist": "scripts/notify_skip",
+    "base_dir": "scripts/notify_skip",
+    "dest": "~~/scripts/ui/notify_skip",
+    "branch": "main",
+    "replacements": [
+      {
+        "search": "package.path = package.path .. ';portable_config/scripts/?.lua;'",
+        "replace": ""
+      },
+      {
+        "search": "local bg_color = 'FFFFFF'  -- White background",
+        "replace": "local bg_color = '111111'  -- Dark background (matches hayase-osc)"
+      },
+      {
+        "search": "local text_color = '000000'  -- Black text",
+        "replace": "local text_color = 'FFFFFF'  -- White text (matches hayase-osc)"
+      },
+      {
+        "search": "border_color = 'FFFFFF',",
+        "replace": "border_color = '333333',"
+      },
+      {
+        "search": "opacity = visibility * 0.65,",
+        "replace": "opacity = visibility * 0.85,"
+      },
+      {
+        "search": "\"(Press Tab)\"",
+        "replace": "\"[Tab]\""
+      }
+    ]
   },
   {
     "git": "https://github.com/allecsc/Stremio-Kai/",
