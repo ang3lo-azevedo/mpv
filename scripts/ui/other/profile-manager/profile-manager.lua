@@ -277,7 +277,7 @@ local function apply_sdr_baseline()
     
     -- 2. Reset Colorspace to Neutral/Auto
     mp.set_property("target-colorspace-hint", "no")   -- Don't trigger HDR mode
-    mp.set_property("target-peak", "203")             -- SDR peak (100 nits nominal)
+    mp.set_property("target-peak", "100") -- [Local Override] Make SDR target much brighter             -- SDR peak (100 nits nominal)
     mp.set_property("hdr-compute-peak", "no")         -- Not needed for SDR
     mp.set_property("hdr-contrast-recovery", "0")     -- Not needed for SDR
     mp.set_property("tone-mapping", "auto")           -- Reset tone mapping
@@ -291,7 +291,7 @@ local function apply_hdr_passthrough(target_peak)
     mp.set_property("hdr-compute-peak", "yes")
     mp.set_property("hdr-peak-percentile", "99.9")
     mp.set_property("hdr-peak-decay-rate", "20")
-    mp.set_property("hdr-contrast-recovery", "0.3")
+    mp.set_property("hdr-contrast-recovery", "0.5") -- [Local Override] Boost shadow visibility
     mp.set_property("target-contrast", "inf")
     -- Use user-specified target-peak if provided, else auto
     mp.set_property("target-peak", target_peak or "auto")
@@ -307,16 +307,16 @@ end
 -- ACTIVE PROCESSING: mpv analyzes HDR signal and maps it to SDR range
 local function apply_tonemapping()
     log("Applying HDR-to-SDR tonemapping layer")
-    mp.set_property("tone-mapping", "bt.2446a")       -- Balanced, good highlight roll-off
+    mp.set_property("tone-mapping", "spline") -- [Local Override] Use spline for brighter HDR-to-SDR tonemapping       -- Balanced, good highlight roll-off
     mp.set_property("tone-mapping-param", "0.5")      -- Adjust highlight compression
     mp.set_property("gamut-mapping-mode", "perceptual")
-    mp.set_property("tone-mapping-mode", "hybrid")
+    mp.set_property("tone-mapping-mode", "auto") -- [Local Override] Auto mode for spline
     
     -- Dynamic peak detection for scene-by-scene adjustments
     mp.set_property("hdr-compute-peak", "yes")        -- Analyze HDR signal
     mp.set_property("hdr-peak-percentile", "99.8")    -- Ignore extreme highlight outliers
     mp.set_property("hdr-peak-decay-rate", "20")      -- Smooth scene-to-scene transitions
-    mp.set_property("hdr-contrast-recovery", "0.3")   -- Recover crushed shadows
+    mp.set_property("hdr-contrast-recovery", "0.5") -- [Local Override] Boost shadow visibility   -- Recover crushed shadows
 end
 
 -- Remove denoise shaders from chain (for legacy/HDR anime)
