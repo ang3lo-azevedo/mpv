@@ -9,6 +9,18 @@
       {
         "search": "mp.msg.info(\"Content type unknown, waiting for metadata...\")",
         "replace": "mp.msg.info(\"Content type unknown, falling back to series for local playback\"); finalize_setup() -- [Local Override] Bypass Stremio IPC metadata latch for local playback"
+      },
+      {
+        "search": "local border_color = 'f55b7b'  -- Purple accent (BGR)",
+        "replace": "local border_color = 'FFFFFF'  -- White accent (matches hayase-osc)"
+      },
+      {
+        "search": "hint_text = \"Press Tab\",",
+        "replace": "hint_text = \"[Tab]\","
+      },
+      {
+        "search": "self.hint_text = hint_text or \"Press Tab\"",
+        "replace": "self.hint_text = hint_text or \"[Tab]\""
       }
     ]
   },
