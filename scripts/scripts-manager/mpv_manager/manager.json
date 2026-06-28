@@ -1,6 +1,19 @@
 [
   {
     "git": "https://github.com/allecsc/Stremio-Kai/",
+    "whitelist": "portable_config/scripts/notify_skip",
+    "base_dir": "portable_config/scripts/notify_skip",
+    "dest": "~~/scripts/ui/notify_skip",
+    "branch": "main",
+    "replacements": [
+      {
+        "search": "mp.msg.info(\"Content type unknown, waiting for metadata...\")",
+        "replace": "mp.msg.info(\"Content type unknown, falling back to series for local playback\"); finalize_setup() -- [Local Override] Bypass Stremio IPC metadata latch for local playback"
+      }
+    ]
+  },
+  {
+    "git": "https://github.com/allecsc/Stremio-Kai/",
     "whitelist": "portable_config/input.conf",
     "dest": "~~/input.conf",
     "branch": "main",
