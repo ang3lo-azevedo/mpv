@@ -103,8 +103,8 @@
         "replace": "if false and not state.metadata_ready then -- [Local Override] Bypass Stremio IPC metadata latch to apply profiles immediately"
       },
       {
-        "search": "local current_visual_profile = \"kai\"",
-        "replace": "local current_visual_profile = \"original\" -- [Local Override] Neutral by default; kai/vivid available via keybind"
+        "search": "local color_profile = meta.color_profile or \"kai\"",
+        "replace": "local color_profile = meta.color_profile or \"original\" -- [Local Override] Neutral default when no Stremio metadata"
       },
       {
         "search": "mp.set_property(\"tone-mapping\", \"bt.2446a\")",
