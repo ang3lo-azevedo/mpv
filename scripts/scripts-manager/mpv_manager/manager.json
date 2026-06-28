@@ -6,10 +6,6 @@
     "branch": "main",
     "replacements": [
       {
-        "search": "osd-font-size=40",
-        "replace": "osd-font-size=20"
-      },
-      {
         "search": "sub-font='Nata Sans'",
         "replace": ""
       },
@@ -32,10 +28,6 @@
       {
         "search": "sub-margin-y=0",
         "replace": ""
-      },
-      {
-        "search": "vd-queue-enable=no",
-        "replace": "vd-queue-enable=no\nvideo-sync=display-resample"
       }
     ]
   },
