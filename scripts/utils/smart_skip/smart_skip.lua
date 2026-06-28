@@ -263,16 +263,11 @@ function show_skip_overlay(message)
     -- This string combines vector drawing for the box and standard text rendering.
     -- It is split into two parts for clarity.
     
-    -- Part 1: The Box.
-    -- Uses your proven vector drawing method. Anchored bottom-right.
-    -- The drawing commands (m, l) are relative to the anchor point.
-    -- A 380x63 box is drawn from the anchor point leftwards and upwards.
-    local box_drawing = "{\\an3\\1c&FFFFFF&\\alpha&H60&\\4c&H000000&\\shad1\\be6\\bord0\\}{\\p1}m 180 15 l 380 15 l 380 55 l 180 55{\\p0}"
+    -- Dark semi-transparent panel — matches hayase-osc dark background aesthetic
+    local box_drawing = "{\\an3\\1c&H000000&\\1a&H45&\\3a&HFF&\\4a&HFF&\\shad0\\be3\\bord0\\}{\\p1}m 180 15 l 380 15 l 380 55 l 180 55{\\p0}"
 
-    -- Part 2: The Text.
-    -- Also anchored bottom-right. A margin is created by adding a newline `\\N`
-    -- and spaces to physically push the text away from the corner.
-    local text_drawing = string.format("{\\fnNata Sans\\alpha&H00&\\c&H111111&\\4c&H000000&\\shad1\\be1\\bord0\\fs24\\b900}%s{\\alpha&H80&\\b0\\fs16} (Press Tab)\\N\\N\\N\\N\\N\\N", message)
+    -- White text, JetBrainsMono NF — matches OSD font and OSC text style
+    local text_drawing = string.format("{\\fnJetBrainsMono NF\\1a&H00&\\c&HFFFFFF&\\shad0\\bord0\\fs20\\b1}%s{\\1a&H90&\\b0\\fs13} [Tab]\\N\\N\\N\\N\\N\\N", message)
 
     -- The two strings are concatenated. The text will appear over the box.
     local ass_string = box_drawing .. text_drawing
