@@ -1,18 +1,18 @@
 [
   {
     "git": "https://github.com/allecsc/mpv-qol-scripts",
-    "whitelist": "scripts/notify_skip/",
-    "base_dir": "scripts/notify_skip",
+    "whitelist": "scripts/notify_skip_click/",
+    "base_dir": "scripts/notify_skip_click",
     "dest": "~~/scripts/ui/notify_skip",
     "branch": "main",
     "replacements": [
       {
-        "search": "local bg_color = 'FFFFFF'  -- White background",
-        "replace": "local bg_color = '000000'  -- Dark background (matches hayase-osc)"
+        "search": "local bg_color = is_hover and '111111' or 'FFFFFF'  -- Black on hover or White",
+        "replace": "local bg_color = is_hover and '333333' or '111111'  -- Dark bg, lighter on hover (matches hayase-osc)"
       },
       {
-        "search": "local text_color = '000000'  -- Black text",
-        "replace": "local text_color = 'FFFFFF'  -- White text (matches hayase-osc)"
+        "search": "local text_color = is_hover and 'FFFFFF' or '000000'  -- White text on hover or Black",
+        "replace": "local text_color = 'FFFFFF'  -- White text always (matches hayase-osc)"
       },
       {
         "search": "border_color = 'FFFFFF',",
