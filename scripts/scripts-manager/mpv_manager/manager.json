@@ -21,6 +21,10 @@
       {
         "search": "mp.add_timeout(3.5, finalize_setup)",
         "replace": "mp.add_timeout(0.5, finalize_setup)"
+      },
+      {
+        "search": "        show_skip_overlay(\"✖ Nothing to skip\", 2, false)\n        return false\n        \n    elseif state.mode == \"silence\" then",
+        "replace": "        if state.silence_active or state.blackframe_skip_active then\n            stop_silence_skip()\n            set_time(state.skip_start_time)\n            show_skip_overlay(\"✓ Skip Cancelled\", 2, false)\n        else\n            init_skipping_filters()\n            start_silence_skip()\n        end\n        return true\n\n    elseif state.mode == \"silence\" then"
       }
     ]
   },
