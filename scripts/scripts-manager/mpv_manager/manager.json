@@ -19,12 +19,8 @@
         "replace": "border_color = '444444',"
       },
       {
-        "search": "        local approaching = (chapter.time > current_time and chapter.time <= current_time)\n        \n        if approaching then\n            local category_display = chapter.category:gsub(\"^%l\", string.upper)\n            local message = \"Skip \" .. category_display\n            \n            show_skip_overlay(message, nil, true)\n            start_skip_suppression() -- Activate suppression after notification\n            return\n        end\n    end\nend",
-        "replace": "        local current_chapter_idx = mp.get_property_native(\"chapter\")\n        if current_chapter_idx ~= nil and chapter.index == current_chapter_idx + 1 then\n            local category_display = chapter.category:gsub(\"^%l\", string.upper)\n            local message = \"Skip \" .. category_display\n            show_skip_overlay(message, nil, true)\n            start_skip_suppression()\n            return\n        end\n    end\nend"
-      },
-      {
-        "search": "    elseif not has_any_chapters then\n        state.mode = \"silence\"\n        mp.msg.info(\"No chapters found. Activating silence/black-frame fallback mode.\")\n\n        -- Initialize both notification and skipping filters for silence mode\n        init_notification_filters()\n        init_skipping_filters()\n        return    \n    end\nend",
-        "replace": "    elseif not has_any_chapters then\n        state.mode = \"silence\"\n        mp.msg.info(\"No chapters found. Activating silence/black-frame fallback mode.\")\n\n        -- Initialize both notification and skipping filters for silence mode\n        init_notification_filters()\n        init_skipping_filters()\n        return\n    else\n        state.mode = \"silence\"\n        mp.msg.info(\"Chapters found but none are skippable. Falling back to silence/black-frame detection.\")\n        init_notification_filters()\n        init_skipping_filters()\n    end\nend"
+        "search": "mp.add_timeout(3.5, finalize_setup)",
+        "replace": "mp.add_timeout(0.5, finalize_setup)"
       }
     ]
   },
