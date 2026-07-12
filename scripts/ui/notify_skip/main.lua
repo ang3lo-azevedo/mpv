@@ -698,9 +698,16 @@ function perform_skip()
             end
         end
         
-        show_skip_overlay("✖ Nothing to skip", 2, false)
-        return false
-        
+        if state.silence_active or state.blackframe_skip_active then
+            stop_silence_skip()
+            set_time(state.skip_start_time)
+            show_skip_overlay("✓ Skip Cancelled", 2, false)
+        else
+            init_skipping_filters()
+            start_silence_skip()
+        end
+        return true
+
     elseif state.mode == "silence" then
         local in_intro = current_time <= opts.intro_time_window and not state.intro_skipped  -- NEW: Add intro_skipped check
         local in_ending = duration > 0 and current_time >= duration - opts.outro_time_window
@@ -782,7 +789,7 @@ end
 function on_file_loaded()
     reset_script_state()
     -- Delay setup to ensure other scripts (like profile managers) run first
-    mp.add_timeout(3.5, finalize_setup)
+    mp.add_timeout(0.5, finalize_setup)
 end
 
 function reset_script_state()

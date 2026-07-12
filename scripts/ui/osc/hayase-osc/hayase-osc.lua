@@ -36,7 +36,6 @@ local user_opts = {
     window_top_bar = "auto",               -- show OSC window top bar: "auto", "yes", or "no" (borderless/fullscreen)
     window_title = false,                  -- show window title in borderless/fullscreen mode
 
-    speed_button = false,                  -- show speed control button
     audio_button = false,                  -- show audio track button (only if more than 1 audio track exists)
 
     seekrange = true,                      -- show seek range overlay
@@ -731,6 +730,29 @@ end
 --
 local elements = {}
 
+local function update_slider(element)
+    local elem_geo = element.layout.geometry
+    local slider_lo = element.layout.slider
+
+    -- calculate positions of min and max points
+    element.slider.min.ele_pos = slider_lo.border
+    element.slider.max.ele_pos = elem_geo.w - element.slider.min.ele_pos
+    element.slider.min.glob_pos = element.hitbox.x1 + element.slider.min.ele_pos
+    element.slider.max.glob_pos = element.hitbox.x1 + element.slider.max.ele_pos
+
+    local static_ass = assdraw.ass_new()
+    static_ass:draw_start()
+
+    -- a hack which prepares the whole slider area to allow center placements such like an=5
+    static_ass:rect_cw(0, 0, elem_geo.w, elem_geo.h)
+    static_ass:rect_ccw(0, 0, elem_geo.w, elem_geo.h)
+
+    element.static_ass = static_ass
+
+    -- Invalidate segment cache on slider geometry/duration changes
+    seekbar_segments_cache.w = nil
+end
+
 -- Helper to draw rounded/flat rectangles
 local function draw_rect(ass, x1, y1, x2, y2, r_left, r_right, r)
     local w = x2 - x1
@@ -813,23 +835,11 @@ local function prepare_elements()
                 static_ass:round_rect_cw(0, 0, elem_geo.w, elem_geo.h, element.layout.box.radius)
             end
             static_ass:draw_stop()
+            element.static_ass = static_ass
 
         elseif element.type == "slider" then
-            --draw static slider parts
-            local slider_lo = element.layout.slider
-            -- calculate positions of min and max points
-            element.slider.min.ele_pos = slider_lo.border
-            element.slider.max.ele_pos = elem_geo.w - element.slider.min.ele_pos
-            element.slider.min.glob_pos = element.hitbox.x1 + element.slider.min.ele_pos
-            element.slider.max.glob_pos = element.hitbox.x1 + element.slider.max.ele_pos
-
-            static_ass:draw_start()
-            -- a hack which prepares the whole slider area to allow center placements such like an=5
-            static_ass:rect_cw(0, 0, elem_geo.w, elem_geo.h)
-            static_ass:rect_ccw(0, 0, elem_geo.w, elem_geo.h)
+            update_slider(element)
         end
-
-        element.static_ass = static_ass
 
         -- if the element is supposed to be disabled,
         -- style it accordingly and kill the eventresponders
@@ -1588,12 +1598,10 @@ local function layout_default()
     lo.style = osc_styles.buttons
     end_x = end_x - 55
 
-    if user_opts.speed_button then
-        lo = add_layout("speed")
-        lo.geometry = {x = end_x, y = ref_y - 38, an = 5, w = 24, h = 24}
-        lo.style = osc_styles.buttons
-        end_x = end_x - 55
-    end
+    lo = add_layout("speed")
+    lo.geometry = {x = end_x, y = ref_y - 38, an = 5, w = 24, h = 24}
+    lo.style = osc_styles.buttons
+    end_x = end_x - 55
 end
 
 
@@ -1862,6 +1870,7 @@ local function create_elements()
 
     --speed
     ne = new_element("speed", "button")
+    ne.visible = (state.speed or 1) ~= 1
     ne.content = function()
         return "x" .. string.format("%g", state.speed or 1)
     end
@@ -2478,8 +2487,9 @@ mp.register_event("seek", function()
     end
 end)
 observe_cached("duration", function ()
-    if user_opts.livemarkers and state.chapter_list[1] then
-        request_init()
+    if state.chapter_list[1] and state.slider_element then
+        update_slider(state.slider_element)
+        request_tick()
     end
 end)
 mp.observe_property("seeking", "native", function(_, seeking)
@@ -2500,8 +2510,7 @@ mp.add_hook("on_unload", 50, function()
 end)
 
 mp.observe_property("display-fps", "number", set_tick_delay)
-observe_cached("pause", request_tick)
-observe_cached("speed", request_tick)
+observe_cached("speed", request_init)
 observe_cached("volume", request_tick)
 observe_cached("mute", request_tick)
 observe_cached("chapter", request_tick)
@@ -2628,32 +2637,30 @@ local function idlescreen_visibility(mode, no_osd)
     request_tick()
 end
 
-observe_cached("pause", function()
-    request_tick()
-
-    if user_opts.visibility ~= "never" then
-        state.enabled = state.pause
-        if state.pause then
-            if user_opts.keeponpause then
-                -- save mode if a temporary change is needed
-                if not state.temp_visibility_mode and user_opts.visibility ~= "always" then
-                    state.temp_visibility_mode = user_opts.visibility
-                end
-                -- force visibility to "always" while paused
-                visibility_mode("always", true)
-            end
-        else
-            -- restore mode if it was changed temporarily
-            if state.temp_visibility_mode then
-                visibility_mode(state.temp_visibility_mode, true)
-                state.temp_visibility_mode = nil
-            else
-                -- respect "always" mode on unpause
-                visibility_mode(user_opts.visibility, true)
-            end
-        end
+local function force_visibility(mode)
+    if not state.temp_visibility_mode then
+        state.temp_visibility_mode = user_opts.visibility
     end
-end)
+    visibility_mode(mode, true)
+end
+
+local function restore_visibility()
+    visibility_mode(state.temp_visibility_mode or user_opts.visibility, true)
+    state.temp_visibility_mode = nil
+end
+
+local function handle_pause_visibility()
+    request_tick()
+    if user_opts.visibility == "never" then return end
+    state.enabled = state.pause
+    if state.pause and user_opts.keeponpause then
+        force_visibility("always")
+    elseif not state.pause then
+        restore_visibility()
+    end
+end
+
+observe_cached("pause", handle_pause_visibility)
 
 mp.register_script_message("osc-visibility", visibility_mode)
 mp.register_script_message("osc-show", show_osc)
@@ -2707,7 +2714,7 @@ opt.read_options(user_opts, "hayase-osc", function(changed)
     set_osc_styles()
     set_time_styles(changed.timecurrent, changed.timems)
     if changed.tick_delay or changed.tick_delay_follow_display_fps then
-        set_tick_delay("display_fps", mp.get_property_number("display_fps"))
+        set_tick_delay("display-fps", mp.get_property_number("display-fps"))
     end
     request_tick()
     visibility_mode(user_opts.visibility, true)
