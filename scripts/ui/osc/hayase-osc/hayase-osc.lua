@@ -128,8 +128,8 @@ local icons = {
     menu = "\238\164\143",
     subtitle = "\238\164\144",
     audio = "\238\164\145",
-    ontop_on = "\238\164\146",
-    ontop_off = "\238\164\147",
+    pip_on = "\238\164\146",
+    pip_off = "\238\164\147",
     fullscreen = "\238\164\148",
     fullscreen_exit = "\238\164\149",
 
@@ -247,6 +247,9 @@ local state = {
     playtime_hour_force_init = false,       -- used to force request_init() once
     persistent_seekbar_element = nil,
     persistent_progress_toggle = user_opts.persistent_progress,
+    pip_active = false,
+    pip_restore = nil,
+    pip_raise_timer = nil,
 }
 
 local logo_lines = {
@@ -773,6 +776,20 @@ local function draw_rect(ass, x1, y1, x2, y2, r_left, r_right, r)
     end
 end
 
+-- Redraw the segmented seekbar background
+local function update_seekbarbg(element)
+    local elem_geo = element.layout.geometry
+    local static_ass = assdraw.ass_new()
+    static_ass:draw_start()
+    local segments = get_seekbar_segments(elem_geo.w)
+    local r = element.layout.box.radius
+    for i, seg in ipairs(segments) do
+        draw_rect(static_ass, seg.x, 0, seg.x + seg.w, elem_geo.h, (i == 1), (i == #segments), r)
+    end
+    static_ass:draw_stop()
+    element.static_ass = static_ass
+end
+
 local function prepare_elements()
     -- remove elements without layout or invisible
     local elements2 = {}
@@ -822,21 +839,19 @@ local function prepare_elements()
         local static_ass = assdraw.ass_new()
 
         if element.type == "box" then
-            --draw box
-            static_ass:draw_start()
             if element.name == "seekbarbg" then
-                local segments = get_seekbar_segments(elem_geo.w)
-                local r = element.layout.box.radius
-                for i, seg in ipairs(segments) do
-                    draw_rect(static_ass, seg.x, 0, seg.x + seg.w, elem_geo.h, (i == 1), (i == #segments), r)
-                end
-            elseif element.layout.box.hexagon then
-                static_ass:hexagon_cw(0, 0, elem_geo.w, elem_geo.h, element.layout.box.radius, 0)
+                update_seekbarbg(element)
             else
-                static_ass:round_rect_cw(0, 0, elem_geo.w, elem_geo.h, element.layout.box.radius)
+                --draw box
+                static_ass:draw_start()
+                if element.layout.box.hexagon then
+                    static_ass:hexagon_cw(0, 0, elem_geo.w, elem_geo.h, element.layout.box.radius, 0)
+                else
+                    static_ass:round_rect_cw(0, 0, elem_geo.w, elem_geo.h, element.layout.box.radius)
+                end
+                static_ass:draw_stop()
+                element.static_ass = static_ass
             end
-            static_ass:draw_stop()
-            element.static_ass = static_ass
 
         elseif element.type == "slider" then
             update_slider(element)
@@ -1570,9 +1585,9 @@ local function layout_default()
     lo.style = osc_styles.buttons
     end_x = end_x - 55
 
-    elements.tog_ontop.visible = osc_geo.w >= 500
-    if elements.tog_ontop.visible then
-        lo = add_layout("tog_ontop")
+    elements.pip.visible = osc_geo.w >= 500
+    if elements.pip.visible then
+        lo = add_layout("pip")
         lo.geometry = {x = end_x, y = ref_y - 38, an = 5, w = 24, h = 24}
         lo.style = osc_styles.buttons
         end_x = end_x - 55
@@ -1646,6 +1661,61 @@ local function build_cache_seek_ranges()
         }
     end
     return nranges
+end
+
+local function set_pip_enabled(enabled)
+    if state.pip_raise_timer then
+        state.pip_raise_timer:kill()
+        state.pip_raise_timer = nil
+    end
+    if enabled then
+        state.pip_restore = {
+            fullscreen = mp.get_property_native("fullscreen") == true,
+            maximized = mp.get_property_native("window-maximized") == true,
+            ontop = mp.get_property_native("ontop") == true,
+            scale = mp.get_property_number("current-window-scale"),
+            title_bar = mp.get_property("title-bar"),
+        }
+        state.pip_active = true
+        mp.set_property_bool("fullscreen", false)
+        mp.set_property_bool("window-maximized", false)
+        mp.set_property_bool("ontop", true)
+        mp.set_property("geometry", "20%-24-24")
+        if state.initial_border == "yes" and state.initial_title_bar == "yes" then
+            mp.commandv("set", "title-bar", "no")
+        end
+    else
+        local restore = state.pip_restore or {}
+        state.pip_active = false
+        state.pip_restore = nil
+        mp.set_property_bool("fullscreen", false)
+        mp.set_property_bool("window-maximized", false)
+        mp.set_property("geometry", "50%:50%")
+        if restore.scale then
+            mp.set_property_number("current-window-scale", restore.scale)
+        end
+        if restore.maximized then
+            mp.set_property_bool("window-maximized", true)
+        elseif restore.fullscreen then
+            mp.set_property_bool("fullscreen", true)
+        end
+        if restore.title_bar and state.initial_border == "yes" and state.initial_title_bar == "yes" then
+            mp.commandv("set", "title-bar", "yes")
+        end
+        if restore.ontop then
+            mp.set_property_bool("ontop", true)
+        else
+            local raise_timer
+            raise_timer = mp.add_timeout(0.12, function()
+                if state.pip_raise_timer ~= raise_timer then return end
+                state.pip_raise_timer = nil
+                if not state.pip_active then
+                    mp.set_property_bool("ontop", false)
+                end
+            end)
+            state.pip_raise_timer = raise_timer
+        end
+    end
 end
 
 local function setup_canvas()
@@ -1853,20 +1923,12 @@ local function create_elements()
     ne.content = function () return state.fullscreen and icons.fullscreen_exit or icons.fullscreen end
     bind_mouse_buttons("fullscreen")
 
-    --tog_ontop
-    ne = new_element("tog_ontop", "button")
+    --pip
+    ne = new_element("pip", "button")
     ne.hover_effect = true
-    ne.content = function () return not state.ontop and icons.ontop_on or icons.ontop_off end
+    ne.content = function () return not state.pip_active and icons.pip_on or icons.pip_off end
     ne.eventresponder["mbtn_left_up"] = function ()
-        local was_ontop = state.ontop
-        mp.commandv("cycle", "ontop")
-        if state.initial_border == "yes" and state.initial_title_bar == "yes" then
-            if not was_ontop then
-                mp.commandv("set", "title-bar", "no")
-            else
-                mp.commandv("set", "title-bar", "yes")
-            end
-        end
+        set_pip_enabled(not state.pip_active)
     end
 
     --speed
@@ -1890,6 +1952,7 @@ local function create_elements()
     --seekbar
     ne = new_element("seekbar", "slider")
     ne.enabled = mp.get_property("percent-pos") ~= nil
+    state.slider_element = ne.enabled and ne or nil
     local seekbar_el = ne
     ne.slider.pos_f = function ()
         if state.eof_reached then return 100 end
@@ -2041,6 +2104,7 @@ local function osc_init()
     end
 
     state.persistent_seekbar_element = elements["persistent_seekbar"]
+    state.seekbarbg_element = elements["seekbarbg"]
 
     prepare_elements()
     update_margins()
@@ -2494,6 +2558,7 @@ observe_cached("duration", function ()
         request_init()
     elseif state.chapter_list[1] and state.slider_element then
         update_slider(state.slider_element)
+        update_seekbarbg(state.seekbarbg_element)
         request_tick()
     end
 end)
