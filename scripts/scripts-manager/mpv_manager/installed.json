@@ -23,7 +23,6 @@
   "scripts/subtitles/mpv-autosub/mpv-autosub.lua",
   "scripts/utils/recent/recent.lua",
   "scripts/utils/mpv-auto-chapters/mpv-auto-chapters.lua",
-  "svp_main.vpy",
   "shaders/Anime4K_Deblur_DoG.glsl",
   "shaders/Anime4K_Deblur_Original.glsl",
   "shaders/Anime4K_Denoise_Bilateral_Mean.glsl",
