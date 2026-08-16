@@ -100,7 +100,9 @@ function scan_dir(dir)
             elseif file:match("%.lua$") then
                 -- Exclude 'load-subdirs' self-loading and 'modules/' subdirectories used by some scripts (like notify_skip)
                 if file ~= "main.lua" or not path:match("[/\\]load%-subdirs[/\\]") then
-                    if not path:match("[/\\]modules[/\\]") then
+                    if not path:match("[/\\]modules[/\\]") and not path:match("[/\\]elements[/\\]") and not path:match("[/\\]lib[/\\]") and not path:match("[/\\]script%-opts[/\\]") and not path:match("[/\\]imgs[/\\]") then
+                        -- Also skip if this is a directory script that MPV already loaded (top-level folders with main.lua)
+                        -- For safety, just don't load anything but main.lua if the folder has a main.lua
                         print("FOUND SCRIPT: " .. path); table.insert(script_files, path)
                     end
                 end

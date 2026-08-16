@@ -135,9 +135,9 @@ local opts = {
 
 -- Shader presets (from original mpv.conf comments)
 local SHADER_PRESETS = {
-    optimized = "~~/shaders/denoise1.glsl;~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Upscale_Denoise_CNN_x2_M.glsl;~~/shaders/Anime4K_Thin_Fast.glsl",
-    fast = "~~/shaders/denoise1.glsl;~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl;~~/shaders/Anime4K_Restore_CNN_S.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl;~~/shaders/Anime4K_Thin_HQ.glsl;~~/shaders/Anime4K_Thin_Fast.glsl;~~/shaders/Anime4K_Thin_VeryFast.glsl",
-    hq = "~~/shaders/nlmeans.glsl;~~/shaders/Anime4K_Clamp_Highlights.glsl;~~/shaders/Anime4K_Restore_CNN_VL.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_VL.glsl;~~/shaders/Anime4K_Restore_CNN_M.glsl;~~/shaders/Anime4K_AutoDownscalePre_x2.glsl;~~/shaders/Anime4K_AutoDownscalePre_x4.glsl;~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl;~~/shaders/Anime4K_Thin_HQ.glsl;~~/shaders/Anime4K_Thin_Fast.glsl;~~/shaders/Anime4K_Thin_VeryFast.glsl"
+    optimized = "~~/shaders/denoise1.glsl:~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_M.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_Denoise_CNN_x2_M.glsl:~~/shaders/Anime4K_Thin_Fast.glsl",
+    fast = "~~/shaders/denoise1.glsl:~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_M.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_Restore_CNN_S.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_S.glsl:~~/shaders/Anime4K_Thin_HQ.glsl:~~/shaders/Anime4K_Thin_Fast.glsl:~~/shaders/Anime4K_Thin_VeryFast.glsl",
+    hq = "~~/shaders/nlmeans.glsl:~~/shaders/Anime4K_Clamp_Highlights.glsl:~~/shaders/Anime4K_Restore_CNN_VL.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_VL.glsl:~~/shaders/Anime4K_Restore_CNN_M.glsl:~~/shaders/Anime4K_AutoDownscalePre_x2.glsl:~~/shaders/Anime4K_AutoDownscalePre_x4.glsl:~~/shaders/Anime4K_Upscale_CNN_x2_M.glsl:~~/shaders/Anime4K_Thin_HQ.glsl:~~/shaders/Anime4K_Thin_Fast.glsl:~~/shaders/Anime4K_Thin_VeryFast.glsl"
 }
 
 -- VF components (composable)
@@ -347,10 +347,10 @@ end
 -- Remove denoise shaders from chain (for legacy/HDR anime)
 local function remove_denoise_shaders(shader_chain)
     return shader_chain
-        :gsub("~~/shaders/denoise1%.glsl;?", "")
-        :gsub("~~/shaders/denoise3%.glsl;?", "")
-        :gsub("~~/shaders/nlmeans%.glsl;?", "")
-        :gsub(";$", "")  -- Clean trailing semicolon
+        :gsub("~~/shaders/denoise1%.glsl:?", "")
+        :gsub("~~/shaders/denoise3%.glsl:?", "")
+        :gsub("~~/shaders/nlmeans%.glsl:?", "")
+        :gsub(":$", "")  -- Clean trailing semicolon
 end
 
 -- Apply anime shader preset
@@ -377,7 +377,7 @@ local function apply_anime_vf(is_legacy, svp_enabled)
     
     if svp_enabled then
         log("Appending VF: SVP (Anime)")
-        mp.commandv("vf", "append", VF_FILTERS.svp_anime)
+        -- mp.commandv("vf", "append", VF_FILTERS.svp_anime) -- Temporarily disabled to prevent NixOS segfault
     end
 end
 
@@ -687,7 +687,7 @@ function try_execute_profile()
         apply_anime_vf(is_legacy_anime, svp_enabled)
     elseif should_run_global_svp then
         log("Appending VF: Global SVP (Cinema)")
-        mp.commandv("vf", "append", VF_FILTERS.svp_cinema)
+        -- mp.commandv("vf", "append", VF_FILTERS.svp_cinema) -- Temporarily disabled to prevent NixOS segfault
     end
 
     audio_state.mode = meta.audio_preset or "off"
