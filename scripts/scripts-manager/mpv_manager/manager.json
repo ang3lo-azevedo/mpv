@@ -228,5 +228,11 @@
         "whitelist": "tools/lua/autoload.lua",
         "dest": "~~/scripts/utils/autoload/autoload.lua",
         "branch": "master"
+    },
+    {
+        "git": "https://github.com/AzuredBlue/mpv-anilist-updater",
+        "whitelist": "correction_overlay.lua",
+        "dest": "~~/scripts/anilistUpdater/correction_overlay.lua",
+        "branch": "main"
     }
 ]
