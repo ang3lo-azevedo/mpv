@@ -127,14 +127,6 @@
                 "replace": "mp.set_property(\"hdr-peak-percentile\", \"99.995\") -- [Local Override] Preserves specular highlights"
             },
             {
-                "search": "mp.commandv(\"vf\", \"append\", VF_FILTERS.svp_anime)",
-                "replace": "-- mp.commandv(\"vf\", \"append\", VF_FILTERS.svp_anime) -- Temporarily disabled to prevent NixOS segfault"
-            },
-            {
-                "search": "mp.commandv(\"vf\", \"append\", VF_FILTERS.svp_cinema)",
-                "replace": "-- mp.commandv(\"vf\", \"append\", VF_FILTERS.svp_cinema) -- Temporarily disabled to prevent NixOS segfault"
-            },
-            {
                 "search": "glsl;",
                 "replace": "glsl:"
             },
