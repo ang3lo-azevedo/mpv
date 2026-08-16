@@ -1,212 +1,240 @@
 [
-  {
-    "git": "https://github.com/allecsc/mpv-qol-scripts",
-    "whitelist": "scripts/notify_skip_click/",
-    "base_dir": "scripts/notify_skip_click",
-    "dest": "~~/scripts/ui/notify_skip",
-    "branch": "main",
-    "replacements": [
-      {
-        "search": "local bg_color = is_hover and '111111' or 'FFFFFF'  -- Black on hover or White",
-        "replace": "local bg_color = is_hover and '333333' or '111111'  -- Dark bg, lighter on hover (matches hayase-osc)"
-      },
-      {
-        "search": "local text_color = is_hover and 'FFFFFF' or '000000'  -- White text on hover or Black",
-        "replace": "local text_color = 'FFFFFF'  -- White text always (matches hayase-osc)"
-      },
-      {
-        "search": "border_color = 'FFFFFF',",
-        "replace": "border_color = '444444',"
-      },
-      {
-        "search": "mp.add_timeout(3.5, finalize_setup)",
-        "replace": "mp.add_timeout(0.5, finalize_setup)"
-      },
-      {
-        "search": "        show_skip_overlay(\"✖ Nothing to skip\", 2, false)\n        return false\n        \n    elseif state.mode == \"silence\" then",
-        "replace": "        if state.silence_active or state.blackframe_skip_active then\n            stop_silence_skip()\n            set_time(state.skip_start_time)\n            show_skip_overlay(\"✓ Skip Cancelled\", 2, false)\n        else\n            init_skipping_filters()\n            start_silence_skip()\n        end\n        return true\n\n    elseif state.mode == \"silence\" then"
-      }
-    ]
-  },
-  {
-    "git": "https://github.com/allecsc/Stremio-Kai/",
-    "whitelist": "portable_config/input.conf",
-    "dest": "~~/input.conf",
-    "branch": "main",
-    "replacements": [
-      {
-        "search": "q       \tquit",
-        "replace": "#q       \tquit"
-      },
-      {
-        "search": "`\t\t    script-message cycle-audio-preset",
-        "replace": "\\\t\t    script-message cycle-audio-preset"
-      },
-      {
-        "search": "Ctrl+F12\tvf toggle @BWDIF:lavfi=[bwdif=mode=1:parity=auto:deint=all],@SVP:vapoursynth=\"~~/svp_main.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"Deinterlace + SVP\" 3000",
-        "replace": "Ctrl+F12\tvf toggle @BWDIF:lavfi=[bwdif=mode=1:parity=auto:deint=all],@SVP:vapoursynth=\"~~/svp_main.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"Deinterlace + SVP\" 3000\n\n# Test\n#u cycle-values sub-ass-override \"force\" \"strip\" \"scale\"# toggle overriding SSA/ASS subtitle styles with the normal styles\n\n# Mouse bindings\nMBTN_LEFT cycle pause"
-      }
-    ]
-  },
-  {
-    "git": "https://github.com/nekoxuee/hayase-osc",
-    "whitelist": "hayase-osc.lua",
-    "dest": "~~/scripts/ui/osc/hayase-osc/hayase-osc.lua",
-    "branch": "main",
-    "replacements": [
-      {
-        "search": "idlescreen = true,                     -- show mpv logo when idle",
-        "replace": "scale = 1.0, idlescreen = true,        -- UI scale factor added via mpv_manager"
-      },
-      {
-        "search": "osc_param.playresy = dimensions.h > 0 and dimensions.h or 720",
-        "replace": "osc_param.playresy = (dimensions.h > 0 and dimensions.h or 720) / (user_opts.scale or 1.0)"
-      }
-    ]
-  },
-  {
-    "git": "https://github.com/nekoxuee/hayase-osc",
-    "whitelist": "Lucide.ttf",
-    "dest": "~~/fonts/Lucide.ttf",
-    "branch": "main"
-  },
-  {
-    "git": "https://github.com/dnlzqn/nata-sans",
-    "whitelist": "NataSans[wght].ttf",
-    "dest": "~~/fonts/NataSans[wght].ttf",
-    "branch": "main"
-  },
-  {
-    "git": "https://github.com/po5/thumbfast",
-    "whitelist": "thumbfast.lua",
-    "dest": "~~/scripts/ui/other/thumbnails/thumbfast/thumbfast.lua"
-  },
-  {
-    "git": "https://github.com/thisisshihan/mpv-player-config-snad/",
-    "whitelist": "pause-indicator.lua",
-    "dest": "~~/scripts/ui/other/pause-indicator/pause-indicator.lua",
-    "branch": "mpv-config-snad-windows-ubuntu-linux-macos"
-  },
-  {
-    "git": "https://github.com/mosquito-byte/mpv-interactive-video",
-    "whitelist": "interactive-video.lua",
-    "dest": "~~/scripts/utils/mpv-interactive-video/mpv-interactive-video.lua"
-  },
-  {
-    "git": "https://github.com/AzuredBlue/mpv-anilist-updater",
-    "whitelist": "main.lua",
-    "dest": "~~/scripts/utils/tracking/anilistUpdater/anilistUpdater.lua",
-    "branch": "main",
-    "replacements": [
-      {
-        "search": "return \"python3\"",
-        "replace": "return \"mpv-python\""
-      }
-    ]
-  },
-  {
-    "git": "https://github.com/allecsc/Stremio-Kai/",
-    "whitelist": "profile-manager.lua",
-    "dest": "~~/scripts/ui/other/profile-manager/profile-manager.lua",
-    "branch": "main",
-    "replacements": [
-      {
-        "search": "if not state.metadata_ready then",
-        "replace": "if false and not state.metadata_ready then -- [Local Override] Bypass Stremio IPC metadata latch to apply profiles immediately"
-      },
-      {
-        "search": "local color_profile = meta.color_profile or \"kai\"",
-        "replace": "local color_profile = meta.color_profile or \"original\" -- [Local Override] Neutral default when no Stremio metadata"
-      },
-      {
-        "search": "mp.set_property(\"tone-mapping\", \"bt.2446a\")",
-        "replace": "mp.set_property(\"tone-mapping\", \"spline\") -- [Local Override] Developer-recommended for gpu-next"
-      },
-      {
-        "search": "mp.set_property(\"hdr-peak-percentile\", \"99.8\")",
-        "replace": "mp.set_property(\"hdr-peak-percentile\", \"99.995\") -- [Local Override] Preserves specular highlights"
-      }
-    ]
-  },
-  {
-    "git": "https://github.com/allecsc/Stremio-Kai/",
-    "whitelist": "reactive_vf_bypass.lua",
-    "dest": "~~/scripts/utils/reactive_vf_bypass/reactive_vf_bypass.lua",
-    "branch": "main"
-  },
-  {
-    "git": "https://github.com/allecsc/Stremio-Kai/",
-    "whitelist": "svp_cleanup.lua",
-    "dest": "~~/scripts/utils/svp_cleanup/svp_cleanup.lua",
-    "branch": "main"
-  },
-  {
-    "git": "https://github.com/allecsc/Stremio-Kai/",
-    "whitelist": "smart-track-selector/main.lua",
-    "dest": "~~/scripts/utils/smart-track-selector/smart-track-selector.lua",
-    "branch": "main"
-  },
-  {
-    "git": "https://github.com/davidde/mpv-autosub",
-    "whitelist": "autosub.lua",
-    "dest": "~~/scripts/subtitles/mpv-autosub/mpv-autosub.lua",
-    "branch": "master",
-    "replacements": [
-      {
-        "search": "local subliminal = '/home/david/.local/bin/subliminal'",
-        "replace": "local subliminal = 'subliminal'"
-      }
-    ]
-  },
-  {
-    "git": "https://github.com/hacel/recent",
-    "whitelist": "recent.lua",
-    "dest": "~~/scripts/utils/recent/recent.lua",
-    "branch": "master"
-  },
-  {
-    "git": "https://github.com/po5/mpv-auto-chapters",
-    "whitelist": "autochapters/main.lua",
-    "dest": "~~/scripts/utils/mpv-auto-chapters/mpv-auto-chapters.lua",
-    "branch": "master",
-    "replacements": [
-      {
-        "search": "local script_name, script_dir = mp.get_script_name(), mp.get_script_directory()",
-        "replace": "local script_name, script_dir = mp.get_script_name(), mp.get_script_directory() or mp.command_native({\"expand-path\", \"~~/script-opts\"})"
-      }
-    ]
-  },
-  {
-    "git": "https://github.com/allecsc/Stremio-Kai/",
-    "whitelist": "portable_config/svp_main.vpy",
-    "base_dir": "portable_config",
-    "dest": "~~/svp_main.vpy",
-    "branch": "main"
-  },
-  {
-    "git": "https://github.com/bloc97/Anime4K",
-    "whitelist": ".glsl",
-    "base_dir": "glsl",
-    "dest": "~~/shaders",
-    "branch": "master",
-    "flatten_folders": true
-  },
-  {
-    "git": "https://github.com/po5/memo",
-    "whitelist": "memo.lua",
-    "dest": "~~/scripts/utils/memo/memo.lua",
-    "branch": "master"
-  },
-  {
-    "git": "https://github.com/4e6/mpv-reload",
-    "whitelist": "main.lua",
-    "dest": "~~/scripts/utils/reload/reload.lua",
-    "branch": "master"
-  },
-  {
-    "git": "https://github.com/mpv-player/mpv",
-    "whitelist": "tools/lua/autoload.lua",
-    "dest": "~~/scripts/utils/autoload/autoload.lua",
-    "branch": "master"
-  }
+    {
+        "git": "https://github.com/allecsc/mpv-qol-scripts",
+        "whitelist": "scripts/notify_skip_click/",
+        "base_dir": "scripts/notify_skip_click",
+        "dest": "~~/scripts/ui/notify_skip",
+        "branch": "main",
+        "replacements": [
+            {
+                "search": "local bg_color = is_hover and '111111' or 'FFFFFF'  -- Black on hover or White",
+                "replace": "local bg_color = is_hover and '333333' or '111111'  -- Dark bg, lighter on hover (matches hayase-osc)"
+            },
+            {
+                "search": "local text_color = is_hover and 'FFFFFF' or '000000'  -- White text on hover or Black",
+                "replace": "local text_color = 'FFFFFF'  -- White text always (matches hayase-osc)"
+            },
+            {
+                "search": "border_color = 'FFFFFF',",
+                "replace": "border_color = '444444',"
+            },
+            {
+                "search": "mp.add_timeout(3.5, finalize_setup)",
+                "replace": "mp.add_timeout(0.5, finalize_setup)"
+            },
+            {
+                "search": "        show_skip_overlay(\"\u2716 Nothing to skip\", 2, false)\n        return false\n        \n    elseif state.mode == \"silence\" then",
+                "replace": "        if state.silence_active or state.blackframe_skip_active then\n            stop_silence_skip()\n            set_time(state.skip_start_time)\n            show_skip_overlay(\"\u2713 Skip Cancelled\", 2, false)\n        else\n            init_skipping_filters()\n            start_silence_skip()\n        end\n        return true\n\n    elseif state.mode == \"silence\" then"
+            }
+        ]
+    },
+    {
+        "git": "https://github.com/allecsc/Stremio-Kai/",
+        "whitelist": "portable_config/input.conf",
+        "dest": "~~/input.conf",
+        "branch": "main",
+        "replacements": [
+            {
+                "search": "q       \tquit",
+                "replace": "#q       \tquit"
+            },
+            {
+                "search": "`\t\t    script-message cycle-audio-preset",
+                "replace": "\\\t\t    script-message cycle-audio-preset"
+            },
+            {
+                "search": "Ctrl+F12\tvf toggle @BWDIF:lavfi=[bwdif=mode=1:parity=auto:deint=all],@SVP:vapoursynth=\"~~/svp_main.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"Deinterlace + SVP\" 3000",
+                "replace": "Ctrl+F12\tvf toggle @BWDIF:lavfi=[bwdif=mode=1:parity=auto:deint=all],@SVP:vapoursynth=\"~~/svp_main.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"Deinterlace + SVP\" 3000\n\n# Test\n#u cycle-values sub-ass-override \"force\" \"strip\" \"scale\"# toggle overriding SSA/ASS subtitle styles with the normal styles\n\n# Mouse bindings\nMBTN_LEFT cycle pause"
+            }
+        ]
+    },
+    {
+        "git": "https://github.com/nekoxuee/hayase-osc",
+        "whitelist": "hayase-osc.lua",
+        "dest": "~~/scripts/ui/osc/hayase-osc/hayase-osc.lua",
+        "branch": "main",
+        "replacements": [
+            {
+                "search": "idlescreen = true,                     -- show mpv logo when idle",
+                "replace": "scale = 1.0, idlescreen = true,        -- UI scale factor added via mpv_manager"
+            },
+            {
+                "search": "osc_param.playresy = dimensions.h > 0 and dimensions.h or 720",
+                "replace": "osc_param.playresy = (dimensions.h > 0 and dimensions.h or 720) / (user_opts.scale or 1.0)"
+            }
+        ]
+    },
+    {
+        "git": "https://github.com/nekoxuee/hayase-osc",
+        "whitelist": "Lucide.ttf",
+        "dest": "~~/fonts/Lucide.ttf",
+        "branch": "main"
+    },
+    {
+        "git": "https://github.com/dnlzqn/nata-sans",
+        "whitelist": "NataSans[wght].ttf",
+        "dest": "~~/fonts/NataSans[wght].ttf",
+        "branch": "main"
+    },
+    {
+        "git": "https://github.com/po5/thumbfast",
+        "whitelist": "thumbfast.lua",
+        "dest": "~~/scripts/ui/other/thumbnails/thumbfast/thumbfast.lua"
+    },
+    {
+        "git": "https://github.com/thisisshihan/mpv-player-config-snad/",
+        "whitelist": "pause-indicator.lua",
+        "dest": "~~/scripts/ui/other/pause-indicator/pause-indicator.lua",
+        "branch": "mpv-config-snad-windows-ubuntu-linux-macos"
+    },
+    {
+        "git": "https://github.com/mosquito-byte/mpv-interactive-video",
+        "whitelist": "interactive-video.lua",
+        "dest": "~~/scripts/utils/mpv-interactive-video/mpv-interactive-video.lua"
+    },
+    {
+        "git": "https://github.com/AzuredBlue/mpv-anilist-updater",
+        "whitelist": "main.lua",
+        "dest": "~~/scripts/utils/tracking/anilistUpdater/anilistUpdater.lua",
+        "branch": "main",
+        "replacements": [
+            {
+                "search": "return \"python3\"",
+                "replace": "return \"mpv-python\""
+            }
+        ]
+    },
+    {
+        "git": "https://github.com/allecsc/Stremio-Kai/",
+        "whitelist": "profile-manager.lua",
+        "dest": "~~/scripts/ui/other/profile-manager/profile-manager.lua",
+        "branch": "main",
+        "replacements": [
+            {
+                "search": "if not state.metadata_ready then",
+                "replace": "if false and not state.metadata_ready then -- [Local Override] Bypass Stremio IPC metadata latch to apply profiles immediately"
+            },
+            {
+                "search": "local color_profile = meta.color_profile or \"kai\"",
+                "replace": "local color_profile = meta.color_profile or \"original\" -- [Local Override] Neutral default when no Stremio metadata"
+            },
+            {
+                "search": "mp.set_property(\"tone-mapping\", \"bt.2446a\")",
+                "replace": "mp.set_property(\"tone-mapping\", \"spline\") -- [Local Override] Developer-recommended for gpu-next"
+            },
+            {
+                "search": "mp.set_property(\"hdr-peak-percentile\", \"99.8\")",
+                "replace": "mp.set_property(\"hdr-peak-percentile\", \"99.995\") -- [Local Override] Preserves specular highlights"
+            },
+            {
+                "search": "mp.commandv(\"vf\", \"append\", VF_FILTERS.svp_anime)",
+                "replace": "-- mp.commandv(\"vf\", \"append\", VF_FILTERS.svp_anime) -- Temporarily disabled to prevent NixOS segfault"
+            },
+            {
+                "search": "mp.commandv(\"vf\", \"append\", VF_FILTERS.svp_cinema)",
+                "replace": "-- mp.commandv(\"vf\", \"append\", VF_FILTERS.svp_cinema) -- Temporarily disabled to prevent NixOS segfault"
+            },
+            {
+                "search": "glsl;",
+                "replace": "glsl:"
+            },
+            {
+                "search": ":gsub(\"~~/shaders/denoise1%.glsl;?\", \"\")",
+                "replace": ":gsub(\"~~/shaders/denoise1%.glsl:?\", \"\")"
+            },
+            {
+                "search": ":gsub(\"~~/shaders/denoise3%.glsl;?\", \"\")",
+                "replace": ":gsub(\"~~/shaders/denoise3%.glsl:?\", \"\")"
+            },
+            {
+                "search": ":gsub(\"~~/shaders/nlmeans%.glsl;?\", \"\")",
+                "replace": ":gsub(\"~~/shaders/nlmeans%.glsl:?\", \"\")"
+            },
+            {
+                "search": ":gsub(\";$\", \"\")",
+                "replace": ":gsub(\":$\", \"\")"
+            }
+        ]
+    },
+    {
+        "git": "https://github.com/allecsc/Stremio-Kai/",
+        "whitelist": "reactive_vf_bypass.lua",
+        "dest": "~~/scripts/utils/reactive_vf_bypass/reactive_vf_bypass.lua",
+        "branch": "main"
+    },
+    {
+        "git": "https://github.com/allecsc/Stremio-Kai/",
+        "whitelist": "svp_cleanup.lua",
+        "dest": "~~/scripts/utils/svp_cleanup/svp_cleanup.lua",
+        "branch": "main"
+    },
+    {
+        "git": "https://github.com/allecsc/Stremio-Kai/",
+        "whitelist": "smart-track-selector/main.lua",
+        "dest": "~~/scripts/utils/smart-track-selector/smart-track-selector.lua",
+        "branch": "main"
+    },
+    {
+        "git": "https://github.com/davidde/mpv-autosub",
+        "whitelist": "autosub.lua",
+        "dest": "~~/scripts/subtitles/mpv-autosub/mpv-autosub.lua",
+        "branch": "master",
+        "replacements": [
+            {
+                "search": "local subliminal = '/home/david/.local/bin/subliminal'",
+                "replace": "local subliminal = 'subliminal'"
+            }
+        ]
+    },
+    {
+        "git": "https://github.com/hacel/recent",
+        "whitelist": "recent.lua",
+        "dest": "~~/scripts/utils/recent/recent.lua",
+        "branch": "master"
+    },
+    {
+        "git": "https://github.com/po5/mpv-auto-chapters",
+        "whitelist": "autochapters/main.lua",
+        "dest": "~~/scripts/utils/mpv-auto-chapters/mpv-auto-chapters.lua",
+        "branch": "master",
+        "replacements": [
+            {
+                "search": "local script_name, script_dir = mp.get_script_name(), mp.get_script_directory()",
+                "replace": "local script_name, script_dir = mp.get_script_name(), mp.get_script_directory() or mp.command_native({\"expand-path\", \"~~/script-opts\"})"
+            }
+        ]
+    },
+    {
+        "git": "https://github.com/allecsc/Stremio-Kai/",
+        "whitelist": "portable_config/svp_main.vpy",
+        "base_dir": "portable_config",
+        "dest": "~~/svp_main.vpy",
+        "branch": "main"
+    },
+    {
+        "git": "https://github.com/bloc97/Anime4K",
+        "whitelist": ".glsl",
+        "base_dir": "glsl",
+        "dest": "~~/shaders",
+        "branch": "master",
+        "flatten_folders": true
+    },
+    {
+        "git": "https://github.com/po5/memo",
+        "whitelist": "memo.lua",
+        "dest": "~~/scripts/utils/memo/memo.lua",
+        "branch": "master"
+    },
+    {
+        "git": "https://github.com/4e6/mpv-reload",
+        "whitelist": "main.lua",
+        "dest": "~~/scripts/utils/reload/reload.lua",
+        "branch": "master"
+    },
+    {
+        "git": "https://github.com/mpv-player/mpv",
+        "whitelist": "tools/lua/autoload.lua",
+        "dest": "~~/scripts/utils/autoload/autoload.lua",
+        "branch": "master"
+    }
 ]
