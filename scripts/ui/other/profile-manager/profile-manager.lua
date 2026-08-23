@@ -377,7 +377,7 @@ local function apply_anime_vf(is_legacy, svp_enabled)
     
     if svp_enabled then
         log("Appending VF: SVP (Anime)")
-        -- mp.commandv("vf", "append", VF_FILTERS.svp_anime) -- Temporarily disabled to prevent NixOS segfault
+        mp.commandv("vf", "append", VF_FILTERS.svp_anime)
     end
 end
 
@@ -687,7 +687,7 @@ function try_execute_profile()
         apply_anime_vf(is_legacy_anime, svp_enabled)
     elseif should_run_global_svp then
         log("Appending VF: Global SVP (Cinema)")
-        -- mp.commandv("vf", "append", VF_FILTERS.svp_cinema) -- Temporarily disabled to prevent NixOS segfault
+        mp.commandv("vf", "append", VF_FILTERS.svp_cinema)
     end
 
     audio_state.mode = meta.audio_preset or "off"
