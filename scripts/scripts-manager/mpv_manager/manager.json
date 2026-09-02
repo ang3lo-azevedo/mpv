@@ -198,9 +198,16 @@
     },
     {
         "git": "https://github.com/allecsc/Stremio-Kai/",
-        "whitelist": "portable_config/svp_main.vpy",
+        "whitelist": "portable_config/svp_anime.vpy",
         "base_dir": "portable_config",
-        "dest": "~~/svp_main.vpy",
+        "dest": "~~/svp_anime.vpy",
+        "branch": "main"
+    },
+    {
+        "git": "https://github.com/allecsc/Stremio-Kai/",
+        "whitelist": "portable_config/svp_cinema.vpy",
+        "base_dir": "portable_config",
+        "dest": "~~/svp_cinema.vpy",
         "branch": "main"
     },
     {
@@ -232,7 +239,7 @@
     {
         "git": "https://github.com/AzuredBlue/mpv-anilist-updater",
         "whitelist": "correction_overlay.lua",
-        "dest": "~~/scripts/anilistUpdater/correction_overlay.lua",
+        "dest": "~~/script-modules/correction_overlay.lua",
         "branch": "main"
     }
 ]
