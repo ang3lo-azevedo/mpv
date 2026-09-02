@@ -74,6 +74,11 @@ config = load_config()
 
 # Apply to core
 core = vs.core
+svp_plugin_dir = os.environ.get('SVP4_PLUGIN_DIR', os.path.join(os.path.dirname(__file__), 'svp-plugins'))
+for plugin_name in ('libsvpflow1.so', 'libsvpflow2.so'):
+    plugin_path = os.path.join(svp_plugin_dir, plugin_name)
+    if os.path.exists(plugin_path):
+        core.std.LoadPlugin(path=plugin_path)
 cpu = multiprocessing.cpu_count()
 
 # threads: 'auto' => half cores capped at 6; explicit int otherwise

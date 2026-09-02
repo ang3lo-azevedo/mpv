@@ -43,8 +43,12 @@
                 "replace": "\\\t\t    script-message cycle-audio-preset"
             },
             {
-                "search": "Ctrl+F12\tvf toggle @BWDIF:lavfi=[bwdif=mode=1:parity=auto:deint=all],@SVP:vapoursynth=\"~~/svp_main.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"Deinterlace + SVP\" 3000",
-                "replace": "Ctrl+F12\tvf toggle @BWDIF:lavfi=[bwdif=mode=1:parity=auto:deint=all],@SVP:vapoursynth=\"~~/svp_main.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"Deinterlace + SVP\" 3000\n\n# Test\n#u cycle-values sub-ass-override \"force\" \"strip\" \"scale\"# toggle overriding SSA/ASS subtitle styles with the normal styles\n\n# Mouse bindings\nMBTN_LEFT cycle pause"
+                "search": "~~/svp_main.vpy",
+                "replace": "~~/svp_cinema.vpy"
+            },
+            {
+                "search": "show-text \"SVP Frame Rate Conversion\" 3000",
+                "replace": "show-text \"SVP Cinema Frame Rate Conversion\" 3000\nShift+F12\tvf toggle @SVP:vapoursynth=\"~~/svp_anime.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"SVP Anime Frame Rate Conversion\" 3000"
             }
         ]
     },
@@ -201,14 +205,26 @@
         "whitelist": "portable_config/svp_anime.vpy",
         "base_dir": "portable_config",
         "dest": "~~/svp_anime.vpy",
-        "branch": "main"
+        "branch": "main",
+        "replacements": [
+            {
+                "search": "core = vs.core",
+                "replace": "core = vs.core\nsvp_plugin_dir = os.environ.get('SVP4_PLUGIN_DIR', os.path.join(os.path.dirname(__file__), 'svp-plugins'))\nfor plugin_name in ('libsvpflow1.so', 'libsvpflow2.so'):\n    plugin_path = os.path.join(svp_plugin_dir, plugin_name)\n    if os.path.exists(plugin_path):\n        core.std.LoadPlugin(path=plugin_path)"
+            }
+        ]
     },
     {
         "git": "https://github.com/allecsc/Stremio-Kai/",
         "whitelist": "portable_config/svp_cinema.vpy",
         "base_dir": "portable_config",
         "dest": "~~/svp_cinema.vpy",
-        "branch": "main"
+        "branch": "main",
+        "replacements": [
+            {
+                "search": "core = vs.core",
+                "replace": "core = vs.core\nsvp_plugin_dir = os.environ.get('SVP4_PLUGIN_DIR', os.path.join(os.path.dirname(__file__), 'svp-plugins'))\nfor plugin_name in ('libsvpflow1.so', 'libsvpflow2.so'):\n    plugin_path = os.path.join(svp_plugin_dir, plugin_name)\n    if os.path.exists(plugin_path):\n        core.std.LoadPlugin(path=plugin_path)"
+            }
+        ]
     },
     {
         "git": "https://github.com/bloc97/Anime4K",
