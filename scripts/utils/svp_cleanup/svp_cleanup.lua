@@ -56,4 +56,4 @@ mp.add_hook("on_unload", 50, function()
     else
         mp.msg.verbose("SVP Cleanup: No SVP chain detected, skipping.")
     end
-end)
+end)

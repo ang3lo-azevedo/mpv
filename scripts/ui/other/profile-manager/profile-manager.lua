@@ -617,6 +617,7 @@ function try_execute_profile()
     local color_profile = meta.color_profile or "original" -- [Local Override] Neutral default when no Stremio metadata
     local icc_profile_enabled = meta.icc_profile
     local svp_enabled = true -- Use the VapourSynth/MVTools interpolation pipeline
+    if svp_enabled == nil then svp_enabled = true end
     local svp_global = meta.svp_global or false
     local target_peak = meta.target_peak or "auto"
     local vulkan_mode = meta.vulkan_mode or false

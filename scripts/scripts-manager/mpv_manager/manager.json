@@ -227,6 +227,10 @@
             {
                 "search": "osd-scale-by-window = yes",
                 "replace": "osd-scale-by-window = yes\nosd-align-x = center\nosd-align-y = center"
+            },
+            {
+                "search": "log-file=LOG.txt",
+                "replace": "log-file=~~/LOG.txt"
             }
         ]
     },

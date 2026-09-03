@@ -239,4 +239,4 @@ function ass_mt:spinner(x, y, size, opts)
 	opts.color = opts.color or fg
 	self:icon(x, y, size, 'autorenew', opts)
 	request_render()
-end
+end
