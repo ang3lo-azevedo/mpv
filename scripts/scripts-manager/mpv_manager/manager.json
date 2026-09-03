@@ -83,7 +83,13 @@
     {
         "git": "https://github.com/po5/thumbfast",
         "whitelist": "thumbfast.lua",
-        "dest": "~~/scripts/ui/other/thumbnails/thumbfast/thumbfast.lua"
+        "dest": "~~/scripts/ui/other/thumbnails/thumbfast/thumbfast.lua",
+        "replacements": [
+            {
+                "search": "allow_fast_seek and \"--hr-seek=no\" or \"--hr-seek=yes\"",
+                "replace": "options.network and \"--hr-seek=yes\" or (allow_fast_seek and \"--hr-seek=no\" or \"--hr-seek=yes\")"
+            }
+        ]
     },
     {
         "git": "https://github.com/thisisshihan/mpv-player-config-snad/",

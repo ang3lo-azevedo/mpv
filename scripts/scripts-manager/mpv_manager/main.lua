@@ -49,7 +49,10 @@ function run(args)
         if not res then res = {} end
         if not res.stdout then res.stdout = "" end
         if not res.status then res.status = -1 end
-        coroutine.resume(co, res)
+        local status, err = coroutine.resume(co, res)
+        if not status then
+            msg.error("Coroutine error: " .. tostring(err))
+        end
     end)
     return coroutine.yield()
 end
@@ -70,15 +73,24 @@ local function remove_empty_dirs_lua(path)
     end
 end
 
-local function to_relative(abs_path)
-    local mpv_dir = mp.command_native({"expand-path", "~~/"})
-    local escaped_dir = mpv_dir:gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
-    local rel = abs_path:gsub("^" .. escaped_dir .. "[/\\]?", "")
-    return rel:gsub("\\", "/")
-end
-
 local current_installed = {}
 local update_targets = os.getenv("MPV_MANAGER_TARGETS")
+local manager_config_dir = os.getenv("MPV_CONFIG_DIR")
+
+local function expand_path(path)
+    if manager_config_dir and path:sub(1, 3) == "~~/" then
+        return manager_config_dir .. "/" .. path:sub(4)
+    end
+    return mp.command_native({"expand-path", path})
+end
+
+local function to_relative(abs_path)
+    local mpv_dir = expand_path("~~/")
+    local escaped_dir = mpv_dir:gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
+    local rel = abs_path:gsub("^" .. escaped_dir .. "[/\\]?", "")
+    local final_rel = rel:gsub("\\", "/")
+    return final_rel
+end
 
 -- Cache a directory
 function cache(path)
@@ -92,7 +104,7 @@ end
 function mkdir(path)
     if dir_cache[path] then return end
     cache(path)
-    run({"git", "init", path})
+    os.execute('mkdir -p "' .. path .. '"')
 end
 
 -- Match a string against a list of patterns
@@ -129,27 +141,33 @@ function update(info)
     info = apply_defaults(info)
     if not info then return false end
     
-    -- Expand destination path and remove trailing slashes
-    local e_dest = string.match(mp.command_native({"expand-path", info.dest}), "(.-)[/\\]?$")
+    local e_dest = string.match(expand_path(info.dest), "(.-)[/\\]?$")
     
-    -- Determine if the destination is a directory or file
-    local is_dir = true  -- Force directory treatment
-    if string.match(info.dest, "%.%w+$") then  -- If ends with extension (e.g. .lua), it's a file
+    local is_dir = true
+    if string.match(info.dest, "%.%w+$") then
         is_dir = false
     end
     local dest_dir = is_dir and e_dest or parent(e_dest)
     
     mkdir(dest_dir)
     
+    local cache_base = expand_path("~~/.manager-cache")
+    mkdir(cache_base)
+    local repo_dir_name = info.git:gsub("[^%w]", "_")
+    local repo_dir = cache_base .. "/" .. repo_dir_name
+    
+    local f_test = io.open(repo_dir .. "/HEAD", "r")
+    if f_test then
+        f_test:close()
+        run({"git", "--git-dir="..repo_dir, "fetch", "origin", info.branch..":"..info.branch})
+    else
+        run({"git", "clone", "--bare", info.git, repo_dir})
+        run({"git", "--git-dir="..repo_dir, "fetch", "origin", info.branch..":"..info.branch})
+    end
+    
     local files = {}
     
-    -- Remove remote if it exists and add it again
-    run({"git", "-C", dest_dir, "remote", "remove", "manager"})
-    run({"git", "-C", dest_dir, "remote", "add", "manager", info.git})
-    run({"git", "-C", dest_dir, "fetch", "manager", info.branch})
-    
-    -- List all files in repository
-    local files_in_repo = run({"git", "-C", dest_dir, "ls-tree", "-r", "--name-only", "remotes/manager/"..info.branch}).stdout
+    local files_in_repo = run({"git", "--git-dir="..repo_dir, "ls-tree", "-r", "--name-only", info.branch}).stdout
     
     for file in string.gmatch(files_in_repo, "[^\r\n]+") do
         local l_file = string.lower(file)
@@ -160,47 +178,27 @@ function update(info)
     end
     
     if next(files) == nil then
-        msg.info("no files matching patterns")
+        msg.info("no files matching patterns for " .. info.git)
         return false
     end
     
     for _, file in ipairs(files) do
-        -- If destination is not a directory, use the destination name as the filename
-        if not is_dir then
-            local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
-            
-            if info.replacements then
-                for _, rep in ipairs(info.replacements) do
-                    if rep.search and rep.replace then
-                        local escaped_search = rep.search:gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
-                        local escaped_replace = rep.replace:gsub("%%", "%%%%")
-                        c = c:gsub(escaped_search, escaped_replace)
-                    end
+        local c = string.match(run({"git", "--git-dir="..repo_dir, "--no-pager", "show", info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
+        
+        if info.replacements then
+            for _, rep in ipairs(info.replacements) do
+                if rep.search and rep.replace then
+                    local escaped_search = rep.search:gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
+                    local escaped_replace = rep.replace:gsub("%%", "%%%%")
+                    c = c:gsub(escaped_search, escaped_replace)
                 end
             end
-            
-            local current_content = ""
-            local old_f = io.open(e_dest, "r")
-            if old_f then
-                current_content = old_f:read("*all")
-                old_f:close()
-            end
-            
-            table.insert(current_installed, to_relative(e_dest))
-            if c ~= current_content then
-                local f = io.open(e_dest, "w")
-                if f then
-                    f:write(c)
-                    f:close()
-                    updated_count = updated_count + 1
-                end
-            end
-            break -- Only write the first file that matches the patterns
-        else
-            -- If it's a directory, maintain the original structure
+        end
+        
+        local target_path = e_dest
+        if is_dir then
             local out_file = file
             if info.base_dir and info.base_dir ~= "" then
-                -- Try to strip base_dir prefix safely
                 local escaped_base = info.base_dir:gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
                 out_file = out_file:gsub("^" .. escaped_base .. "/?", "")
             end
@@ -209,38 +207,48 @@ function update(info)
             if p_based and not info.flatten_folders then 
                 mkdir(e_dest.."/"..p_based) 
             end
-            local c = string.match(run({"git", "-C", dest_dir, "--no-pager", "show", "remotes/manager/"..info.branch..":"..file}).stdout, "(.-)[\r\n]?$")
+            target_path = e_dest.."/"..(info.flatten_folders and out_file:match("[^/]+$") or out_file)
+        end
+        
+        local current_content = ""
+        local old_f = io.open(target_path, "r")
+        if old_f then
+            current_content = old_f:read("*all")
+            old_f:close()
+        end
+        
+        table.insert(current_installed, to_relative(target_path))
+        
+        local norm_c = (c or ""):gsub("\r\n", "\n")
+        local norm_curr = current_content:gsub("\r\n", "\n")
+        
+        if norm_c ~= norm_curr then
+            local tmp_old = os.tmpname()
+            local tmp_new = os.tmpname()
+            local f_old = io.open(tmp_old, "w")
+            if f_old then f_old:write(norm_curr); f_old:close() end
+            local f_new = io.open(tmp_new, "w")
+            if f_new then f_new:write(norm_c); f_new:close() end
             
-            if info.replacements then
-                for _, rep in ipairs(info.replacements) do
-                    if rep.search and rep.replace then
-                        local escaped_search = rep.search:gsub("([%-%.%+%[%]%(%)%$%^%%%?%*])", "%%%1")
-                        local escaped_replace = rep.replace:gsub("%%", "%%%%")
-                        c = c:gsub(escaped_search, escaped_replace)
-                    end
-                end
+            local diff_out = run({"diff", "-u", tmp_old, tmp_new}).stdout
+            if not diff_out or diff_out == "" then
+                diff_out = "(Diff unavailable. Contents changed.)"
             end
+            msg.info("Changes in " .. target_path .. ":\n" .. diff_out)
+            os.remove(tmp_old)
+            os.remove(tmp_new)
             
-            local target_path = e_dest.."/"..(info.flatten_folders and out_file:match("[^/]+$") or out_file)
-            local current_content = ""
-            local old_f = io.open(target_path, "r")
-            if old_f then
-                current_content = old_f:read("*all")
-                old_f:close()
-            end
-            
-            table.insert(current_installed, to_relative(target_path))
-            if c ~= current_content then
-                local f = io.open(target_path, "w")
-                if f then
-                    f:write(c)
-                    f:close()
-                    updated_count = updated_count + 1
-                else
-                    msg.error("Failed to write to " .. target_path)
-                end
+            local f = io.open(target_path, "w")
+            if f then
+                f:write(c)
+                f:close()
+                updated_count = updated_count + 1
+            else
+                msg.error("Failed to write to " .. target_path)
             end
         end
+        
+        if not is_dir then break end
     end
     return updated_count
 end
@@ -249,13 +257,14 @@ end
     Update all scripts
 ]]
 function update_all()
+    local script_dir = mp.get_script_directory()
+    if not script_dir or script_dir == "" then script_dir = expand_path("~~/scripts/scripts-manager/mpv_manager") end
+    
+    local manager_json_path = script_dir .. "/manager.json"
+    local installed_path = script_dir .. "/installed.json"
+    
     -- Open the manager.json file
-    local f = io.open(
-        mp.command_native(
-            {"expand-path", "~~/scripts/scripts-manager/mpv_manager/manager.json"}
-        ),
-        "r"
-    )
+    local f = io.open(manager_json_path, "r")
 
     -- Check if the file was opened successfully
     if f then
@@ -274,7 +283,7 @@ function update_all()
     local total_updated = 0
     current_installed = {}
     
-    local installed_path = mp.command_native({"expand-path", "~~/scripts/scripts-manager/mpv_manager/installed.json"})
+    -- Read installed.json
     local old_installed = {}
     local f_inst = io.open(installed_path, "r")
     if f_inst then
@@ -345,6 +354,21 @@ local function run_update(source)
         return
     end
 
+    local force = os.getenv("MPV_MANAGER_ONESHOT") == "1"
+    local cache_base = expand_path("~~/.manager-cache")
+    local lockfile = cache_base .. "/last_update.txt"
+    
+    if not force then
+        local f = io.open(lockfile, "r")
+        if f then
+            local last_update = tonumber(f:read("*all"))
+            f:close()
+            if last_update and (os.time() - last_update < 86400) then
+                return
+            end
+        end
+    end
+
     update_running = true
     mp.osd_message("Manager: updating scripts...", 2)
     coroutine.wrap(function()
@@ -352,7 +376,16 @@ local function run_update(source)
         update_running = false
         mp.osd_message("Manager: update complete", 3)
         msg.info(source .. " update complete!")
-        if os.getenv("MPV_MANAGER_ONESHOT") == "1" then
+        
+        -- Write new timestamp
+        os.execute('mkdir -p "' .. cache_base .. '"')
+        local f = io.open(lockfile, "w")
+        if f then
+            f:write(tostring(os.time()))
+            f:close()
+        end
+        
+        if force then
             mp.command("quit")
         end
     end)()
