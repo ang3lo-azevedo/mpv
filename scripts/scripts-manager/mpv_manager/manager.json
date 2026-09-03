@@ -149,6 +149,10 @@
             {
                 "search": ":gsub(\";$\", \"\")",
                 "replace": ":gsub(\":$\", \"\")"
+            },
+            {
+                "search": "local svp_enabled = meta.svp_enabled",
+                "replace": "local svp_enabled = true -- Use the VapourSynth/MVTools interpolation pipeline"
             }
         ]
     },
@@ -207,10 +211,6 @@
         "dest": "~~/svp_anime.vpy",
         "branch": "main",
         "replacements": [
-            {
-                "search": "core = vs.core",
-                "replace": "core = vs.core\nsvp_plugin_dir = os.environ.get('SVP4_PLUGIN_DIR', os.path.join(os.path.dirname(__file__), 'svp-plugins'))\nfor plugin_name in ('libsvpflow1.so', 'libsvpflow2.so'):\n    plugin_path = os.path.join(svp_plugin_dir, plugin_name)\n    if os.path.exists(plugin_path):\n        core.std.LoadPlugin(path=plugin_path)"
-            }
         ]
     },
     {
@@ -220,10 +220,6 @@
         "dest": "~~/svp_cinema.vpy",
         "branch": "main",
         "replacements": [
-            {
-                "search": "core = vs.core",
-                "replace": "core = vs.core\nsvp_plugin_dir = os.environ.get('SVP4_PLUGIN_DIR', os.path.join(os.path.dirname(__file__), 'svp-plugins'))\nfor plugin_name in ('libsvpflow1.so', 'libsvpflow2.so'):\n    plugin_path = os.path.join(svp_plugin_dir, plugin_name)\n    if os.path.exists(plugin_path):\n        core.std.LoadPlugin(path=plugin_path)"
-            }
         ]
     },
     {

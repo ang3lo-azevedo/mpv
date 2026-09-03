@@ -16,9 +16,11 @@
 
 import logging
 import os
-import multiprocessing
 import math
 import sys
+svp_python_lib = os.path.join(os.path.dirname(__file__), 'svp-runtime', 'python', 'lib')
+if os.path.isdir(svp_python_lib):
+    sys.path.insert(0, svp_python_lib)
 from fractions import Fraction
 from subprocess import call
 import vapoursynth as vs
@@ -74,12 +76,8 @@ config = load_config()
 
 # Apply to core
 core = vs.core
-svp_plugin_dir = os.environ.get('SVP4_PLUGIN_DIR', os.path.join(os.path.dirname(__file__), 'svp-plugins'))
-for plugin_name in ('libsvpflow1.so', 'libsvpflow2.so'):
-    plugin_path = os.path.join(svp_plugin_dir, plugin_name)
-    if os.path.exists(plugin_path):
-        core.std.LoadPlugin(path=plugin_path)
-cpu = multiprocessing.cpu_count()
+# SVP4 flow loading is intentionally disabled; use the MVTools fallback below.
+cpu = os.cpu_count() or 1
 
 # threads: 'auto' => half cores capped at 6; explicit int otherwise
 nt_cfg = config.get('num_threads', 'auto')
@@ -150,7 +148,7 @@ def get_svp_params(clip):
     
     if mpix > 6:    # 4K+ content
         return {
-            'super': "{pel:1,scale:{up:0},gpu:1,full:false,rc:false}",
+            'super': "{pel:1,scale:{up:0},gpu:0,full:false,rc:false}",
             'analyse': "{block:{overlap:0},main:{search:{coarse:{distance:-6,bad:{sad:2000}},type:2,distance:-6}},refine:[{thsad:200}]}",
             'algo': 13,
             'format': vs.YUV420P8,
@@ -159,7 +157,7 @@ def get_svp_params(clip):
     else:   # 1080p and below
         block_size = calculate_optimal_block_size(width)
         return {
-            'super': "{pel:1,scale:{up:2},gpu:1,full:false,rc:false}",
+            'super': "{pel:1,scale:{up:2},gpu:0,full:false,rc:false}",
             'analyse': "{block:{w:" + str(block_size) + ",overlap:1},main:{search:{coarse:{distance:-10,bad:{sad:1800}},type:2,distance:-10}},refine:[{thsad:220}]}",
             'algo': 13,
             'format': vs.YUV420P8,
