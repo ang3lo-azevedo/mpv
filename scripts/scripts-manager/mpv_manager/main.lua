@@ -78,6 +78,7 @@ local function to_relative(abs_path)
 end
 
 local current_installed = {}
+local update_targets = os.getenv("MPV_MANAGER_TARGETS")
 
 -- Cache a directory
 function cache(path)
@@ -284,37 +285,50 @@ function update_all()
 
     for i, info in ipairs(config) do
         local script_path = info.dest:match("~~/(.*)")  -- Get path after ~~/
-        local updated = update(info)
-        if type(updated) == "number" then
-            total_updated = total_updated + updated
+        local selected = not update_targets
+        if update_targets and info.dest then
+            for target in string.gmatch(update_targets, "[^,]+") do
+                if info.dest == target then
+                    selected = true
+                    break
+                end
+            end
         end
-        msg.info("Checked " .. script_path .. ": Updated " .. (type(updated) == "number" and updated or 0) .. " files")
+        if selected then
+            local updated = update(info)
+            if type(updated) == "number" then
+                total_updated = total_updated + updated
+            end
+            msg.info("Checked " .. script_path .. ": Updated " .. (type(updated) == "number" and updated or 0) .. " files")
+        end
     end
     
-    -- Cleanup orphans
-    local current_set = {}
-    for _, path in ipairs(current_installed) do
-        current_set[path] = true
-    end
-
-    local mpv_dir = mp.command_native({"expand-path", "~~/"})
-    for _, path in ipairs(old_installed) do
-        if not current_set[path] then
-            local abs_path = mpv_dir .. "/" .. path
-            os.remove(abs_path)
-            msg.info("Removed orphan: " .. path)
-            remove_empty_dirs_lua(abs_path)
+    if not update_targets then
+        -- Cleanup orphans
+        local current_set = {}
+        for _, path in ipairs(current_installed) do
+            current_set[path] = true
         end
-    end
 
-    -- Save new installed list
-    local f_out = io.open(installed_path, "w")
-    if f_out then
-        local j_out = utils.format_json(current_installed)
-        if j_out then
-            f_out:write(j_out)
+        local mpv_dir = mp.command_native({"expand-path", "~~/"})
+        for _, path in ipairs(old_installed) do
+            if not current_set[path] then
+                local abs_path = mpv_dir .. "/" .. path
+                os.remove(abs_path)
+                msg.info("Removed orphan: " .. path)
+                remove_empty_dirs_lua(abs_path)
+            end
         end
-        f_out:close()
+
+        -- Save new installed list
+        local f_out = io.open(installed_path, "w")
+        if f_out then
+            local j_out = utils.format_json(current_installed)
+            if j_out then
+                f_out:write(j_out)
+            end
+            f_out:close()
+        end
     end
     
     if total_updated > 0 then
@@ -323,8 +337,30 @@ function update_all()
     end
 end
 
+local update_running = false
+
+local function run_update(source)
+    if update_running then
+        mp.osd_message("Manager: update already running", 3)
+        return
+    end
+
+    update_running = true
+    mp.osd_message("Manager: updating scripts...", 2)
+    coroutine.wrap(function()
+        update_all()
+        update_running = false
+        mp.osd_message("Manager: update complete", 3)
+        msg.info(source .. " update complete!")
+        if os.getenv("MPV_MANAGER_ONESHOT") == "1" then
+            mp.command("quit")
+        end
+    end)()
+end
+
 msg.info("Starting background update of all scripts...")
-coroutine.wrap(function()
-    update_all()
-    msg.info("Background update complete!")
-end)()
+run_update("Background")
+
+mp.add_key_binding("ctrl+alt+u", "manager-update", function()
+    run_update("Manual")
+end)

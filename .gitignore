@@ -1,4 +1,7 @@
-*history.log
+history.log
+memo-history.log
+script-opts/anime.json
+script-opts/relations.json
 **/trakt-mpv/config.json
 **/anilistToken.txt
 cache/

@@ -48,7 +48,7 @@
             },
             {
                 "search": "show-text \"SVP Frame Rate Conversion\" 3000",
-                "replace": "show-text \"SVP Cinema Frame Rate Conversion\" 3000\nShift+F12\tvf toggle @SVP:vapoursynth=\"~~/svp_anime.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"SVP Anime Frame Rate Conversion\" 3000"
+                "replace": "show-text \"SVP Cinema: ${?vf==:OFF}${!vf==:ON}\" 3000\nShift+F12\tvf toggle @SVP:vapoursynth=\"~~/svp_anime.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"SVP Anime: ${?vf==:OFF}${!vf==:ON}\" 3000"
             }
         ]
     },
@@ -187,12 +187,6 @@
         ]
     },
     {
-        "git": "https://github.com/hacel/recent",
-        "whitelist": "recent.lua",
-        "dest": "~~/scripts/utils/recent/recent.lua",
-        "branch": "master"
-    },
-    {
         "git": "https://github.com/po5/mpv-auto-chapters",
         "whitelist": "autochapters/main.lua",
         "dest": "~~/scripts/utils/mpv-auto-chapters/mpv-auto-chapters.lua",
@@ -211,6 +205,23 @@
         "dest": "~~/svp_anime.vpy",
         "branch": "main",
         "replacements": [
+            {
+                "search": "interpolate_svp(processed_clip, svp_params, target_fps)",
+                "replace": "interpolate_mvtools(clip, target_fps)"
+            }
+        ]
+    },
+    {
+        "git": "https://github.com/allecsc/Stremio-Kai/",
+        "whitelist": "portable_config/mpv.conf",
+        "base_dir": "portable_config",
+        "dest": "~~/mpv.conf",
+        "branch": "main",
+        "replacements": [
+            {
+                "search": "osd-scale-by-window = yes",
+                "replace": "osd-scale-by-window = yes\nosd-align-x = center\nosd-align-y = center"
+            }
         ]
     },
     {
@@ -220,6 +231,10 @@
         "dest": "~~/svp_cinema.vpy",
         "branch": "main",
         "replacements": [
+            {
+                "search": "interpolate_svp(processed_clip, svp_params, target_fps)",
+                "replace": "interpolate_mvtools(clip, target_fps)"
+            }
         ]
     },
     {
