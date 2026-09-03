@@ -5,3 +5,4 @@ script-opts/relations.json
 **/anilistToken.txt
 cache/
 .manager-cache/
+LOG.txt

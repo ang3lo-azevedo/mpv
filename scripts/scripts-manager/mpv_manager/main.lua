@@ -159,10 +159,10 @@ function update(info)
     local f_test = io.open(repo_dir .. "/HEAD", "r")
     if f_test then
         f_test:close()
-        run({"git", "--git-dir="..repo_dir, "fetch", "origin", info.branch..":"..info.branch})
+        run({"git", "--git-dir="..repo_dir, "fetch", "--depth=1", "--filter=blob:none", "origin", info.branch..":"..info.branch})
     else
-        run({"git", "clone", "--bare", info.git, repo_dir})
-        run({"git", "--git-dir="..repo_dir, "fetch", "origin", info.branch..":"..info.branch})
+        run({"git", "clone", "--bare", "--depth=1", "--filter=blob:none", "--single-branch", "--branch="..info.branch, info.git, repo_dir})
+        run({"git", "--git-dir="..repo_dir, "fetch", "--depth=1", "--filter=blob:none", "origin", info.branch..":"..info.branch})
     end
     
     local files = {}
