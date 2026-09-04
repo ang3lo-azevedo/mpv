@@ -59,18 +59,8 @@ end
 
 -- Get the parent directory of a path
 function parent(path)
+    if not path or path == "" then return nil end
     return string.match(path, "(.*)[/\\]")
-end
-
-local function remove_empty_dirs_lua(path)
-    local p = parent(path)
-    while p and p ~= "" and p ~= "." do
-        local success, err = os.remove(p)
-        if not success then
-            break
-        end
-        p = parent(p)
-    end
 end
 
 local current_installed = {}
@@ -82,6 +72,22 @@ local function expand_path(path)
         return manager_config_dir .. "/" .. path:sub(4)
     end
     return mp.command_native({"expand-path", path})
+end
+
+local function remove_empty_dirs_lua(path)
+    local p = parent(path)
+    local root = expand_path("~~/"):gsub("[/\\]$", "")
+    while p and p ~= "" and p ~= "." do
+        local norm_p = p:gsub("[/\\]$", "")
+        if norm_p == root or #norm_p <= #root then
+            break
+        end
+        local success, err = os.remove(p)
+        if not success then
+            break
+        end
+        p = parent(p)
+    end
 end
 
 local function to_relative(abs_path)
@@ -102,6 +108,7 @@ end
 
 -- Create a directory
 function mkdir(path)
+    if not path or path == "" then return end
     if dir_cache[path] then return end
     cache(path)
     os.execute('mkdir -p "' .. path .. '"')

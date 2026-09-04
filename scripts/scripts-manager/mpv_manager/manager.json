@@ -48,7 +48,7 @@
             },
             {
                 "search": "show-text \"SVP Frame Rate Conversion\" 3000",
-                "replace": "show-text \"SVP Cinema: ${?vf==:OFF}${!vf==:ON}\" 3000\nShift+F12\tvf toggle @SVP:vapoursynth=\"~~/vapoursynth/svp_anime.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"SVP Anime: ${?vf==:OFF}${!vf==:ON}\" 3000"
+                "replace": "show-text \"SVP Cinema: ${?vf==:OFF}${!vf==:ON}\" 3000\nShift+F12\tvf toggle @SVP:vapoursynth=\"~~/vapoursynth/svp_anime.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"SVP Anime: ${?vf==:OFF}${!vf==:ON}\" 3000\n\n# MPV Manager\nCtrl+Alt+u script-binding manager-update"
             }
         ]
     },
@@ -169,6 +169,14 @@
             {
                 "search": "local svp_enabled = meta.svp_enabled",
                 "replace": "local svp_enabled = true -- Use the VapourSynth/MVTools interpolation pipeline"
+            },
+            {
+                "search": "vapoursynth=\"~~/svp_anime.vpy\"",
+                "replace": "vapoursynth=\"~~/vapoursynth/svp_anime.vpy\""
+            },
+            {
+                "search": "vapoursynth=\"~~/svp_cinema.vpy\"",
+                "replace": "vapoursynth=\"~~/vapoursynth/svp_cinema.vpy\""
             }
         ]
     },
@@ -237,6 +245,14 @@
             {
                 "search": "osd-scale-by-window = yes",
                 "replace": "osd-scale-by-window = yes\nosd-align-x = center\nosd-align-y = center"
+            },
+            {
+                "search": "osd-color=0.0/0.0/0.0/1.0",
+                "replace": "osd-color=1.0/1.0/1.0/1.0"
+            },
+            {
+                "search": "osd-outline-color=1.0/1.0/1.0/1.0",
+                "replace": "osd-outline-color=0.0/0.0/0.0/1.0"
             },
             {
                 "search": "log-file=LOG.txt",
