@@ -1,4 +1,4 @@
-*history.log
+*.log
 script-opts/anime.json
 script-opts/relations.json
 **/trakt-mpv/config.json

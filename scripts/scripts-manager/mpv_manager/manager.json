@@ -44,11 +44,11 @@
             },
             {
                 "search": "~~/svp_main.vpy",
-                "replace": "~~/svp_cinema.vpy"
+                "replace": "~~/vapoursynth/svp_cinema.vpy"
             },
             {
                 "search": "show-text \"SVP Frame Rate Conversion\" 3000",
-                "replace": "show-text \"SVP Cinema: ${?vf==:OFF}${!vf==:ON}\" 3000\nShift+F12\tvf toggle @SVP:vapoursynth=\"~~/svp_anime.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"SVP Anime: ${?vf==:OFF}${!vf==:ON}\" 3000"
+                "replace": "show-text \"SVP Cinema: ${?vf==:OFF}${!vf==:ON}\" 3000\nShift+F12\tvf toggle @SVP:vapoursynth=\"~~/vapoursynth/svp_anime.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"SVP Anime: ${?vf==:OFF}${!vf==:ON}\" 3000"
             }
         ]
     },
@@ -218,7 +218,7 @@
         "git": "https://github.com/allecsc/Stremio-Kai/",
         "whitelist": "portable_config/svp_anime.vpy",
         "base_dir": "portable_config",
-        "dest": "~~/svp_anime.vpy",
+        "dest": "~~/vapoursynth/svp_anime.vpy",
         "branch": "main",
         "replacements": [
             {
@@ -252,7 +252,7 @@
         "git": "https://github.com/allecsc/Stremio-Kai/",
         "whitelist": "portable_config/svp_cinema.vpy",
         "base_dir": "portable_config",
-        "dest": "~~/svp_cinema.vpy",
+        "dest": "~~/vapoursynth/svp_cinema.vpy",
         "branch": "main",
         "replacements": [
             {

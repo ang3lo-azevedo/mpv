@@ -146,8 +146,8 @@ local VF_FILTERS = {
     hqdn3d = '@HQDN3D_HIGH:lavfi=[hqdn3d=luma_spatial=5:chroma_spatial=5:luma_tmp=6:chroma_tmp=6]',
     bwdif = '@BWDIF:lavfi=[bwdif=mode=1:parity=auto:deint=all]',
     -- SVP interpolation (anime vs cinema)
-    svp_anime = '@SVP:vapoursynth="~~/svp_anime.vpy":buffered-frames=8:concurrent-frames=16',
-    svp_cinema = '@SVP:vapoursynth="~~/svp_cinema.vpy":buffered-frames=8:concurrent-frames=16'
+    svp_anime = '@SVP:vapoursynth="~~/vapoursynth/svp_anime.vpy":buffered-frames=8:concurrent-frames=16',
+    svp_cinema = '@SVP:vapoursynth="~~/vapoursynth/svp_cinema.vpy":buffered-frames=8:concurrent-frames=16'
 }
 
 -- Audio Presets (Audiophile / Non-Destructive)
