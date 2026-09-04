@@ -302,7 +302,7 @@ local function find_and_add_entries()
     if o.disabled then
         msg.debug("stopping: autoload disabled")
         return
-    elseif #dir == 0 then
+    elseif #dir == 0 or path:match("^https?://") or path:match("^magnet:") then
         msg.debug("stopping: not a local path")
         return
     end

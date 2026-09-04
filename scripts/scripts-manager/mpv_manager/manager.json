@@ -36,7 +36,7 @@
         "replacements": [
             {
                 "search": "q       \tquit",
-                "replace": "#q       \tquit"
+                "replace": "#q       \tquit\n\n# Mouse controls\nMBTN_LEFT cycle pause\nMBTN_LEFT_DBL cycle fullscreen"
             },
             {
                 "search": "`\t\t    script-message cycle-audio-preset",
@@ -111,8 +111,18 @@
             {
                 "search": "return \"python3\"",
                 "replace": "return \"mpv-python\""
+            },
+            {
+                "search": "local correction_overlay = require(\"correction_overlay\")",
+                "replace": "package.path = package.path .. \";\" .. mp.command_native({\"expand-path\", \"~~/script-modules/?.lua\"})\nlocal correction_overlay = require(\"correction_overlay\")"
             }
         ]
+    },
+    {
+        "git": "https://github.com/AzuredBlue/mpv-anilist-updater",
+        "whitelist": "anilistUpdater.py",
+        "dest": "~~/scripts/utils/tracking/anilistUpdater/anilistUpdater.py",
+        "branch": "main"
     },
     {
         "git": "https://github.com/allecsc/Stremio-Kai/",
@@ -231,6 +241,10 @@
             {
                 "search": "log-file=LOG.txt",
                 "replace": "log-file=~~/LOG.txt"
+            },
+            {
+                "search": "stream-lavf-o=reconnect=1,reconnect_streamed=1,reconnect_delay_max=5",
+                "replace": "stream-lavf-o=reconnect=1,reconnect_streamed=1,reconnect_delay_max=5\nforce-window=immediate"
             }
         ]
     },
@@ -271,7 +285,13 @@
         "git": "https://github.com/mpv-player/mpv",
         "whitelist": "tools/lua/autoload.lua",
         "dest": "~~/scripts/utils/autoload/autoload.lua",
-        "branch": "master"
+        "branch": "master",
+        "replacements": [
+            {
+                "search": "elseif #dir == 0 then",
+                "replace": "elseif #dir == 0 or path:match(\"^https?://\") or path:match(\"^magnet:\") then"
+            }
+        ]
     },
     {
         "git": "https://github.com/AzuredBlue/mpv-anilist-updater",

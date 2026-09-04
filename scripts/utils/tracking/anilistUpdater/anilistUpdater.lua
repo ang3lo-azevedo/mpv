@@ -26,6 +26,7 @@ SILENT_MODE: Boolean. If true, won't show OSD messages.
 
 local utils = require 'mp.utils'
 local mpoptions = require("mp.options")
+package.path = package.path .. ";" .. mp.command_native({"expand-path", "~~/script-modules/?.lua"})
 local correction_overlay = require("correction_overlay")
 
 local conf_name = "anilistUpdater.conf"
