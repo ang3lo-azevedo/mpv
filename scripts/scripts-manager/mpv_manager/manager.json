@@ -48,7 +48,7 @@
             },
             {
                 "search": "show-text \"SVP Frame Rate Conversion\" 3000",
-                "replace": "show-text \"SVP Cinema: ${?vf==:OFF}${!vf==:ON}\" 3000\nShift+F12\tvf toggle @SVP:vapoursynth=\"~~/vapoursynth/svp_anime.vpy\":buffered-frames=8:concurrent-frames=16 ; show-text \"SVP Anime: ${?vf==:OFF}${!vf==:ON}\" 3000\n\n# MPV Manager\nCtrl+Alt+u script-binding manager-update"
+                "replace": "script-message show-svp-status \"SVP Cinema\"\nShift+F12\tvf toggle @SVP:vapoursynth=\"~~/vapoursynth/svp_anime.vpy\":buffered-frames=8:concurrent-frames=16 ; script-message show-svp-status \"SVP Anime\"\n\n# MPV Manager\nCtrl+Alt+u script-binding manager-update"
             }
         ]
     },
