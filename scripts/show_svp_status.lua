@@ -13,6 +13,6 @@ mp.register_script_message("show-svp-status", function(name)
             end
         end
 
-        mp.osd_message(name .. ": " .. (is_on and "ON" or "OFF"), 3000)
+        mp.osd_message(name .. ": " .. (is_on and "ON" or "OFF"), 3)
     end)
 end)

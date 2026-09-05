@@ -256,7 +256,7 @@
             },
             {
                 "search": "log-file=LOG.txt",
-                "replace": "log-file=~~/LOG.txt"
+                "replace": "log-file=~~/LOG.txt\nsave-position-on-quit=yes\nwrite-filename-in-watch-later-config=yes"
             },
             {
                 "search": "stream-lavf-o=reconnect=1,reconnect_streamed=1,reconnect_delay_max=5",
@@ -289,7 +289,13 @@
         "git": "https://github.com/po5/memo",
         "whitelist": "memo.lua",
         "dest": "~~/scripts/utils/memo/memo.lua",
-        "branch": "master"
+        "branch": "master",
+        "replacements": [
+            {
+                "search": "if menu_shown and last_state and last_state.current_page == 1 then\n        show_history(options.entries, false, false, true)\n    end",
+                "replace": "if menu_shown then\n        memo_close()\n    end"
+            }
+        ]
     },
     {
         "git": "https://github.com/4e6/mpv-reload",

@@ -1186,8 +1186,8 @@ function file_load()
         dyn_menu_update()
     end
 
-    if menu_shown and last_state and last_state.current_page == 1 then
-        show_history(options.entries, false, false, true)
+    if menu_shown then
+        memo_close()
     end
 end
 
