@@ -1,427 +1,601 @@
 """
-mpv-anilist-updater: Automatically updates your AniList based on the file you just watched in MPV.
+mpv-anilist-updater: Auto-update AniList based on MPV file watching.
 
-This script parses anime filenames, determines the correct AniList entry, and updates your progress
-or status accordingly.
+Parses anime filenames, finds AniList entries, and updates progress/status.
 """
 
 # Configuration options for anilistUpdater (set in anilistUpdater.conf):
-#
-# DIRECTORIES: List or comma/semicolon-separated string. The directories the script will work on. Leaving it empty will make it work on every video you watch with mpv. Example: DIRECTORIES = ["D:/Torrents", "D:/Anime"]
-#
-# UPDATE_PERCENTAGE: Integer (0-100). The percentage of the video you need to watch before it updates AniList automatically. Default is 85 (usually before the ED of a usual episode duration).
-#
-# SET_COMPLETED_TO_REWATCHING_ON_FIRST_EPISODE: Boolean. If true, when watching episode 1 of a completed anime, set it to rewatching and update progress.
-#
-# UPDATE_PROGRESS_WHEN_REWATCHING: Boolean. If true, allow updating progress for anime set to rewatching. This is for if you want to set anime to rewatching manually, but still update progress automatically.
-#
-# SET_TO_COMPLETED_AFTER_LAST_EPISODE_CURRENT: Boolean. If true, set to COMPLETED after last episode if status was CURRENT.
-#
-# SET_TO_COMPLETED_AFTER_LAST_EPISODE_REWATCHING: Boolean. If true, set to COMPLETED after last episode if status was REPEATING (rewatching).
+#   DIRECTORIES: List or comma/semicolon-separated string. The directories the script will work on. Leaving it empty will make it work on every video you watch with mpv. Example: DIRECTORIES = ["D:/Torrents", "D:/Anime"]
+#   UPDATE_PERCENTAGE: Integer (0-100). The percentage of the video you need to watch before it updates AniList automatically. Default is 85 (usually before the ED of a usual episode duration).
+#   SET_COMPLETED_TO_REWATCHING_ON_FIRST_EPISODE: Boolean. If true, when watching episode 1 of a completed anime, set it to rewatching and update progress.
+#   UPDATE_PROGRESS_WHEN_REWATCHING: Boolean. If true, allow updating progress for anime set to rewatching. This is for if you want to set anime to rewatching manually, but still update progress automatically.
+#   SET_TO_COMPLETED_AFTER_LAST_EPISODE_CURRENT: Boolean. If true, set to COMPLETED after last episode if status was CURRENT.
+#   SET_TO_COMPLETED_AFTER_LAST_EPISODE_REWATCHING: Boolean. If true, set to COMPLETED after last episode if status was REPEATING (rewatching).
+#   ADD_ENTRY_IF_MISSING: Boolean. If true, automatically add anime to your list when an update is triggered (i.e., when you've watched enough of the episode). Default is False.
+#   CACHE_REFRESH_RATE: Integer (hours). How long a normal cache entry is valid, in hours. Default is 24 (1 day).
+#   CACHE_MODE: String. Either "NORMAL" or "SLIDING". If set to "SLIDING", sliding expiration behaviour will be applied to every cached entry. Default is "NORMAL".
 
-import sys
-import os
-import webbrowser
-import time
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+# IMPORTS
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+
 import hashlib
-import re
 import json
+import os
+import re
+import sys
+import time
+from collections.abc import Iterator
+from dataclasses import dataclass
+from typing import Any, ClassVar
+
 import requests
-from guessit import guessit
+from guessit import guessit  # type: ignore
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+# DATA CLASSES
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+
+
+@dataclass
+class SeasonEpisodeInfo:
+    """Season and episode info for absolute numbering."""
+
+    season_id: int | None
+    season_title: str | None
+    progress: int | None
+    episodes: int | None
+    relative_episode: int | None
+
+
+@dataclass
+class AnimeInfo:
+    """Anime information including progress and status."""
+
+    anime_id: int | None
+    anime_name: str | None
+    current_progress: int | None
+    total_episodes: int | None
+    file_progress: int | None
+    current_status: str | None
+    mal_id: int | None = None
+
+    # Can not specify the type further. Causes some of the the variables type checking to be unhappy.
+    def __iter__(self) -> Iterator[Any]:  # fmt: off
+        """Allow tuple unpacking of AnimeInfo."""
+        return iter((self.anime_id, self.anime_name, self.current_progress, self.total_episodes, self.file_progress, self.current_status, self.mal_id))  # fmt: off
+
+
+@dataclass
+class FileInfo:
+    """Parsed filename information."""
+
+    name: str
+    episode: int
+    year: str
+    file_format: str | None
+
+    def __iter__(self) -> Iterator[Any]:
+        """Allow tuple unpacking of FileInfo."""
+        return iter((self.name, self.episode, self.year, self.file_format))
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+# GRAPHQL QUERIES
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+
+
+class AniListQueries:
+    """GraphQL queries for AniList API operations."""
+
+    # Query to search for anime with optional filters
+    # Variables: search (String), year (FuzzyDateInt), page (Int), format (MediaFormat)
+    SEARCH_ANIME = """
+        query($search: String, $year: FuzzyDateInt, $page: Int, $format_in: [MediaFormat]) {
+            GlobalSearch: Page(page: $page, perPage: 20) {
+                media (search: $search, type: ANIME, startDate_greater: $year, format_in: $format_in, status_not:NOT_YET_RELEASED) {
+                    id
+                    idMal
+                    title { romaji, english }
+                    season
+                    seasonYear
+                    episodes
+                    duration
+                    format
+                    status
+                    mediaListEntry {
+                        status
+                        progress
+                        media {
+                            episodes
+                        }
+                    }
+                    relations {
+                        edges {
+                            relationType
+                            node {
+                                id
+                                format
+                                title {
+                                    romaji
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            UserSearch: Page(page: $page, perPage: 20) {
+                media (search: $search, type: ANIME, startDate_greater: $year, format_in: $format_in, status_not:NOT_YET_RELEASED, onList: true) {
+                    id
+                    idMal
+                    title { romaji, english }
+                    season
+                    seasonYear
+                    episodes
+                    duration
+                    format
+                    status
+                    startDate { year month day }
+                    mediaListEntry {
+                        status
+                        progress
+                        media {
+                            episodes
+                        }
+                    }
+                    relations {
+                        edges {
+                            relationType
+                            node {
+                                id
+                                format
+                                title {
+                                    romaji
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    """
+
+    # Mutation to save/update media list entry (works for both adding and updating)
+    # Variables: mediaId (Int), progress (Int), status (MediaListStatus)
+    SAVE_MEDIA_LIST_ENTRY = """
+        mutation ($mediaId: Int, $progress: Int, $status: MediaListStatus) {
+            SaveMediaListEntry (mediaId: $mediaId, progress: $progress, status: $status) {
+                status
+                id
+                progress
+                mediaId
+            }
+        }
+    """
+
+    # Query to get anime by AniList ID
+    GET_ANIME_BY_ID = """
+        query($id: Int) {
+            Media(id: $id, type: ANIME) {
+                id
+                idMal
+                title { romaji, english }
+                episodes
+                mediaListEntry {
+                    status
+                    progress
+                }
+            }
+        }
+    """
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+# MAIN ANILIST UPDATER CLASS
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+
 
 class AniListUpdater:
-    """
-    Handles AniList authentication, file parsing, API requests, and updating anime progress/status.
-    """
-    ANILIST_API_URL = 'https://graphql.anilist.co'
-    TOKEN_PATH = os.path.join(os.path.dirname(__file__), 'anilistToken.txt')
-    CACHE_PATH = os.path.join(os.path.dirname(__file__), 'cache.json')
-    OPTIONS = "--excludes country --excludes language --type episode"
-    CACHE_REFRESH_RATE =  24 * 60 * 60
+    """AniList authentication, file parsing, API requests, and progress updates."""
+
+    ANILIST_API_URL: str = "https://graphql.anilist.co"
+    TOKEN_PATH: str = os.path.join(os.path.dirname(__file__), "anilistToken.txt")
+    CACHE_PATH: str = os.path.join(os.path.dirname(__file__), "cache.json")
+    OPTIONS: ClassVar[dict[str, Any]] = {"excludes": ["country", "language"]}
+    CACHE_REFRESH_RATE: int = 24 * 60 * 60
+    CORRECTED_CACHE_REFRESH_RATE: int = 28 * 24 * 60 * 60
+
+    # CACHE_MODE: "NORMAL" (default) or "SLIDING". When "SLIDING", apply sliding
+    # expiration to all cache entries.
+    CACHE_MODE: str = "NORMAL"
+
+    _CHARS_TO_REPLACE: str = r'\/:!*?"<>|._-'
+    # Matches any of the chars, only if not followed by a whitespace and a digit.
+    CLEAN_PATTERN: str = rf"(?: - Movie)|[{re.escape(_CHARS_TO_REPLACE)}](?!\s*\d)"
+    VERSION_REGEX: re.Pattern[str] = re.compile(r"(E\d+)v\d")
+    SEASON_EPISODE_REGEX: re.Pattern[str] = re.compile(
+        r"\b(?:season\s*|s)(\d+)\s*[-_ ]\s*(\d{1,4})\b", re.IGNORECASE
+    )
+
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
+    # INITIALIZATION & TOKEN HANDLING
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
 
     # Load token
-    def __init__(self, options, action):
+    def __init__(self, options: dict[str, Any]) -> None:
         """
-        Initializes the AniListUpdater, loading the access token.
+        Initialize AniListUpdater with configuration.
+
+        Args:
+            options (dict[str, Any]): Configuration options.
         """
-        self.access_token = self.load_access_token()
-        self.options = options
-        self.ACTION = action
-        self._cache = None
+        self.access_token: str | None = self._load_access_token()
+        self.options: dict[str, Any] = options
+        self._cache: dict[str, Any] | None = None
+        # Convert CACHE_REFRESH_RATE from hours to seconds.
+        try:
+            hours = float(self.options.get("CACHE_REFRESH_RATE", self.CACHE_REFRESH_RATE // 3600))
+            self.CACHE_REFRESH_RATE = int(hours * 3600)
+        except Exception:
+            self.CACHE_REFRESH_RATE = AniListUpdater.CACHE_REFRESH_RATE
+
+        self.CORRECTED_CACHE_REFRESH_RATE = AniListUpdater.CORRECTED_CACHE_REFRESH_RATE
+
+        self.CACHE_MODE = str(self.options.get("CACHE_MODE", self.CACHE_MODE)).upper()
 
     # Load token from anilistToken.txt
-    def load_access_token(self):
+    def _load_access_token(self) -> str | None:
         """
-        Loads access token in a single file read.
-        Token file formats supported:
-          - token_only
-          - user_id:token (legacy - user_id will be removed)
-          (legacy cache lines with ';;' are also cleaned up if found)
+        Load access token from file.
+
         Returns:
-            str or None: access_token or None
+            str | None: Access token or None if not found.
         """
         try:
             if not os.path.exists(self.TOKEN_PATH):
                 return None
-            with open(self.TOKEN_PATH, 'r', encoding='utf-8') as f:
+            with open(self.TOKEN_PATH, encoding="utf-8") as f:
                 lines = f.read().splitlines()
             if not lines:
                 return None
 
-            # Check for legacy formats and clean them up if found
-            has_legacy_cache = any(';;' in ln for ln in lines)
-            has_legacy_user_id = ':' in lines[0] and lines[0].split(':', 1)[0].isdigit()
-
-            # Cleans up the file and returns the token directly
-            if has_legacy_cache or has_legacy_user_id:
-                return self.cleanup_legacy_formats(lines, has_legacy_user_id)
-
-            # If no legacy formats, the first line should have the token.
+            # The first line should have the token.
             return lines[0].strip()
 
         except Exception as e:
-            print(f'Error reading access token: {e}')
+            print(f"Error reading access token: {e}")
             return None
 
-    def cleanup_legacy_formats(self, lines, has_legacy_user_id):
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
+    # CACHE MANAGEMENT
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
+
+    def _hash_path(self, path: str) -> str:
         """
-        Removes legacy cache entries and user_id from token file using already-read lines.
+        Generate SHA256 hash of path.
+
         Args:
-            lines (list): The lines already read from the token file.
-            has_legacy_user_id (bool): Whether the first line has user_id:token format.
-        """
-        try:
-            header = lines[0] if lines else ''
+            path (str): Path to hash.
 
-            # Extract just the token if it's in user_id:token format
-            if has_legacy_user_id and ':' in header:
-                token = header.split(':', 1)[1].strip()
-            else:
-                token = header.strip()
-
-            # Rewrite token file with just the token, removing user_id and cache lines
-            with open(self.TOKEN_PATH, 'w', encoding='utf-8') as f:
-                f.write(token + ('\n' if token else ''))
-
-            lines = token
-
-            if has_legacy_user_id:
-                print('Cleaned up legacy user_id from token file.')
-            if any(';;' in ln for ln in lines):
-                print('Cleaned up legacy cache entries from token file.')
-        except Exception as e:
-            print(f'Legacy format cleanup failed: {e}')
-
-        return lines
-
-
-    def cache_to_file(self, path, guessed_name, absolute_progress, result):
-        """
-        Stores/updates a structured cache entry in cache.json.
-        Cache schema: hash -> { guessed_name, anime_id, current_progress, total_episodes, current_status, ttl }
-        ttl is an absolute epoch time (expiry moment).
-        Args:
-            path (str): The file path.
-            guessed_name (str): The guessed anime name.
-            result (tuple): The result to cache (anime_id, anime_name, current_progress, total_episodes, relative_progress, current_status).
-        """
-        try:
-            dir_hash = self.hash_path(os.path.dirname(path))
-            cache = self.load_cache()
-            
-            anime_id, _, current_progress, total_episodes, relative_progress, current_status = result
-
-            now = time.time()
-
-            cache[dir_hash] = {
-                'guessed_name': guessed_name,
-                'anime_id': anime_id,
-                'current_progress': current_progress,
-                'relative_progress': f"{absolute_progress}->{relative_progress}",
-                'total_episodes': total_episodes,
-                'current_status': current_status,
-                'ttl': now + self.CACHE_REFRESH_RATE
-            }
-
-            self.save_cache(cache)
-        except Exception as e:
-            print(f'Error trying to cache {result}: {e}')
-
-    def hash_path(self, path):
-        """
-        Returns a SHA256 hash of the given path.
-        Args:
-            path (str): The path to hash.
         Returns:
-            str: The hashed path.
+            str: Hashed path.
         """
-        return hashlib.sha256(path.encode('utf-8')).hexdigest()
+        return hashlib.sha256(path.encode("utf-8")).hexdigest()
 
-    def check_and_clean_cache(self, path, guessed_name):
+    def cache_to_file(self, path: str, guessed_name: str, absolute_progress: int, result: AnimeInfo) -> None:
         """
-        Returns structured cache entry if valid. Cleans expired entries.
-        Returns (entry_dict or None).
+        Store/update cache entry for anime information.
+
         Args:
-            path (str): The path to the media file.
-            guessed_name (str): The guessed name of the anime.
+            path (str): File path.
+            guessed_name (str): Guessed anime name.
+            absolute_progress (int): Absolute episode number.
+            result (AnimeInfo): Anime information to cache.
         """
-        try:
-            cache = self.load_cache()
-            now = time.time()
-            changed = False
-            # Purge expired
-            for k, v in list(cache.items()):
-                if v.get('ttl', 0) < now:
-                    cache.pop(k, None)
+        dir_hash = self._hash_path(os.path.dirname(path))
+        cache = self.load_cache()
+        existing_entry = cache.get(dir_hash, {})
+        is_corrected = bool(existing_entry.get("corrected", False))
+
+        anime_id, _, current_progress, total_episodes, relative_progress, current_status, mal_id = result
+
+        now = time.time()
+        ttl_refresh_rate = self.CORRECTED_CACHE_REFRESH_RATE if is_corrected else self.CACHE_REFRESH_RATE
+
+        cache[dir_hash] = {
+            "guessed_name": guessed_name,
+            "anime_id": anime_id,
+            "mal_id": mal_id,
+            "current_progress": current_progress,
+            "relative_progress": f"{absolute_progress}->{relative_progress}",
+            "total_episodes": total_episodes,
+            "current_status": current_status,
+            "corrected": is_corrected,
+            "ttl": now + ttl_refresh_rate,
+        }
+
+        self.save_cache(cache)
+
+    def check_and_clean_cache(self, path: str, guessed_name: str) -> dict[str, Any] | None:
+        """
+        Get valid cache entry and clean expired entries.
+
+        Args:
+            path (str): Path to media file.
+            guessed_name (str): Guessed anime name.
+
+        Returns:
+            dict[str, Any] | None: Cache entry or None if not found/valid.
+        """
+        cache = self.load_cache()
+        now = time.time()
+        changed = False
+
+        # Purge expired
+        for k, v in list(cache.items()):
+            if v.get("ttl", 0) < now:
+                cache.pop(k, None)
+                changed = True
+
+        dir_hash = self._hash_path(os.path.dirname(path))
+        entry = cache.get(dir_hash)
+
+        if entry and entry.get("guessed_name") == guessed_name:
+            # Determine whether to apply sliding expiration.
+            apply_sliding = self.CACHE_MODE == "SLIDING" or entry.get("corrected", False)
+
+            if apply_sliding:
+                # Choose refresh window based on whether the entry is corrected.
+                refresh_rate = (
+                    self.CORRECTED_CACHE_REFRESH_RATE if entry.get("corrected", False) else self.CACHE_REFRESH_RATE
+                )
+                # If close to expiration (within half of its TTL), extend it.
+                if entry.get("ttl", 0) <= now + (refresh_rate // 2):
+                    entry["ttl"] = now + refresh_rate
+                    cache[dir_hash] = entry
                     changed = True
+
             if changed:
                 self.save_cache(cache)
 
-            dir_hash = self.hash_path(os.path.dirname(path))
-            entry = cache.get(dir_hash)
+            return entry
 
-            if entry and entry.get('guessed_name') == guessed_name:
-                return entry
-            
-            return None
-        except Exception as e:
-            print(f'Error trying to read cache file: {e}')
-            return None
+        if changed:
+            self.save_cache(cache)
 
+        return None
 
-    def load_cache(self):
+    def load_cache(self) -> dict[str, Any]:
         """
-        Loads the cache from the CACHE_PATH JSON file with lazy loading.
-        Returns the cached data if already loaded, otherwise loads from file.
-        Returns an empty dictionary if the file does not exist or an error occurs.
+        Load cache from JSON file with lazy loading.
+
+        Returns:
+            dict[str, Any]: Cache data or empty dict if file doesn't exist.
         """
         if self._cache is None:
             try:
                 if not os.path.exists(self.CACHE_PATH):
                     self._cache = {}
                 else:
-                    with open(self.CACHE_PATH, 'r', encoding='utf-8') as f:
+                    with open(self.CACHE_PATH, encoding="utf-8") as f:
                         self._cache = json.load(f)
             except Exception:
                 self._cache = {}
+        # At this point, self._cache is guaranteed to be a dict
+        assert self._cache is not None
         return self._cache
 
-    def save_cache(self, cache):
+    def save_cache(self, cache: dict[str, Any]) -> None:
         """
-        Saves the cache dictionary to the CACHE_PATH JSON file and updates the local cache.
+        Save cache dictionary to JSON file.
+
         Args:
-            cache (dict): The cache data to save.
+            cache (dict[str, Any]): Cache data to save.
         """
         try:
-            with open(self.CACHE_PATH, 'w', encoding='utf-8') as f:
+            with open(self.CACHE_PATH, "w", encoding="utf-8") as f:
                 json.dump(cache, f, ensure_ascii=False, indent=2)
             # Keep local cache in sync
             self._cache = cache
         except Exception as e:
-            print(f'Failed saving cache.json: {e}')
+            print(f"Failed saving cache.json: {e}")
+
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
+    # API COMMUNICATION
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
 
     # Function to make an api request to AniList's api
-    def make_api_request(self, query, variables=None, access_token=None):
+    def _make_api_request(
+        self, query: str, variables: dict[str, Any] | None = None, access_token: str | None = None
+    ) -> dict[str, Any]:
         """
-        Makes a POST request to the AniList GraphQL API.
-        Args:
-            query (str): The GraphQL query string.
-            variables (dict, optional): Variables for the query.
-            access_token (str, optional): AniList access token.
-        Returns:
-            dict or None: The API response as a dict, or None on error.
-        """
-        headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
+        Make POST request to AniList GraphQL API.
 
+        Args:
+            query (str): GraphQL query string.
+            variables (dict[str, Any] | None): Query variables.
+            access_token (str | None): AniList access token.
+
+        Returns:
+            dict[str, Any]: API response data.
+
+        Raises:
+            Exception: If the API responds with a non-200 status code.
+        """
+        headers = {"Content-Type": "application/json", "Accept": "application/json"}
         if access_token:
-            headers['Authorization'] = f'Bearer {access_token}'
+            headers["Authorization"] = f"Bearer {access_token}"
 
-        response = requests.post(self.ANILIST_API_URL, json={'query': query, 'variables': variables}, headers=headers, timeout=10)
-        # print(f"Made an API Query with: Query: {query}\nVariables: {variables} ")
+        response = requests.post(
+            self.ANILIST_API_URL, json={"query": query, "variables": variables}, headers=headers, timeout=10
+        )
+
+        response_json = response.json()
+
         if response.status_code == 200:
-            return response.json()
-        print(f'API request failed: {response.status_code} - {response.text}\nQuery: {query}\nVariables: {variables}')
-        return None
+            return response_json
 
-    @staticmethod
-    def season_order(season):
-        """
-        Returns a numeric order for seasons for sorting.
-        Args:
-            season (str): The season name (WINTER, SPRING, SUMMER, FALL).
-        Returns:
-            int: The order value.
-        """
-        return {'WINTER': 1, 'SPRING': 2, 'SUMMER': 3, 'FALL': 4}.get(season, 5)
+        error_msg = response_json.get("errors", [{}])[0].get("message", "Unknown error")
+        osd_message(f"API request failed: {error_msg}")
+        raise Exception(f"API request failed: {response.status_code} - {error_msg}")
 
-    def filter_valid_seasons(self, seasons):
-        """
-        Filters and sorts valid TV seasons for absolute numbering logic.
-        Args:
-            seasons (list): List of season dicts from AniList API.
-        Returns:
-            list: Filtered and sorted list of seasons.
-        """
-        # Filter only to those whose format is TV and duration > 21 OR those who have no duration and are releasing.
-        # This is due to newly added anime having duration as null
-        seasons = [
-                    season for season in seasons
-                if ((season['duration'] is None and season['status'] == 'RELEASING') or
-                   (season['duration'] is not None and season['duration'] > 21)) and season['format'] == 'TV'
-                ]
-                # One of the problems with this filter is needing the format to be 'TV'
-                # But if accepted any format, it would also include many ONA's which arent included in absolute numbering.
-
-                # Sort them based on release date
-        seasons = sorted(seasons, key=lambda x: (x['seasonYear'] if x['seasonYear'] else float("inf"), self.season_order(x['season'] if x['season'] else float("inf"))))
-        return seasons
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
+    # SEASON & EPISODE HANDLING
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
 
     # Finds the season and episode of an anime with absolute numbering
-    def find_season_and_episode(self, seasons, absolute_episode):
+    def find_season_and_episode(
+        self, seasons: list[dict[str, Any]] | None, absolute_episode: int
+    ) -> SeasonEpisodeInfo:
         """
-        Finds the correct season and relative episode for an absolute episode number.
+        Find correct season and relative episode for absolute episode number.
+
         Args:
-            seasons (list): List of season dicts.
-            absolute_episode (int): The absolute episode number.
+            seasons (list[dict[str, Any]]): Season dicts.
+            absolute_episode (int): Absolute episode number.
+
         Returns:
-            tuple: (season_id, season_title, progress, episodes, relative_episode)
+            SeasonEpisodeInfo: Season and episode information.
         """
+        if seasons is None:
+            return SeasonEpisodeInfo(None, None, None, None, None)
+
         accumulated_episodes = 0
         for season in seasons:
-            season_episodes = season.get('episodes', 12) if season.get('episodes') else 12
+            season_episodes = season.get("episodes", 12) if season.get("episodes") else 12
 
             if accumulated_episodes + season_episodes >= absolute_episode:
-                return (
-                    season.get('id'),
-                    season.get('title', {}).get('romaji'),
-                    season.get('mediaListEntry', {}).get('progress') if season.get('mediaListEntry') else None,
-                    season.get('episodes'),
-                    absolute_episode - accumulated_episodes
+                return SeasonEpisodeInfo(
+                    season.get("id"),
+                    season.get("title", {}).get("romaji"),
+                    season.get("mediaListEntry", {}).get("progress") if season.get("mediaListEntry") else None,
+                    episodes=season.get("episodes"),
+                    relative_episode=absolute_episode - accumulated_episodes,
                 )
             accumulated_episodes += season_episodes
-        return (None, None, None, None, None)
+        return SeasonEpisodeInfo(None, None, None, None, None)
 
-    def handle_filename(self, filename):
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
+    # FILE PROCESSING & PARSING
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
+
+    def handle_filename(self, filename: str) -> None:
         """
-        Main entry point for handling a file: parses, checks cache, updates AniList, and manages cache.
+        Handle file processing for the info action: parse, check cache, output info.
+
         Args:
-            filename (str): The path to the video file.
+            filename (str): Path to video file.
         """
         file_info = self.parse_filename(filename)
-        cache_entry = self.check_and_clean_cache(filename, file_info.get('name'))
-
-        # If launching and cache has anime_id, we can skip search and open directly.
-        if self.ACTION == 'launch' and cache_entry and cache_entry.get('anime_id'):
-            anime_id = cache_entry['anime_id']
-            print(f'Opening AniList (cached) for guessed "{file_info.get("name")}": https://anilist.co/anime/{anime_id}')
-            webbrowser.open_new_tab(f'https://anilist.co/anime/{anime_id}')
-            return
+        cache_entry = self.check_and_clean_cache(filename, file_info.name)
+        result = None
 
         # Use cached data if available, otherwise fetch fresh info
         if cache_entry:
-
-            print(f'Using cached data for "{file_info.get("name")}"')
-
-            l, r = cache_entry.get('relative_progress', '0->0').split('->')
+            left, right = cache_entry.get("relative_progress", "0->0").split("->")
             # For example, if 19->7, that means that 19 absolute is equivalent to 7 relative to this season
-            # File episode 20: 18 - 19 + 7 = 8 relative to this season
-            offset = int(l) - int(r)
+            # File episode 20: 20 - 19 + 7 = 8 relative to this season
+            offset = int(left) - int(right)
 
-            relative_episode = file_info.get('episode') - offset
+            # Does it make sense if the offset is negative?
+            relative_episode = file_info.episode - offset
 
-            if 1 <= relative_episode <= cache_entry.get('total_episodes'):
-                # Reconstruct result tuple from cache
-                result = (
-                    cache_entry['anime_id'],
-                    cache_entry['guessed_name'],
-                    cache_entry['current_progress'],
-                    cache_entry['total_episodes'],
+            # For shows without a total episode count, just assume its correct as long as >= 1
+            if 1 <= relative_episode <= (cache_entry.get("total_episodes") or 999):
+                print(f'Using cached data for "{file_info.name}": {cache_entry["anime_id"]}')
+
+                # Reconstruct result from cache
+                result = AnimeInfo(
+                    cache_entry["anime_id"],
+                    cache_entry["guessed_name"],
+                    cache_entry["current_progress"],
+                    cache_entry["total_episodes"],
                     relative_episode,
-                    cache_entry['current_status']
+                    cache_entry["current_status"],
+                    cache_entry.get("mal_id"),
                 )
-            else:
-                result = self.get_anime_info_and_progress(file_info.get('name'), file_info.get('episode'), file_info.get('year'))
 
-        else:
-            result = self.get_anime_info_and_progress(file_info.get('name'), file_info.get('episode'), file_info.get('year'))
+        # At this point, we guess using the guessed name and other information
+        if result is None:
+            result = self.get_anime_info_and_progress(file_info)
 
-        result = self.update_episode_count(result)
+        # total_episodes can be None at first for ongoing anime. Refresh it for corrected entries
+        # and for sliding cache entries so stale missing metadata gets filled in.
+        should_refresh_missing_episodes = bool(
+            cache_entry
+            and (cache_entry.get("corrected", False) or self.CACHE_MODE == "SLIDING")
+            and result
+            and result.total_episodes is None
+        )
+        if should_refresh_missing_episodes:
+            result = self.refresh_anime_info_by_id(result)
 
-        if result and result[2] is not None:
-            # Update cache with latest data
-            self.cache_to_file(filename, file_info.get('name'), file_info.get('episode') , result)
-        return
+        if result:
+            payload = {
+                "anime_id": result.anime_id,
+                "mal_id": result.mal_id,
+                "anime_name": result.anime_name,
+                "episode": result.file_progress,
+                "current_progress": result.current_progress,
+                "total_episodes": result.total_episodes,
+                "current_status": result.current_status,
+                "guessed_name": file_info.name,
+                "absolute_episode": file_info.episode,
+            }
+            print(f"INFO:{json.dumps(payload)}")
+            if result.current_progress is not None:
+                self.cache_to_file(filename, file_info.name, file_info.episode, result)
 
-    # Hardcoded exceptions to fix detection
-    # Easier than just renaming my files 1 by 1 on Qbit
-    # Every exception I find will be added here
-    def fix_filename(self, path_parts):
+    # Attempt to improve detection
+    def fix_filename(self, path_parts: list[str]) -> list[str]:
         """
-        Applies hardcoded exceptions and fixes to the filename and folder structure for better title detection.
+        Apply hardcoded fixes to filename/folder structure for better detection.
+
         Args:
-            path_parts (list): List of path components.
+            path_parts (list[str]): Path components.
+
         Returns:
-            list: Modified path components.
+            list[str]: Modified path components.
         """
-        guess = guessit(path_parts[-1], self.OPTIONS) # Simply easier for fixing the filename if we have what it is detecting.
-
-        path_parts[-1] = os.path.splitext(path_parts[-1])[0]
-        pattern = r'[\\\/:!\*\?"<>\|\._-]'
-
-        title_depth = -1
-
-        # Fix from folders if the everything is not in the filename
-        if 'title' not in guess:
-            # Depth=2
-            for depth in range(2, min(4, len(path_parts))):
-                folder_guess = guessit(path_parts[-depth], self.OPTIONS)
-                if 'title' in folder_guess:
-                    guess['title'] = folder_guess['title']
-                    title_depth = -depth
-                    break
-
-        if 'title' not in guess:
-            print(f"Couldn't find title in filename '{path_parts[-1]}'! Guess result: {guess}")
-            return path_parts
-
-        # Only clean up titles for some series
-        cleanup_titles = ['Ranma', 'Chi', 'Bleach', 'Link Click']
-        if any(title in guess['title'] for title in cleanup_titles):
-            path_parts[title_depth] = re.sub(pattern, ' ', path_parts[title_depth])
-            path_parts[title_depth] = " ".join(path_parts[title_depth].split())
-
-        if 'Centimeters per Second' == guess['title'] and 5 == guess.get('episode', 0):
-            path_parts[title_depth] = path_parts[title_depth].replace(' 5 ', ' Five ')
-            # For some reason AniList has this film in 3 parts.
-            path_parts[title_depth] = path_parts[title_depth].replace('per Second', 'per Second 3')
+        # Before using guessit, clean up the filename
+        path_parts[-1] = re.sub(self.CLEAN_PATTERN, " ", path_parts[-1])
+        path_parts[-1] = " ".join(path_parts[-1].split())
 
         # Remove 'v2', 'v3'... from the title since it fucks up with episode detection
-        match = re.search(r'(E\d+)v\d', path_parts[title_depth])
+        match = self.VERSION_REGEX.search(path_parts[-1])
         if match:
             episode = match.group(1)
-            path_parts[title_depth] = path_parts[title_depth].replace(match.group(0), episode)
+            path_parts[-1] = path_parts[-1].replace(match.group(0), episode)
+
+        # Convert "Season 2 - 02", "Season 2 02", "S2 - 02", etc. into "S2 E02"
+        # so GuessIt doesn't mistake it for a season range or break titles with numbers
+        path_parts[-1] = self.SEASON_EPISODE_REGEX.sub(r"S\1 E\2", path_parts[-1])
 
         return path_parts
 
     # Parse the file name using guessit
-    def parse_filename(self, filepath):
+    def parse_filename(self, filepath: str) -> FileInfo:
         """
-        Parses the filename and folder structure to extract anime title, episode, season, and year.
+        Parse filename/folder structure to extract anime info.
+
         Args:
-            filepath (str): The path to the video file.
+            filepath (str): Path to video file.
+
         Returns:
-            dict: Parsed info with keys 'name', 'episode', 'year'.
+            FileInfo: Parsed info with name, episode, year.
+
+        Raises:
+            Exception: If no title is found from file name and the folders it is in.
         """
-        path_parts = self.fix_filename(filepath.replace('\\', '/').split('/'))
+        path_parts = self.fix_filename(filepath.replace("\\", "/").split("/"))
         filename = path_parts[-1]
-        name, season, part, year, remaining = '', '', '', '',  []
-        episode = 1
+        guessed_name, season, part, year = "", "", "", ""
+        remaining: list[int] = []
         # First, try to guess from the filename
         guess = guessit(filename, self.OPTIONS)
-        print(f'File name guess: {filename} -> {dict(guess)}')
+
+        print(f"File name guess: {filename} -> {dict(guess)}")
 
         # Episode guess from the title.
         # Usually, releases are formated [Release Group] Title - S01EX
@@ -434,316 +608,706 @@ class AniListUpdater:
 
         # If its >2, theres probably a Release Group and Title / Season / Part, so its good
 
-        episode = guess.get('episode', 1)
-        season = guess.get('season', '')
-        part = str(guess.get('part', ''))
-        year = str(guess.get('year', ''))
+        episode = guess.get("episode", None)
+        season = guess.get("season", "")
+        part = str(guess.get("part", ""))
+        year = str(guess.get("year", ""))
+        file_format = None
+
+        # Right now, only detect both these formats
+        other = guess.get("other", "")
+        if other == "Original Animated Video":
+            file_format = "OVA"
+        elif other == "Original Net Animation":
+            file_format = "ONA"
 
         # Quick fixes assuming season before episode
         # 'episode_title': '02' in 'S2 02'
-        if guess.get('episode_title', '').isdigit() and episode is None:
-            print(f'Detected episode in episode_title. Episode: {int(guess.get("episode_title"))}')
-            episode = int(guess.get('episode_title'))
+        if guess.get("episode_title", "").isdigit() and "episode" not in guess:
+            print(f"Detected episode in episode_title. Episode: {int(guess.get('episode_title'))}")
+            episode = int(guess.get("episode_title"))
 
         # 'episode': [86, 13] (EIGHTY-SIX), [1, 2, 3] (RANMA) lol.
         if isinstance(episode, list):
-            print(f'Detected multiple episodes: {episode}. Picking last one.')
+            print(f"Detected multiple episodes: {episode}. Picking last one.")
             remaining = episode[:-1]
             episode = episode[-1]
 
         # 'season': [2, 3] in "S2 03"
         if isinstance(season, list):
-            print(f'Detected multiple seasons: {season}. Picking first one as season.')
-            if episode is None:
-                print('Episode still not detected. Picking last position of the season list.')
+            print(f"Detected multiple seasons: {season}. Picking first one as season.")
+            # If episode wasn't detected or is default, try to extract from season list
+            if episode is None and len(season) > 1:
+                print("Episode not detected. Picking last position of the season list.")
                 episode = season[-1]
 
             season = season[0]
 
+        # Ensure episode is never None
+        episode = episode or 1
+
         season = str(season)
 
         keys = list(guess.keys())
-        episode_index = keys.index('episode') if 'episode' in guess else 1
-        season_index = keys.index('season') if 'season' in guess else -1
-        title_in_filename = 'title' in guess and (episode_index > 0 and (season_index > 0 or season_index == -1))
+        episode_index = keys.index("episode") if "episode" in guess else 1
+        season_index = keys.index("season") if "season" in guess else -1
+        title_in_filename = "title" in guess and (episode_index > 0 and (season_index > 0 or season_index == -1))
+        found_title = title_in_filename
 
         # If the title is not in the filename or episode index is 0, try the folder name
         # If the episode index > 0 and season index > 0, its safe to assume that the title is in the file name
 
         if title_in_filename:
-            name = guess['title']
+            guessed_name = guess["title"]
         else:
             # If it isnt in the name of the file, try to guess using the name of the folder it is stored in
 
             # Depth=2 folders
             for depth in [2, 3]:
-                folder_guess = guessit(path_parts[-depth], self.OPTIONS) if len(path_parts) > depth-1 else ''
-                if folder_guess != '':
-                    print(f'{depth-1}{"st" if depth-1==1 else "nd"} Folder guess:\n{path_parts[-depth]} -> {dict(folder_guess)}')
+                folder_guess = guessit(path_parts[-depth], self.OPTIONS) if len(path_parts) > depth - 1 else None
+                if folder_guess:
+                    print(
+                        f"{depth - 1}{'st' if depth - 1 == 1 else 'nd'} Folder guess:\n{path_parts[-depth]} -> {dict(folder_guess)}"
+                    )
 
-                    name = str(folder_guess.get('title', ''))
-                    season = season or str(folder_guess.get('season', ''))
-                    part = part or str(folder_guess.get('part', ''))
-                    year = year or str(folder_guess.get('year', ''))
+                    guessed_name = str(folder_guess.get("title", ""))
+                    season = season or str(folder_guess.get("season", ""))
+                    part = part or str(folder_guess.get("part", ""))
+                    year = year or str(folder_guess.get("year", ""))
 
                     # If we got the name, its probable we already got season and part from the way folders are usually structured
-                    if name != '':
+                    if guessed_name:
+                        found_title = True
                         break
 
+        if not found_title:
+            raise Exception(f"Couldn't find title in filename '{filename}'! Guess result: {guess}")
+
         # Haven't tested enough but seems to work fine
+        # If there are remaining episodes, append them to the name
         if remaining:
-            # If there are remaining episodes, append them to the name
-            name += ' ' + ' '.join(str(ep) for ep in remaining)
+            guessed_name += " " + " ".join(str(ep) for ep in remaining)
 
         # Add season and part if there are
         if season and (int(season) > 1 or part):
-            name += f" Season {season}"
-            
-        if part:
-            name += f" Part {part}"
+            guessed_name += f" Season {season}"
 
-        print('Guessed name: ' + name)
-        return {
-            'name': name,
-            'episode': episode,
-            'year': year,
-        }
+        # Rare case where "Part" is in the episode title: "My Hero Academia S06E06 Encounter, Part 2"
+        # If episode_title is detected, part must be before it
+        episode_title_index = keys.index("episode_title") if "episode_title" in guess else 99
 
-    def get_anime_info_and_progress(self, name, file_progress, year):
+        if part and keys.index("part") < episode_title_index:
+            guessed_name += f" Part {part}"
+
+        print(f"Guessed: {guessed_name}{f' {file_format}' if file_format else ''} - E{episode} {year}")
+        return FileInfo(guessed_name, episode, year, file_format)
+
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
+    # ANIME INFO & PROGRESS UPDATES
+    # ──────────────────────────────────────────────────────────────────────────────────────────────────
+
+    def filter_valid_seasons(self, seasons: list[dict[str, Any]]) -> list[dict[str, Any]] | None:
         """
-        Queries AniList for anime info and user progress for a given title and year.
+        Filter and sort valid seasons.
+
         Args:
-            name (str): Anime title.
-            file_progress (int): Episode number from the file.
-            year (str): Year string (may be empty).
+            seasons (list[dict[str, Any]]): Season dicts from AniList API.
+
         Returns:
-            tuple: (anime_id, anime_name, current_progress, total_episodes, file_progress, current_status)
+            list[dict[str, Any]] | None: Filtered and sorted seasons or None if no seasons could be found.
         """
+        valid_formats = {"TV", "ONA"}
 
-        # Only those that are in the user's list
+        # Build a list of the main series using relationType, assuming [0] is the correct series
+        season_map = {s["id"]: s for s in seasons}
 
-        query = '''
-            query($search: String, $year: FuzzyDateInt, $page: Int, $onList: Boolean) {
-                Page(page: $page) {
-                    media (search: $search, type: ANIME, startDate_greater: $year, onList: $onList) {
-                        id
-                        title { romaji }
-                        season
-                        seasonYear
-                        episodes
-                        duration
-                        format
-                        status
-                        mediaListEntry {
-                            status
-                            progress
-                            media {
-                                episodes
-                            }
-                        }
-                    }
-                }
-            }
-            '''
-        variables = {'search': name, 'year': year or 1, 'page': 1, 'onList': True}
+        # Use the first TV | ONA, with duration > 21 as a starting point
+        current_node = None
+        for s in seasons:
+            if s["format"] in valid_formats and (
+                (s["duration"] is None and s["status"] == "RELEASING")
+                or (s["duration"] is not None and s["duration"] > 21)
+            ):
+                current_node = s
+                break
 
-        response = self.make_api_request(query, variables, self.access_token)
+        if current_node is None:
+            return None
 
-        if not response or 'data' not in response:
-            return (None, None, None, None, None, None)
+        main_series = [current_node]
+        visited_ids = {current_node["id"]}
 
-        seasons = response['data']['Page']['media']
+        while True:
+            edges = current_node.get("relations", {}).get("edges", [])
 
-        # No results from the API request
-        if not seasons:
-            # Before erroring, if its a "launch" request we can search even if its not in the user list
-            if self.ACTION == 'launch':
-                variables['onList'] = False
-                response = self.make_api_request(query, variables, self.access_token)
+            # It might have more than 1 sequel, check for the ones in "season".
+            # As "season" might be the user's list, a sequel might not be in season_map
+            candidate_sequels = [
+                edge["node"]
+                for edge in edges
+                if edge["relationType"] == "SEQUEL" and edge["node"]["id"] in season_map
+            ]
 
-                if not response or 'data' not in response:
-                    return (None, None, None, None, None, None)
+            if not candidate_sequels:
+                break
 
-                seasons = response['data']['Page']['media']
-                # If its still empty
-                if not seasons:
-                    raise Exception(f"Couldn\'t find an anime from this title! ({name})")
-            else:
-                raise Exception(f"Couldn\'t find an anime from this title! ({name}). Is it in your list?")
+            # At this point, candidate_sequels contain sequels in season_map. Prioritise those that are "TV" or "ONA"
+            next_sequel = max(candidate_sequels, key=lambda x: x["format"] in valid_formats)
+            next_id = next_sequel["id"]
 
-        # This is the first element, which is the same as Media(search: $search)
-        entry = seasons[0]['mediaListEntry']
-        anime_data = (
-            seasons[0]['id'],
-            seasons[0]['title']['romaji'],
-            entry['progress'] if entry is not None else None,
-            seasons[0]['episodes'],
+            if next_id in visited_ids:
+                break
+
+            visited_ids.add(next_id)
+            current_node = season_map[next_id]
+
+            if current_node["format"] in valid_formats:
+                main_series.append(current_node)
+
+        return main_series
+
+    def get_anime_info_and_progress(self, file_info: FileInfo) -> AnimeInfo:
+        """
+        Query AniList for anime info and user progress.
+
+        Args:
+            file_info (FileInfo): Anime file information.
+
+        Returns:
+            AnimeInfo: Complete anime information.
+
+        Raises:
+            Exception: If it could not find the anime.
+        """
+        # Unpack file info
+        name, file_progress, year, file_format = file_info
+
+        # If theres a format specified, search only for that format.
+        format_in = [file_format] if file_format else ["TV", "TV_SHORT", "MOVIE", "SPECIAL", "OVA", "ONA"]
+
+        # We first need to make sure if we should search ALL of anime or only the user's list
+        # Only those that are in the user's list at first
+        query = AniListQueries.SEARCH_ANIME
+        variables = {"search": name, "year": year or 1, "page": 1, "format_in": format_in}
+
+        response = self._make_api_request(query, variables, self.access_token)
+
+        user_list_seasons = response["data"]["UserSearch"]["media"]
+        global_search_seasons = response["data"]["GlobalSearch"]["media"]
+
+        # If no results for both, raise exception
+        if not user_list_seasons and not global_search_seasons:
+            raise Exception(f"Couldn't find an anime from this title! ({name}). Is it in your list?")
+
+        seasons = user_list_seasons or global_search_seasons  # Priority to the user list
+
+        # Results from the API request from the user's list or from global search.
+        # If from global search then entry will be None, and the anime will be added if ADD_ENTRY_IF_MISSING
+        entry = seasons[0]["mediaListEntry"]
+        anime_data = AnimeInfo(
+            seasons[0]["id"],
+            seasons[0]["title"]["romaji"],
+            entry["progress"] if entry is not None else None,
+            seasons[0]["episodes"],
             file_progress,
-            entry['status'] if entry is not None else None
+            entry["status"] if entry is not None else None,
+            seasons[0]["idMal"],
         )
 
-        # If the episode in the file name is larger than the total amount of episodes
-        # Then they are using absolute numbering format for episodes
-        # Try to guess season and episode.
-        if seasons[0]['episodes'] is not None and file_progress > seasons[0]['episodes']:
-            seasons = self.filter_valid_seasons(seasons)
-            print('Related shows:', ", ".join(season["title"]["romaji"] for season in seasons))
-            anime_data = self.find_season_and_episode(seasons, file_progress)
-            print(anime_data)
-            found_season = next((season for season in seasons if season['id'] == anime_data[0]), None)
-            found_entry = found_season['mediaListEntry'] if found_season and found_season['mediaListEntry'] else None
-            anime_data = (
-                anime_data[0],
-                anime_data[1],
-                anime_data[2],
-                anime_data[3],
-                anime_data[4],
-                found_entry['status'] if found_entry else None
+        is_absolute_numbering = seasons and seasons[0]["episodes"] and file_progress > seasons[0]["episodes"]
+        filtered_seasons = []
+
+        # Check if it's using absolute numbering, if so, find out the main series and all sequels
+        if is_absolute_numbering:
+            filtered_seasons = self.filter_valid_seasons(seasons)
+            season_episode_info = self.find_season_and_episode(filtered_seasons, file_progress)
+
+            # If it is None, needs to use global searchto find out the series exact episode
+            if not filtered_seasons or season_episode_info.season_id is None:
+                seasons = global_search_seasons
+
+                # At this point it should either have the correct main series or it failed
+                # Recalculate both
+                filtered_seasons = self.filter_valid_seasons(seasons)
+                season_episode_info = self.find_season_and_episode(filtered_seasons, file_progress)
+
+                if filtered_seasons is None or season_episode_info.season_id is None:
+                    raise Exception(f"No valid seasons found for '{name}'.")
+
+            seasons = filtered_seasons
+
+            found_season = next(
+                (season for season in seasons if season["id"] == season_episode_info.season_id), None
             )
-            print(f"Final guessed anime: {found_season}")
-            print(f'Absolute episode {file_progress} corresponds to Anime: {anime_data[1]}, Episode: {anime_data[-2]}')
+            found_entry = (
+                found_season["mediaListEntry"] if found_season and found_season["mediaListEntry"] else None
+            )
+            anime_data = AnimeInfo(
+                season_episode_info.season_id,
+                season_episode_info.season_title,
+                season_episode_info.progress,
+                season_episode_info.episodes,
+                season_episode_info.relative_episode,
+                found_entry["status"] if found_entry else None,
+                found_season.get("idMal") if found_season else None,
+            )
+            print(f"Final guessed anime: {anime_data.anime_name}")
+            print(f"Absolute episode {file_progress} corresponds to episode: {anime_data.file_progress}")
         else:
-            print(f"Final guessed anime: {seasons[0]}")
+            print(f"Final guessed anime: {seasons[0]['title']['romaji']}")
         return anime_data
 
     # Update the anime based on file progress
-    def update_episode_count(self, result):
+    def update_episode_count(self, result: AnimeInfo) -> AnimeInfo:
         """
-        Updates the episode count and/or status for an anime entry on AniList, according to user settings.
+        Update episode count and/or status on AniList per user settings.
+
         Args:
-            result (tuple): (anime_id, anime_name, current_progress, total_episodes, file_progress, current_status)
+            result (AnimeInfo): Anime information.
+
         Returns:
-            tuple or bool: Updated result tuple, or False on failure.
+            AnimeInfo: Updated anime information.
+
+        Raises:
+            Exception: If the update fails.
         """
         if result is None:
-            raise Exception('Parameter in update_episode_count is null.')
+            raise Exception("Parameter in update_episode_count is null.")
 
-        anime_id, anime_name, current_progress, total_episodes, file_progress, current_status = result
+        anime_id, anime_name, current_progress, total_episodes, file_progress, current_status, mal_id = result
 
         if anime_id is None:
-            raise Exception('Couldn\'t find that anime! Make sure it is on your list and the title is correct.')
+            raise Exception("Couldn't find that anime! Make sure it is on your list and the title is correct.")
 
-        # Only launch anilist
-        if self.ACTION == 'launch':
-            print(f'Opening AniList for "{anime_name}": https://anilist.co/anime/{anime_id}')
-            webbrowser.open_new_tab(f'https://anilist.co/anime/{anime_id}')
-            return result
+        should_add_entry = current_progress is None and current_status is None
+        is_last_episode = file_progress == total_episodes
 
-        if current_progress is None:
-            raise Exception('Failed to get current episode count. Is it on your list?')
+        # Handle adding anime to list if it's not already there (ADD_ENTRY_IF_MISSING feature)
+        if should_add_entry:
+            if not self.options.get("ADD_ENTRY_IF_MISSING", False):
+                raise Exception("Failed to get current episode count. Is it on your list?")
+
+            print(f'Adding "{anime_name}" to your list since you\'re watching it...')
+            initial_status = "CURRENT"
+
+            if is_last_episode and self.options.get("SET_TO_COMPLETED_AFTER_LAST_EPISODE_CURRENT", False):
+                initial_status = "COMPLETED"
+
+            if not self._save_media_list_entry(anime_id, initial_status, file_progress):
+                raise Exception(f"Failed to add '{anime_name}' to your list.")
+
+            osd_message(f'Added "{anime_name}" to your list with progress: {file_progress}')
+
+            return AnimeInfo(
+                anime_id, anime_name, file_progress, total_episodes, file_progress, initial_status, mal_id
+            )
+
+        should_set_to_rewatching = (
+            current_status == "COMPLETED"
+            and file_progress == 1
+            and self.options.get("SET_COMPLETED_TO_REWATCHING_ON_FIRST_EPISODE", False)
+        )
 
         # Handle completed -> rewatching on first episode
-        if (current_status == 'COMPLETED' and file_progress == 1 and self.options['SET_COMPLETED_TO_REWATCHING_ON_FIRST_EPISODE']):
-
+        if should_set_to_rewatching:
             # Needs to update in 2 steps, since AniList
             # doesn't allow setting progress while changing the status from completed to rewatching.
             # If you try, it will just reset the progress to 0.
-            print('Setting status to REPEATING (rewatching) and updating progress for first episode of completed anime.')
+            print("Setting status to REPEATING")
 
             # Step 1: Set to REPEATING, progress=0
-            query = '''
-            mutation ($mediaId: Int, $progress: Int, $status: MediaListStatus) {
-                SaveMediaListEntry (mediaId: $mediaId, progress: $progress, status: $status) {
-                    status
-                    id
-                    progress
-                }
-            }
-            '''
-
-            variables = {'mediaId': anime_id, 'progress': 0, 'status': 'REPEATING'}
-            response = self.make_api_request(query, variables, self.access_token)
+            self._save_media_list_entry(anime_id, "REPEATING", 0)
 
             # Step 2: Set progress to 1
-            variables = {'mediaId': anime_id, 'progress': 1}
-            response = self.make_api_request(query, variables, self.access_token)
+            response = self._save_media_list_entry(anime_id, None, 1)
 
-            if response and 'data' in response:
-                updated_progress = response['data']['SaveMediaListEntry']['progress']
-                print(f'Episode count updated successfully! New progress: {updated_progress}')
+            updated_progress = response["data"]["SaveMediaListEntry"]["progress"]
+            osd_message(f'Updated "{anime_name}" to REPEATING with progress: {updated_progress}')
 
-                return (anime_id, anime_name, updated_progress, total_episodes, 1, 'REPEATING')
-            print('Failed to update episode count.')
+            return AnimeInfo(anime_id, anime_name, updated_progress, total_episodes, 1, "REPEATING", mal_id)
 
-            return False
+        rewatching_and_updating = current_status == "REPEATING" and self.options["UPDATE_PROGRESS_WHEN_REWATCHING"]
+        in_modifiable_state = current_status in {"CURRENT", "PLANNING", "PAUSED"}
 
         # Handle updating progress for rewatching
-        if (current_status == 'REPEATING' and self.options['UPDATE_PROGRESS_WHEN_REWATCHING']):
-            print('Updating progress for anime set to REPEATING (rewatching).')
-            status_to_set = 'REPEATING'
+        if rewatching_and_updating:
+            print("Updating progress for anime set to REPEATING.")
+            status_to_set = "REPEATING"
 
-        # Only update if status is CURRENT or PLANNING
-        elif current_status in ['CURRENT', 'PLANNING']:
-
+        # Only update if status is CURRENT, PLANNING, or PAUSED
+        elif in_modifiable_state:
             # If its lower than the current progress, dont update.
-            if file_progress <= current_progress:
-                raise Exception(f'Episode was not new. Not updating ({file_progress} <= {current_progress})')
+            if file_progress and current_progress is not None and file_progress <= current_progress:
+                raise Exception(f"Episode was not new. Not updating ({file_progress} <= {current_progress})")
 
-            status_to_set = 'CURRENT'
+            status_to_set = "CURRENT"
 
         else:
-            raise Exception(f'Anime is not in a modifiable state (status: {current_status}). Not updating.')
+            raise Exception(f"Anime is not in a modifiable state (status: {current_status}). Not updating.")
 
-        # Set to COMPLETED if last episode and the option is enabled
-        if file_progress == total_episodes:
-            if (current_status == 'CURRENT' and self.options['SET_TO_COMPLETED_AFTER_LAST_EPISODE_CURRENT']) or (current_status == 'REPEATING' and self.options['SET_TO_COMPLETED_AFTER_LAST_EPISODE_REWATCHING']):
-                status_to_set = "COMPLETED"
+        should_set_to_completed = is_last_episode and (
+            (in_modifiable_state and self.options["SET_TO_COMPLETED_AFTER_LAST_EPISODE_CURRENT"])
+            or (current_status == "REPEATING" and self.options["SET_TO_COMPLETED_AFTER_LAST_EPISODE_REWATCHING"])
+        )
 
-        query = '''
-        mutation ($mediaId: Int, $progress: Int, $status: MediaListStatus) {
-            SaveMediaListEntry (mediaId: $mediaId, progress: $progress, status: $status) {
-                status
-                id
-                progress
-            }
-        }
-        '''
+        if should_set_to_completed:
+            status_to_set = "COMPLETED"
 
-        variables = {'mediaId': anime_id, 'progress': file_progress}
         if status_to_set:
-            variables['status'] = status_to_set
+            response = self._save_media_list_entry(anime_id, status_to_set, file_progress)
+        else:
+            response = self._save_media_list_entry(anime_id, None, file_progress)
 
-        response = self.make_api_request(query, variables, self.access_token)
-        if response and 'data' in response:
-            updated_progress = response['data']['SaveMediaListEntry']['progress']
-            print(f'Episode count updated successfully! New progress: {updated_progress}')
-            current_status = response['data']['SaveMediaListEntry']['status']
+        updated_progress = response["data"]["SaveMediaListEntry"]["progress"]
+        updated_status = response["data"]["SaveMediaListEntry"]["status"]
+        osd_message(f'Updated "{anime_name}" to: {updated_progress}')
 
-            return (anime_id, anime_name, updated_progress, total_episodes, file_progress, current_status)
-        print('Failed to update episode count.')
-        return False
+        return AnimeInfo(
+            anime_id, anime_name, updated_progress, total_episodes, file_progress, updated_status, mal_id
+        )
 
-def main():
-    """
-    Main entry point for the script. Handles encoding and runs the updater.
-    """
-    try:
-        # Reconfigure to utf-8
-        if sys.stdout.encoding != 'utf-8':
-            try:
-                sys.stdout.reconfigure(encoding='utf-8')
-                sys.stderr.reconfigure(encoding='utf-8')
-            except Exception as e_reconfigure:
-                print(f"Couldn\'t reconfigure stdout/stderr to UTF-8: {e_reconfigure}", file=sys.stderr)
+    def _save_media_list_entry(self, anime_id: int, status: str | None, progress: int | None) -> dict[str, Any]:
+        """
+        Helper function to save media list entry.
 
-        # Parse options from argv[3] if present
-        options = {
-            "SET_COMPLETED_TO_REWATCHING_ON_FIRST_EPISODE": False,
-            "UPDATE_PROGRESS_WHEN_REWATCHING": True,
-            "SET_TO_COMPLETED_AFTER_LAST_EPISODE_CURRENT": False,
-            "SET_TO_COMPLETED_AFTER_LAST_EPISODE_REWATCHING": True
+        Args:
+            anime_id (int): AniList anime ID.
+            status (str | None): Status to set.
+            progress (int | None): Progress to set.
+
+        Returns:
+            dict[str, Any]: API response.
+
+        Raises:
+            ValueError: If both status and progress are omitted.
+        """
+        query = AniListQueries.SAVE_MEDIA_LIST_ENTRY
+        variables: dict[str, Any] = {"mediaId": anime_id}
+
+        if status is not None:
+            variables["status"] = status
+        if progress is not None:
+            variables["progress"] = progress
+
+        if "status" not in variables and "progress" not in variables:
+            raise ValueError("At least one of status or progress must be provided.")
+
+        return self._make_api_request(query, variables, self.access_token)
+
+    def refresh_anime_info_by_id(self, result: AnimeInfo) -> AnimeInfo:
+        """
+        Refresh anime info by AniList ID.
+
+        Needed for refreshing total_episodes, which will be None for new shows.
+
+        Args:
+            result (AnimeInfo): Current anime information.
+
+        Returns:
+            AnimeInfo: Updated anime information if found, otherwise original info.
+        """
+        if result.anime_id is None:
+            return result
+
+        query = AniListQueries.GET_ANIME_BY_ID
+        variables = {"id": result.anime_id}
+
+        response = self._make_api_request(query, variables, self.access_token)
+        media = response.get("data", {}).get("Media")
+
+        if not media:
+            return result
+
+        entry = media.get("mediaListEntry")
+        refreshed_name = (
+            media.get("title", {}).get("romaji") or media.get("title", {}).get("english") or result.anime_name
+        )
+        refreshed_progress = entry.get("progress") if entry else result.current_progress
+        refreshed_status = entry.get("status") if entry else result.current_status
+
+        return AnimeInfo(
+            result.anime_id,
+            refreshed_name,
+            refreshed_progress,
+            media.get("episodes"),
+            result.file_progress,
+            refreshed_status,
+            media.get("idMal") or result.mal_id,
+        )
+
+    def update_with_preloaded_info(self, filepath: str, anime_info: dict[str, Any]) -> None:
+        """
+        Update AniList using pre-fetched anime info.
+
+        Args:
+            filepath (str): Path to the currently playing file.
+            anime_info (dict[str, Any]): Pre-fetched anime info from the 'info' action.
+        """
+        result = AnimeInfo(
+            anime_id=anime_info.get("anime_id"),
+            anime_name=anime_info.get("anime_name"),
+            current_progress=anime_info.get("current_progress"),
+            total_episodes=anime_info.get("total_episodes"),
+            file_progress=anime_info.get("episode"),
+            current_status=anime_info.get("current_status"),
+            mal_id=anime_info.get("mal_id"),
+        )
+
+        result = self.update_episode_count(result)
+
+        if result and result.current_progress is not None:
+            self.cache_to_file(
+                filepath,
+                anime_info["guessed_name"],
+                anime_info["absolute_episode"],
+                result,
+            )
+
+    def _correct_anime_id_change(
+        self,
+        anilist_id: int,
+        fallback_name: str,
+        fallback_progress: int | None,
+        fallback_status: str | None,
+    ) -> dict[str, Any]:
+        """
+        Fetch AniList media data for a changed ID and merge with fallback cache values.
+
+        Raises:
+            Exception: If the anime could not be found on AniList.
+        """
+        query = AniListQueries.GET_ANIME_BY_ID
+        variables = {"id": anilist_id}
+        response = self._make_api_request(query, variables, self.access_token)
+
+        media = response.get("data", {}).get("Media")
+        if not media:
+            raise Exception(f"Could not find anime with AniList ID {anilist_id}.")
+
+        entry = media.get("mediaListEntry")
+        anime_name = media.get("title", {}).get("romaji") or media.get("title", {}).get("english") or fallback_name
+
+        return {
+            "anime_name": anime_name,
+            "mal_id": media.get("idMal"),
+            "total_episodes": media.get("episodes"),
+            "current_progress": entry.get("progress") if entry else fallback_progress,
+            "current_status": entry.get("status") if entry else fallback_status,
         }
-        if len(sys.argv) > 3:
+
+    def _correct_relative_episode(
+        self,
+        absolute_episode: int,
+        existing_relative_mapping: str | None,
+        requested_relative_episode: int | None,
+    ) -> tuple[int, bool]:
+        """Resolve the mapped relative episode and whether it changed."""
+        existing_relative_episode = absolute_episode
+        if isinstance(existing_relative_mapping, str):
+            _, _, right = existing_relative_mapping.partition("->")
+            if right:
+                try:
+                    existing_relative_episode = int(right)
+                except Exception:
+                    existing_relative_episode = absolute_episode
+
+        mapped_relative_episode = (
+            requested_relative_episode
+            if requested_relative_episode and requested_relative_episode > 0
+            else existing_relative_episode
+        )
+        mapped_relative_episode = max(1, mapped_relative_episode)
+
+        return mapped_relative_episode, mapped_relative_episode != existing_relative_episode
+
+    def _correct_status(
+        self, anime_id: int, selected_status: str | None, current_status: str | None
+    ) -> tuple[str | None, bool]:
+        """Update AniList status only when a new status was selected."""
+        if not selected_status or selected_status == current_status:
+            return current_status, False
+
+        self._save_media_list_entry(anime_id, selected_status, None)
+        return selected_status, True
+
+    def _correct_cache(self, cache: dict[str, Any], dir_hash: str, payload: dict[str, Any]) -> None:
+        """Persist corrected mapping into cache.json."""
+        cache[dir_hash] = payload
+        self.save_cache(cache)
+
+    def correct_anime_id(
+        self,
+        filepath: str,
+        anilist_id: int,
+        relative_episode: int | None,
+        target_status: str | None,
+        anime_info: dict[str, Any],
+    ) -> None:
+        """
+        Correct the anime ID in cache by querying AniList for the given ID.
+
+        Args:
+            filepath (str): Path to the currently playing file (used to compute dir hash).
+            anilist_id (int): The correct AniList anime ID.
+            relative_episode (int | None): Optional relative episode override for current file.
+            target_status (str | None): Optional MediaList status override.
+            anime_info (dict[str, Any]): Pre-fetched anime info.
+
+        """
+        selected_status = target_status.upper() if target_status else None
+
+        guessed_name = anime_info.get("guessed_name", "")
+        absolute_episode = anime_info.get("absolute_episode", 1)
+        existing_anime_id = anime_info.get("anime_id")
+        id_changed = existing_anime_id != anilist_id
+
+        anime_name = anime_info.get("anime_name") or guessed_name
+        mal_id = anime_info.get("mal_id")
+        total_episodes = anime_info.get("total_episodes")
+        current_progress = anime_info.get("current_progress")
+        current_status = anime_info.get("current_status")
+
+        if id_changed:
+            id_data = self._correct_anime_id_change(
+                anilist_id,
+                guessed_name,
+                current_progress,
+                current_status,
+            )
+            anime_name = id_data["anime_name"]
+            mal_id = id_data["mal_id"]
+            total_episodes = id_data["total_episodes"]
+            current_progress = id_data["current_progress"]
+            current_status = id_data["current_status"]
+
+        existing_relative_episode = anime_info.get("episode") or absolute_episode
+        mapped_relative_episode = (
+            relative_episode if relative_episode and relative_episode > 0 else existing_relative_episode
+        )
+        mapped_relative_episode = max(1, mapped_relative_episode)
+        relative_changed = mapped_relative_episode != existing_relative_episode
+
+        status_before = current_status
+        current_status, status_changed = self._correct_status(
+            anilist_id,
+            selected_status,
+            current_status,
+        )
+
+        changes = [
+            f"ID: {existing_anime_id or '?'}->{anilist_id}" if id_changed else None,
+            f"Mapped {absolute_episode}->{mapped_relative_episode}" if relative_changed else None,
+            f"Status: {status_before or 'None'}->{current_status}" if status_changed else None,
+        ]
+        changes = [change for change in changes if change]
+
+        if not changes:
+            osd_message("No correction changes detected.")
+            return
+
+        dir_hash = self._hash_path(os.path.dirname(filepath))
+        cache = self.load_cache()
+        existing_entry = cache.get(dir_hash, {})
+
+        self._correct_cache(
+            cache,
+            dir_hash,
+            {
+                "guessed_name": guessed_name,
+                "anime_id": anilist_id,
+                "mal_id": mal_id,
+                "current_progress": current_progress,
+                "relative_progress": f"{absolute_episode}->{mapped_relative_episode}",
+                "total_episodes": total_episodes,
+                "current_status": current_status,
+                "corrected": True if id_changed else existing_entry.get("corrected", False),
+                "ttl": time.time() + self.CORRECTED_CACHE_REFRESH_RATE,
+            },
+        )
+
+        osd_message(f'Corrected "{anime_name}" (ID: {anilist_id}) | ' + " | ".join(changes))
+
+        # Update anime info
+        corrected_payload = {
+            "anime_id": anilist_id,
+            "mal_id": mal_id,
+            "anime_name": anime_name,
+            "episode": mapped_relative_episode,
+            "current_progress": current_progress,
+            "total_episodes": total_episodes,
+            "current_status": current_status,
+            "guessed_name": guessed_name,
+            "absolute_episode": absolute_episode,
+        }
+        print(f"INFO:{json.dumps(corrected_payload)}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+# MAIN ENTRY POINT
+# ═══════════════════════════════════════════════════════════════════════════════════════════════════════
+
+
+def osd_message(msg: str) -> None:
+    """Display an on-screen display (OSD) message."""
+    print(f"OSD:{msg}")
+    print(f"{msg}")
+
+
+def run_action(updater: AniListUpdater) -> None:
+    """Execute the appropriate updater action based on command line arguments."""
+    action = sys.argv[2]
+    filepath = sys.argv[1]
+    if action == "update_with_info" and len(sys.argv) > 4:
+        anime_info_json = json.loads(sys.argv[4])
+        updater.update_with_preloaded_info(filepath, anime_info_json)
+    elif action == "correct":
+        # Pre-fetched anime info JSON is always the last argument
+        anime_info = json.loads(sys.argv[-1])
+        if len(sys.argv) > 7:
+            updater.correct_anime_id(filepath, int(sys.argv[4]), int(sys.argv[5]), sys.argv[6], anime_info)
+        else:
+            updater.correct_anime_id(filepath, int(sys.argv[4]), None, sys.argv[5], anime_info)
+    else:
+        updater.handle_filename(filepath)
+
+
+def main() -> None:
+    """Main entry point for the script."""
+    # Reconfigure to utf-8
+    if sys.stdout.encoding != "utf-8":
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")  # type: ignore
+            sys.stderr.reconfigure(encoding="utf-8")  # type: ignore
+        except Exception as e_reconfigure:
+            print(f"Couldn't reconfigure stdout/stderr to UTF-8: {e_reconfigure}", file=sys.stderr)
+
+    # Parse options from argv[3] if present
+    options = {
+        "SET_COMPLETED_TO_REWATCHING_ON_FIRST_EPISODE": False,
+        "UPDATE_PROGRESS_WHEN_REWATCHING": True,
+        "SET_TO_COMPLETED_AFTER_LAST_EPISODE_CURRENT": False,
+        "SET_TO_COMPLETED_AFTER_LAST_EPISODE_REWATCHING": True,
+        "ADD_ENTRY_IF_MISSING": False,
+        "CACHE_REFRESH_RATE": AniListUpdater.CACHE_REFRESH_RATE // 3600,
+        "CACHE_MODE": AniListUpdater.CACHE_MODE,
+    }
+    if len(sys.argv) > 3:
+        try:
             user_options = json.loads(sys.argv[3])
             options.update(user_options)
+        except Exception as e:
+            print(f"ERROR: {e}")
+            sys.exit(1)
 
-        # Pass options to AniListUpdater
-        updater = AniListUpdater(options, sys.argv[2])
-        updater.handle_filename(sys.argv[1])
+    # Pass options to AniListUpdater
+    updater = AniListUpdater(options)
 
+    try:
+        run_action(updater)
     except Exception as e:
-        print(f'ERROR: {e}')
+        print(f"ERROR: {e}")
         sys.exit(1)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

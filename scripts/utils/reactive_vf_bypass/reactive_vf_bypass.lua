@@ -395,4 +395,4 @@ mp.register_event("seek", function()
             is_restoring = false
         end
     end)
-end)
+end)

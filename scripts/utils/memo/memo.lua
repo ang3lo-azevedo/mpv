@@ -1361,8 +1361,8 @@ mp.add_key_binding(nil, "memo-prev", memo_prev)
 mp.add_key_binding(nil, "memo-log", function()
     write_history(true)
 
-    if menu_shown and last_state and last_state.current_page == 1 then
-        show_history(options.entries, false, false, true)
+    if menu_shown then
+        memo_close()
     end
 end)
 mp.add_key_binding(nil, "memo-last", function()
