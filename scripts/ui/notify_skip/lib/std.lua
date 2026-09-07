@@ -314,4 +314,4 @@ end
 function CircularBuffer:clear()
 	itable_clear(self.data)
 	self.pos = 0
-end
+end
