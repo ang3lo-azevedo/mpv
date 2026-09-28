@@ -70,13 +70,13 @@
     },
     {
         "git": "https://github.com/nekoxuee/hayase-osc",
-        "whitelist": "Lucide.ttf",
+        "whitelist": "lucide.ttf",
         "dest": "~~/fonts/Lucide.ttf",
         "branch": "main"
     },
     {
         "git": "https://github.com/dnlzqn/nata-sans",
-        "whitelist": "NataSans[wght].ttf",
+        "whitelist": "natasans[wght].ttf",
         "dest": "~~/fonts/NataSans[wght].ttf",
         "branch": "main"
     },

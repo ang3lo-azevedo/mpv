@@ -178,8 +178,8 @@ function update(info)
     
     for file in string.gmatch(files_in_repo, "[^\r\n]+") do
         local l_file = string.lower(file)
-        if (info.whitelist == "" or match(l_file, info.whitelist)) and
-           (info.blacklist == "" or not match(l_file, info.blacklist)) then
+        if (info.whitelist == "" or match(l_file, string.lower(info.whitelist))) and
+           (info.blacklist == "" or not match(l_file, string.lower(info.blacklist))) then
             table.insert(files, file)
         end
     end
