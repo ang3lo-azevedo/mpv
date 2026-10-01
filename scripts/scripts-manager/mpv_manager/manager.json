@@ -36,7 +36,7 @@
         "replacements": [
             {
                 "search": "q       \tquit",
-                "replace": "#q       \tquit\n\n# Mouse controls\nMBTN_LEFT cycle pause\nMBTN_LEFT_DBL cycle fullscreen"
+                "replace": "#q       \tquit\n\n# Mouse controls\n# MBTN_LEFT and MBTN_LEFT_DBL are handled by scripts/click-gestures.lua"
             },
             {
                 "search": "`\t\t    script-message cycle-audio-preset",
