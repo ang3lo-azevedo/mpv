@@ -36,7 +36,7 @@
         "replacements": [
             {
                 "search": "q       \tquit",
-                "replace": "#q       \tquit\n\n# Mouse controls\n# MBTN_LEFT and MBTN_LEFT_DBL are handled by scripts/click-gestures.lua"
+                "replace": "#q       \tquit\n\n# Mouse controls\nWHEEL_LEFT  seek -10\nWHEEL_RIGHT seek 10\nAXIS_LEFT   seek -10\nAXIS_RIGHT  seek 10\n\n# MBTN_LEFT and MBTN_LEFT_DBL are handled by scripts/click-gestures.lua"
             },
             {
                 "search": "`\t\t    script-message cycle-audio-preset",

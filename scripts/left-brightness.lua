@@ -63,7 +63,19 @@ mp.add_key_binding("WHEEL_UP", "wheel_up_handler", function()
     end
 end)
 
+mp.add_key_binding("AXIS_UP", "axis_up_handler", function()
+    if not change_brightness("up") then
+        mp.command("add volume 2")
+    end
+end)
+
 mp.add_key_binding("WHEEL_DOWN", "wheel_down_handler", function()
+    if not change_brightness("down") then
+        mp.command("add volume -2")
+    end
+end)
+
+mp.add_key_binding("AXIS_DOWN", "axis_down_handler", function()
     if not change_brightness("down") then
         mp.command("add volume -2")
     end
