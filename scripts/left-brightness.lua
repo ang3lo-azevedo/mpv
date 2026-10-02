@@ -23,7 +23,7 @@ local function change_brightness(direction)
             playback_only = false,
         })
 
-        if info and info.status == 0 then
+        if info and info.status == 0 thensa
             local level = string.match(info.stdout, "(%d+)%%")
             if level then
                 mp.osd_message(string.format("Screen Brightness: %s%%", level), 1.5)
