@@ -1,5 +1,7 @@
 local mp = require 'mp'
 
+local script_path = os.getenv("HOME") .. "/.config/scripts/display/monitor-brightness.sh"
+
 local function change_brightness(direction)
     local mx, my = mp.get_mouse_pos()
     local w, h = mp.get_osd_size()
@@ -7,10 +9,9 @@ local function change_brightness(direction)
 
     -- If mouse is on the left half of the screen
     if mx < w * 0.5 then
-        local delta = direction == "up" and "+2%" or "2%-"
-        local res = mp.command_native({
+        mp.command_native({
             name = "subprocess",
-            args = { "brightnessctl", "set", delta, "-q" },
+            args = { script_path, "step", direction },
             capture_stdout = false,
             playback_only = false,
         })
@@ -18,13 +19,13 @@ local function change_brightness(direction)
         -- After setting it, read it to get the current percentage
         local info = mp.command_native({
             name = "subprocess",
-            args = { "brightnessctl", "i" },
+            args = { script_path, "get" },
             capture_stdout = true,
             playback_only = false,
         })
 
-        if info and info.status == 0 thensa
-            local level = string.match(info.stdout, "(%d+)%%")
+        if info and info.status == 0 then
+            local level = string.match(info.stdout, "(%d+)")
             if level then
                 mp.osd_message(string.format("Screen Brightness: %s%%", level), 1.5)
             end
