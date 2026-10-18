@@ -224,8 +224,15 @@ local function parse_detected_info(result)
     return nil
 end
 
-local function show_messages(success, result)
+function callback(success, result, error)
     local is_success = success and result and result.status == 0
+
+    -- Update progress locally
+    if is_success then
+        if current_anime_info and current_anime_info.episode then
+            current_anime_info.current_progress = current_anime_info.episode
+        end
+    end
 
     -- Don't show any messages only if the result is successful
     if options.SILENT_MODE and is_success then return end
@@ -239,15 +246,6 @@ local function show_messages(success, result)
     if #messages > 0 then
         mp.osd_message(table.concat(messages, "\n"), 5)
     end
-end
-
-function callback(success, result, error)
-    -- Update progress locally
-    if success and result and result.status == 0 and current_anime_info and current_anime_info.episode then
-        current_anime_info.current_progress = current_anime_info.episode
-    end
-
-    show_messages(success, result)
 end
 
 local function get_python_command()
@@ -491,7 +489,7 @@ mp.add_key_binding("ctrl+d", 'open_folder', open_folder)
 correction_overlay.init({
     python_command = python_command,
     python_options_json = python_options_json,
-    callback = show_messages,
+    callback = callback,
     get_current_anime_info = function() return current_anime_info end,
     set_current_anime_info = function(info) current_anime_info = info end
 })

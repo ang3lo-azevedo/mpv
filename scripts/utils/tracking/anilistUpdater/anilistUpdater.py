@@ -298,14 +298,13 @@ class AniListUpdater:
         existing_entry = cache.get(dir_hash, {})
         is_corrected = bool(existing_entry.get("corrected", False))
 
-        anime_id, anime_name, current_progress, total_episodes, relative_progress, current_status, mal_id = result
+        anime_id, _, current_progress, total_episodes, relative_progress, current_status, mal_id = result
 
         now = time.time()
         ttl_refresh_rate = self.CORRECTED_CACHE_REFRESH_RATE if is_corrected else self.CACHE_REFRESH_RATE
 
         cache[dir_hash] = {
             "guessed_name": guessed_name,
-            "anime_name": anime_name,
             "anime_id": anime_id,
             "mal_id": mal_id,
             "current_progress": current_progress,
@@ -463,12 +462,10 @@ class AniListUpdater:
             return SeasonEpisodeInfo(None, None, None, None, None)
 
         accumulated_episodes = 0
-        for i, season in enumerate(seasons):
-            season_episodes = season.get("episodes") or 12
-            # Last season still airing with unknown episode count: assume the episode belongs to it
-            is_open_ended = not season.get("episodes") and i == len(seasons) - 1
+        for season in seasons:
+            season_episodes = season.get("episodes", 12) if season.get("episodes") else 12
 
-            if is_open_ended or accumulated_episodes + season_episodes >= absolute_episode:
+            if accumulated_episodes + season_episodes >= absolute_episode:
                 return SeasonEpisodeInfo(
                     season.get("id"),
                     season.get("title", {}).get("romaji"),
@@ -511,7 +508,7 @@ class AniListUpdater:
                 # Reconstruct result from cache
                 result = AnimeInfo(
                     cache_entry["anime_id"],
-                    cache_entry.get("anime_name") or cache_entry["guessed_name"],
+                    cache_entry["guessed_name"],
                     cache_entry["current_progress"],
                     cache_entry["total_episodes"],
                     relative_episode,
@@ -647,8 +644,7 @@ class AniListUpdater:
             season = season[0]
 
         # Ensure episode is never None
-        if episode is None:
-            episode = 1
+        episode = episode or 1
 
         season = str(season)
 
@@ -675,14 +671,6 @@ class AniListUpdater:
                     )
 
                     guessed_name = str(folder_guess.get("title", ""))
-                    # Numeric titles like "86" get parsed as an episode
-                    folder_keys = list(folder_guess.keys())
-                    folder_episode = folder_guess.get("episode")
-                    if isinstance(folder_episode, int) and (
-                        not guessed_name or folder_keys.index("episode") < folder_keys.index("title")
-                    ):
-                        guessed_name = f"{folder_episode} {guessed_name}".strip()
-
                     season = season or str(folder_guess.get("season", ""))
                     part = part or str(folder_guess.get("part", ""))
                     year = year or str(folder_guess.get("year", ""))
@@ -700,10 +688,6 @@ class AniListUpdater:
         if remaining:
             guessed_name += " " + " ".join(str(ep) for ep in remaining)
 
-        # GuessIt reads "(2019)" as both year and season
-        if season == year:
-            season = ""
-
         # Add season and part if there are
         if season and (int(season) > 1 or part):
             guessed_name += f" Season {season}"
@@ -712,7 +696,7 @@ class AniListUpdater:
         # If episode_title is detected, part must be before it
         episode_title_index = keys.index("episode_title") if "episode_title" in guess else 99
 
-        if part and ("part" not in keys or keys.index("part") < episode_title_index):
+        if part and keys.index("part") < episode_title_index:
             guessed_name += f" Part {part}"
 
         print(f"Guessed: {guessed_name}{f' {file_format}' if file_format else ''} - E{episode} {year}")
@@ -804,7 +788,7 @@ class AniListUpdater:
         # We first need to make sure if we should search ALL of anime or only the user's list
         # Only those that are in the user's list at first
         query = AniListQueries.SEARCH_ANIME
-        variables = {"search": name, "year": int(year) * 10000 if year else 1, "page": 1, "format_in": format_in}
+        variables = {"search": name, "year": year or 1, "page": 1, "format_in": format_in}
 
         response = self._make_api_request(query, variables, self.access_token)
 
@@ -894,9 +878,6 @@ class AniListUpdater:
 
         if anime_id is None:
             raise Exception("Couldn't find that anime! Make sure it is on your list and the title is correct.")
-
-        if file_progress == 0:
-            raise Exception("Episode 0 is not counted on AniList. Not updating.")
 
         should_add_entry = current_progress is None and current_status is None
         is_last_episode = file_progress == total_episodes
@@ -1173,18 +1154,6 @@ class AniListUpdater:
             anime_info (dict[str, Any]): Pre-fetched anime info.
 
         """
-        # It can be none, but we still need to populate it to save it correctly on cache
-        if not anime_info:
-            file_info = self.parse_filename(filepath)
-            episode = file_info.episode or 1
-            anime_info = {
-                "guessed_name": file_info.name,
-                "absolute_episode": episode,
-                "anime_id": None,
-                "episode": episode,
-            }
-
-
         selected_status = target_status.upper() if target_status else None
 
         guessed_name = anime_info.get("guessed_name", "")
@@ -1245,7 +1214,6 @@ class AniListUpdater:
             dir_hash,
             {
                 "guessed_name": guessed_name,
-                "anime_name": anime_name,
                 "anime_id": anilist_id,
                 "mal_id": mal_id,
                 "current_progress": current_progress,

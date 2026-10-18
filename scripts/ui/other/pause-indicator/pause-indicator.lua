@@ -1020,4 +1020,4 @@ local fileLoaded
 fileLoaded = function()
   return mp.register_event('playback-restart', initDraw)
 end
-return mp.register_event('file-loaded', fileLoaded)
+return mp.register_event('file-loaded', fileLoaded)
