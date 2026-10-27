@@ -407,4 +407,4 @@ mp.set_key_bindings({
 	{'wheel_down', cursor:create_handler('wheel_down')},
 }, 'wheel', 'force')
 
-return cursor
+return cursor
