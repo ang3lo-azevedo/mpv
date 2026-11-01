@@ -79,6 +79,11 @@ local property_path = nil
 local property_time_pos = 0
 local property_keep_open = nil
 
+-- Position and duration saved by the last reload, kept until the reloaded file
+-- has loaded. While it is loading mpv has no time-pos or duration, so a repeated
+-- reload would take them for a live stream and lose the position.
+local reload_saved = nil
+
 -- FSM managing the demuxer cache.
 --
 -- States:
@@ -280,16 +285,30 @@ function read_settings()
   msg.debug(utils.to_string(settings))
 end
 
-function reload(path, time_pos)
-  msg.debug("reload", path, time_pos)
-  if time_pos == nil then
-    mp.commandv("loadfile", path, "replace")
+-- Appends the reloaded file to the playlist; reload_resume() then plays it in
+-- place of the current entry, so the other entries are never recreated and keep
+-- their titles.
+function reload(path, time_pos, title)
+  msg.debug("reload", path, time_pos, title)
+  local file_options = {}
+  if time_pos ~= nil then
+    table.insert(file_options, "start=+" .. time_pos)
+  end
+  -- mpv sets an entry's title from this option only when the entry starts
+  -- playing. The %n% prefix gives the value's length, so commas in a title
+  -- are not taken for option separators.
+  if title ~= nil then
+    table.insert(file_options, "force-media-title=%" .. #title .. "%" .. title)
+  end
+  if #file_options == 0 then
+    mp.commandv("loadfile", path, "append")
   else
-    local success = mp.commandv("loadfile", path, "replace", -1, "start=+" .. time_pos)
+    local options_string = table.concat(file_options, ",")
+    local success = mp.commandv("loadfile", path, "append", -1, options_string)
     -- fallback to old syntax of loadfile for compatibility
     if success == nil then
       msg.warn("old loadfile syntax detected. falling back to using old syntax. update mpv to remove this warning")
-      mp.commandv("loadfile", path, "replace", "start=+" .. time_pos)
+      mp.commandv("loadfile", path, "append", options_string)
     end
   end
 end
@@ -299,12 +318,16 @@ function reload_resume()
   local time_pos = mp.get_property("time-pos")
   local reload_duration = mp.get_property_native("duration")
 
+  if reload_saved and reload_saved.path == path then
+    time_pos = reload_saved.time_pos
+    reload_duration = reload_saved.duration
+  else
+    reload_saved = { path = path, time_pos = time_pos, duration = reload_duration }
+  end
+
   local playlist_count = mp.get_property_number("playlist/count")
   local playlist_pos = mp.get_property_number("playlist-pos")
-  local playlist = {}
-  for i = 0, playlist_count-1 do
-      playlist[i] = mp.get_property("playlist/" .. i .. "/filename")
-  end
+  local title = mp.get_property("playlist/" .. playlist_pos .. "/title")
   -- Tries to determine live stream vs. pre-recordered VOD. VOD has non-zero
   -- duration property. When reloading VOD, to keep the current time position
   -- we should provide offset from the start. Stream doesn't have fixed start.
@@ -312,26 +335,26 @@ function reload_resume()
   -- That's the reason we don't pass the offset when reloading streams.
   if reload_duration and reload_duration > 0 then
     msg.info("reloading video from", time_pos, "second")
-    reload(path, time_pos)
+    reload(path, time_pos, title)
   -- VODs get stuck when reload is called without a time_pos
   -- this is most noticeable in youtube videos whenever download gets stuck in the first frames
   -- video would stay paused without being actually paused
   -- issue surfaced in mpv 0.33, afaik
   elseif reload_duration and reload_duration == 0 then
     msg.info("reloading video from", time_pos, "second")
-    reload(path, time_pos)
+    reload(path, time_pos, title)
   else
     msg.info("reloading stream")
-    reload(path, nil)
+    reload(path, nil, title)
   end
   msg.info("file", playlist_pos+1, "of", playlist_count, "in playlist")
-  for i = 0, playlist_pos-1 do
-    mp.commandv("loadfile", playlist[i], "append")
+  -- the reloaded file is the last entry: put it right after the current one,
+  -- play it and drop the current one
+  if playlist_count > playlist_pos+1 then
+    mp.commandv("playlist-move", playlist_count, playlist_pos+1)
   end
-  mp.commandv("playlist-move", 0, playlist_pos+1)
-  for i = playlist_pos+1, playlist_count-1 do
-    mp.commandv("loadfile", playlist[i], "append")
-  end
+  mp.commandv("playlist-play-index", playlist_pos+1)
+  mp.commandv("playlist-remove", playlist_pos)
 end
 
 function reload_eof(property, eof_reached)
@@ -359,6 +382,7 @@ function reload_eof(property, eof_reached)
 end
 
 function on_file_loaded(event)
+  reload_saved = nil
   local debug_info = {
     event = event,
     time_pos = mp.get_property("time-pos"),
@@ -371,17 +395,6 @@ function on_file_loaded(event)
     cache_buffering_state = mp.get_property("cache-buffering-state"),
   }
   msg.debug("debug_info", utils.to_string(debug_info))
-
-  -- When the video is reloaded after being paused for cache, it won't start
-  -- playing again while all properties looks fine:
-  -- `pause=no`, `paused-for-cache=no` and `cache-buffering-state=100`.
-  -- As a workaround, we cycle through the paused state by sending two SPACE
-  -- keypresses.
-  -- What didn't work:
-  -- - Cycling through the `pause` property.
-  -- - Run the `playlist-play-index current` command.
-  mp.commandv("keypress", 'SPACE')
-  mp.commandv("keypress", 'SPACE')
 end
 
 -- Round positive numbers.
