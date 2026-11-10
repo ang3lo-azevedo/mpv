@@ -23,8 +23,8 @@
                 "replace": "mp.add_timeout(0.5, finalize_setup)"
             },
             {
-                "search": "        show_skip_overlay(\"\u2716 Nothing to skip\", 2, false)\n        return false\n        \n    elseif state.mode == \"silence\" then",
-                "replace": "        if state.silence_active or state.blackframe_skip_active then\n            stop_silence_skip()\n            set_time(state.skip_start_time)\n            show_skip_overlay(\"\u2713 Skip Cancelled\", 2, false)\n        else\n            init_skipping_filters()\n            start_silence_skip()\n        end\n        return true\n\n    elseif state.mode == \"silence\" then"
+                "search": "        show_skip_overlay(\"✖ Nothing to skip\", 2, false)\n        return false\n        \n    elseif state.mode == \"silence\" then",
+                "replace": "        if state.silence_active or state.blackframe_skip_active then\n            stop_silence_skip()\n            set_time(state.skip_start_time)\n            show_skip_overlay(\"✓ Skip Cancelled\", 2, false)\n        else\n            init_skipping_filters()\n            start_silence_skip()\n        end\n        return true\n\n    elseif state.mode == \"silence\" then"
             }
         ]
     },
@@ -260,7 +260,27 @@
             },
             {
                 "search": "stream-lavf-o=reconnect=1,reconnect_streamed=1,reconnect_delay_max=5",
-                "replace": "stream-lavf-o=reconnect=1,reconnect_streamed=1,reconnect_delay_max=5\nforce-window=immediate\nfullscreen=yes"
+                "replace": "stream-lavf-o=reconnect=1,reconnect_streamed=1,reconnect_delay_max=5\nnetwork-timeout=30\nforce-window=immediate\nfullscreen=yes"
+            },
+            {
+                "search": "cache-secs=900",
+                "replace": "cache-secs=300"
+            },
+            {
+                "search": "demuxer-readahead-secs=180",
+                "replace": "demuxer-readahead-secs=60"
+            },
+            {
+                "search": "demuxer-max-back-bytes=512MiB",
+                "replace": "demuxer-max-back-bytes=128MiB"
+            },
+            {
+                "search": "demuxer-max-bytes=1024MiB",
+                "replace": "demuxer-max-bytes=256MiB"
+            },
+            {
+                "search": "stream-buffer-size=128MiB",
+                "replace": "stream-buffer-size=16MiB"
             }
         ]
     },
