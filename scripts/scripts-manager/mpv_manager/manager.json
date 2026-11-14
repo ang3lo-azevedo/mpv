@@ -49,6 +49,30 @@
             {
                 "search": "show-text \"SVP Frame Rate Conversion\" 3000",
                 "replace": "script-message show-svp-status \"SVP Cinema\"\nShift+F12\tvf toggle @SVP:vapoursynth=\"~~/vapoursynth/svp_anime.vpy\":buffered-frames=8:concurrent-frames=16 ; script-message show-svp-status \"SVP Anime\"\n\n# MPV Manager\nCtrl+Alt+u script-binding manager-update"
+            },
+            {
+                "search": "Ctrl+F4     set glsl-shaders \" \" ; show-text \"All Filters: OFF ❌\" 3000",
+                "replace": "Ctrl+F4     script-message clear-shaders"
+            },
+            {
+                "search": "Ctrl+1\t\tno-osd change-list glsl-shaders toggle \"~~/shaders/Anime4K_Thin_VeryFast.glsl\" ; show-text \"Anime4K: Thin Lines (Very Fast) ${?glsl-shaders==~~/shaders/Anime4K_Thin_VeryFast.glsl:ON}${!glsl-shaders==~~/shaders/Anime4K_Thin_VeryFast.glsl:OFF} ⭐\" 3000\n\nCtrl+2\t\tno-osd change-list glsl-shaders toggle \"~~/shaders/Anime4K_Thin_Fast.glsl\" ; show-text \"Anime4K: Thin Lines (Fast) ${?glsl-shaders==~~/shaders/Anime4K_Thin_Fast.glsl:ON}${!glsl-shaders==~~/shaders/Anime4K_Thin_Fast.glsl:OFF} ⭐⭐\" 3000\n\nCtrl+3\t\tno-osd change-list glsl-shaders toggle \"~~/shaders/Anime4K_Thin_HQ.glsl\" ; show-text \"Anime4K: Thin Lines (HQ) ${?glsl-shaders==~~/shaders/Anime4K_Thin_HQ.glsl:ON}${!glsl-shaders==~~/shaders/Anime4K_Thin_HQ.glsl:OFF} ⭐⭐⭐\" 3000",
+                "replace": "Ctrl+1\t\tscript-message toggle-shader \"~~/shaders/Anime4K_Thin_VeryFast.glsl\" \"Anime4K: Thin Lines (Very Fast)\" \"⭐\"\nCtrl+2\t\tscript-message toggle-shader \"~~/shaders/Anime4K_Thin_Fast.glsl\" \"Anime4K: Thin Lines (Fast)\" \"⭐⭐\"\nCtrl+3\t\tscript-message toggle-shader \"~~/shaders/Anime4K_Thin_HQ.glsl\" \"Anime4K: Thin Lines (HQ)\" \"⭐⭐⭐\""
+            },
+            {
+                "search": "Ctrl+F6\t    no-osd change-list glsl-shaders toggle \"~~/shaders/hdeband.glsl\"; show-text \"Debanding Shader: ${?glsl-shaders==~~/shaders/hdeband.glsl:ON}${!glsl-shaders==~~/shaders/hdeband.glsl:OFF} (ﾉ◕ヮ◕)ﾉ*･ﾟ✧\" 3000",
+                "replace": "Ctrl+F6\t    script-message toggle-shader \"~~/shaders/hdeband.glsl\" \"Debanding Shader\" \"(ﾉ◕ヮ◕)ﾉ*･ﾟ✧\""
+            },
+            {
+                "search": "F10 \t    change-list glsl-shaders toggle \"~~/shaders/denoise1.glsl\" ; show-text \"Denoise Low: ${?glsl-shaders==~~/shaders/denoise1.glsl:ON}${!glsl-shaders==~~/shaders/denoise1.glsl:OFF}\" 3000\nShift+F10\tchange-list glsl-shaders toggle \"~~/shaders/nlmeans.glsl\" ; show-text \"Denoise Normal: ${?glsl-shaders==~~/shaders/denoise2.glsl:ON}${!glsl-shaders==~~/shaders/denoise2.glsl:OFF}\" 3000\nCtrl+F10\tchange-list glsl-shaders toggle \"~~/shaders/denoise3.glsl\" ; show-text \"Denoise High: ${?glsl-shaders==~~/shaders/denoise3.glsl:ON}${!glsl-shaders==~~/shaders/denoise3.glsl:OFF}\" 3000",
+                "replace": "F10 \t    script-message toggle-shader \"~~/shaders/denoise1.glsl\" \"Denoise Low\"\nShift+F10\tscript-message toggle-shader \"~~/shaders/nlmeans.glsl\" \"Denoise Normal\"\nCtrl+F10\tscript-message toggle-shader \"~~/shaders/denoise3.glsl\" \"Denoise High\""
+            },
+            {
+                "search": "F11 \t\tchange-list glsl-shaders toggle \"~~/shaders/adaptive-sharpen.glsl\"; show-text \"Adaptive-Sharpen: ${?glsl-shaders==~~/shaders/adaptive-sharpen.glsl:ON}${!glsl-shaders==~~/shaders/adaptive-sharpen.glsl:OFF} ( ͡°( ͡° ͜ʖ( ͡° ͜ʖ ͡°)ʖ ͡°) ͡°)\" 3000",
+                "replace": "F11 \t\tscript-message toggle-shader \"~~/shaders/adaptive-sharpen.glsl\" \"Adaptive-Sharpen\" \"( ͡°( ͡° ͜ʖ( ͡° ͜ʖ ͡°)ʖ ͡°)\""
+            },
+            {
+                "search": "Ctrl+F11\tchange-list glsl-shaders toggle \"~~/shaders/sharpen_denoise.glsl\"; show-text \"Sharpen-Denoise: ${?glsl-shaders==~~/shaders/sharpen_denoise.glsl:ON}${!glsl-shaders==~~/shaders/sharpen_denoise.glsl:OFF}  ╰(*°▽°*)╯\" 3000",
+                "replace": "Ctrl+F11\tscript-message toggle-shader \"~~/shaders/sharpen_denoise.glsl\" \"Sharpen-Denoise\" \"╰(*°▽°*)╯\""
             }
         ]
     },
@@ -177,6 +201,10 @@
             {
                 "search": "vapoursynth=\"~~/svp_cinema.vpy\"",
                 "replace": "vapoursynth=\"~~/vapoursynth/svp_cinema.vpy\""
+            },
+            {
+                "search": "mp.set_property(\"glsl-shaders\", \"\")   -- Clear all shaders",
+                "replace": "mp.set_property_native(\"glsl-shaders\", {})   -- Clear all shaders"
             }
         ]
     },

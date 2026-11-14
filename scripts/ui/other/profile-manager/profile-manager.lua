@@ -272,7 +272,7 @@ local function apply_sdr_baseline()
     mp.set_property("hwdec", "auto")
     
     -- 1. Reset Rendering Chains (prevents bleed-over without resetting global prefs like volume)
-    mp.set_property("glsl-shaders", "")   -- Clear all shaders
+    mp.set_property_native("glsl-shaders", {})   -- Clear all shaders
     mp.set_property("vf", "")             -- Clear video filters
     mp.set_property("af", "")             -- Clear audio filters
     
