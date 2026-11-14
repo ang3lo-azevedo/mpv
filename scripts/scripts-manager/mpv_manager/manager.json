@@ -73,6 +73,14 @@
             {
                 "search": "Ctrl+F11\tchange-list glsl-shaders toggle \"~~/shaders/sharpen_denoise.glsl\"; show-text \"Sharpen-Denoise: ${?glsl-shaders==~~/shaders/sharpen_denoise.glsl:ON}${!glsl-shaders==~~/shaders/sharpen_denoise.glsl:OFF}  ╰(*°▽°*)╯\" 3000",
                 "replace": "Ctrl+F11\tscript-message toggle-shader \"~~/shaders/sharpen_denoise.glsl\" \"Sharpen-Denoise\" \"╰(*°▽°*)╯\""
+            },
+            {
+                "search": "Ctrl+4\t\tno-osd change-list glsl-shaders toggle \"~~/shaders/Anime4K_Thin_HQ.glsl\" ; no-osd change-list glsl-shaders toggle \"~~/shaders/Anime4K_Thin_Fast.glsl\" ; no-osd change-list glsl-shaders toggle \"~~/shaders/Anime4K_Thin_VeryFast.glsl\" ; show-text \"Anime4K: Thin Lines (AIO) ⭐⭐⭐⭐⭐\" 3000",
+                "replace": "Ctrl+4\t\tscript-message toggle-shader-group \"~~/shaders/Anime4K_Thin_HQ.glsl:~~/shaders/Anime4K_Thin_Fast.glsl:~~/shaders/Anime4K_Thin_VeryFast.glsl\" \"Anime4K: Thin Lines (AIO)\" \"⭐⭐⭐⭐⭐\""
+            },
+            {
+                "search": "glsl;",
+                "replace": "glsl:"
             }
         ]
     },
