@@ -191,4 +191,4 @@ function Element:observe_mp_property(name, type_or_callback, callback_maybe)
 	self:register_disposer(function() mp.unobserve_property(callback) end)
 end
 
-return Element
+return Element

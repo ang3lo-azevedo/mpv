@@ -905,4 +905,4 @@ function request_render()
 	local timeout = math.max(0, state.render_delay - (mp.get_time() - state.render_last_time))
 	state.render_timer.timeout = timeout
 	state.render_timer:resume()
-end
+end
